@@ -394,19 +394,19 @@ namespace core {
      bool _ready, _paused;
      ScenarioWeakRef _scenario;
      set<ObjectRef> _objects;
-     map<size_t,ObjectRef> _objectsById;
+     map<size_t, ObjectRef> _objectsById;
      time_state _time;
      string _name;
      DrawDispatcherRef _drawDispatcher;
      cpBodyVelocityFunc _bodyVelocityFunc;
      vector<GravitationCalculatorRef> _gravities;
-
+     ViewportControllerRef _viewportController;
+     
      set<collision_type_pair> _monitoredCollisions;
      map<collision_type_pair, vector<EarlyCollisionCallback>> _collisionBeginHandlers, _collisionPreSolveHandlers;
      map<collision_type_pair, vector<LateCollisionCallback>> _collisionPostSolveHandlers, _collisionSeparateHandlers;
      map<collision_type_pair, vector<ContactCallback>> _contactHandlers;
-     map<collision_type_pair, vector<pair<ObjectRef, ObjectRef>>> _syntheticContacts;
-     */
+     map<collision_type_pair, vector<pair<ObjectRef, ObjectRef>>> _syntheticContacts;     */
 
     Stage::Stage(string name) :
             _space(cpSpaceNew()),
@@ -488,6 +488,9 @@ namespace core {
     }
 
     void Stage::update(const time_state &time) {
+        
+        _viewportController->update(time);
+        
         if (!_paused) {
             _time = time;
         }
@@ -618,7 +621,7 @@ namespace core {
     }
 
     ViewportControllerRef Stage::getViewportController() const {
-        return getScenario()->getViewportController();
+        return _viewportController;
     }
 
     void Stage::addGravity(const GravitationCalculatorRef &gravityCalculator) {
@@ -849,6 +852,7 @@ namespace core {
 
     void Stage::addedToScenario(ScenarioRef scenario) {
         _scenario = scenario;
+        _viewportController = make_shared<ViewportController>(scenario->getViewport());
     }
 
     void Stage::removeFromScenario() {

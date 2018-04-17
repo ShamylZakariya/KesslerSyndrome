@@ -28,30 +28,6 @@ namespace game {
         setStage(stage);
 
         stage->load(app::loadAsset(_stageXmlFile));
-        auto planet = stage->getPlanet();
-
-        if (true) {
-
-            // build camera controller, dragger, and cutter, with input dispatch indices 0,1,2 meaning CC gets input first
-
-            auto cc = Object::with("CameraController", {make_shared<MouseViewportControlComponent>(getViewportController(), 0)});
-            getStage()->addObject(cc);
-
-            auto dragger = Object::with("Dragger", {
-                    make_shared<MousePickComponent>(ShapeFilters::GRABBABLE, 1),
-                    make_shared<MousePickDrawComponent>()
-            });
-            getStage()->addObject(dragger);
-
-            if (planet) {
-                auto cutter = Object::with("Cutter", {
-                        make_shared<terrain::MouseCutterComponent>(planet, 4, 2),
-                        make_shared<terrain::MouseCutterDrawComponent>()
-                });
-                getStage()->addObject(cutter);
-            }
-
-        }
     }
 
     void GameScenario::cleanup() {

@@ -62,12 +62,6 @@ namespace core {
             return _viewport;
         }
 
-        const ViewportControllerRef getViewportController() const {
-            return _viewportController;
-        }
-
-        void setViewportController(ViewportControllerRef vp);
-
         // time state used for animation
         const time_state &getTime() const {
             return _time;
@@ -117,7 +111,6 @@ namespace core {
 
         ViewportRef _viewport;
         ScreenViewportRef _screenViewport;
-        ViewportControllerRef _viewportController;
         time_state _time, _stepTime;
         render_state _renderState, _screenRenderState;
         StageRef _stage;

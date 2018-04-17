@@ -69,16 +69,7 @@ namespace game {
     GameStage::~GameStage() {
     }
 
-    void GameStage::addObject(ObjectRef obj) {
-        Stage::addObject(obj);
-    }
-
-    void GameStage::removeObject(ObjectRef obj) {
-        Stage::removeObject(obj);
-    }
-
     void GameStage::load(ci::DataSourceRef stageXmlData) {
-
         auto root = XmlTree(stageXmlData);
         auto prefabsNode = root.getChild("prefabs");
         auto stageNode = root.getChild("stage");
@@ -156,9 +147,35 @@ namespace game {
 
         buildExplosionParticleSystem();
         buildDustParticleSystem();
+        
+        //
+        //  Build development control components
+        //
 
         if (true) {
-
+            
+            //
+            // build camera controller, dragger, and cutter, with input dispatch indices 0,1,2 meaning CC gets input first
+            //
+            
+            addObject(Object::with("CameraController", {
+                make_shared<MouseViewportControlComponent>(getViewportController(), 0)
+            }));
+            
+            addObject(Object::with("Dragger", {
+                make_shared<MousePickComponent>(ShapeFilters::GRABBABLE, 1),
+                make_shared<MousePickDrawComponent>()
+            }));
+            
+            addObject(Object::with("Cutter", {
+                make_shared<terrain::MouseCutterComponent>(getPlanet(), 4, 2),
+                make_shared<terrain::MouseCutterDrawComponent>()
+            }));
+            
+            //
+            // When user hits command-mouse-down explode a bomb
+            //
+            
             addObject(Object::with("Mouse", MouseDelegateComponent::create(0)->onPress([this](dvec2 screen, dvec2 world, const ci::app::MouseEvent &event) {
                 if (event.isMetaDown()) {
                     performExplosion(world);
@@ -166,21 +183,7 @@ namespace game {
                 }
                 return false;
             })));
-
-            auto keys = initializer_list < int > {app::KeyEvent::KEY_c, app::KeyEvent::KEY_s};
-            addObject(Object::with("Keyboard", KeyboardDelegateComponent::create(0, keys)->onPress([this](int keyCode) {
-                switch (keyCode) {
-                    case app::KeyEvent::KEY_c:
-                        cullRubble();
-                        break;
-                    case app::KeyEvent::KEY_s:
-                        makeSleepersStatic();
-                        break;
-                }
-            })));
-
         }
-
     }
 
     void GameStage::onReady() {

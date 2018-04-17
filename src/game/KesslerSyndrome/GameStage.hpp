@@ -31,14 +31,6 @@ namespace game {
         virtual ~GameStage();
 
         //
-        //	Stage
-        //
-
-        void addObject(core::ObjectRef obj) override;
-
-        void removeObject(core::ObjectRef obj) override;
-
-        //
         //	GameStage
         //
 

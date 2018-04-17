@@ -37,7 +37,6 @@ namespace core {
     /*
         ViewportRef _viewport;
         shared_ptr<ScreenViewport> _screenViewport;
-        ViewportControllerRef _viewportController;
         time_state _time, _stepTime;
         render_state _renderState, _screenRenderState;
         StageRef _stage;
@@ -48,7 +47,6 @@ namespace core {
             InputListener(numeric_limits<int>::max()), // scenario should always be last to receive input after in-game input components
             _viewport(make_shared<Viewport>()),
             _screenViewport(make_shared<ScreenViewport>()),
-            _viewportController(make_shared<ViewportController>(_viewport)),
             _time(app::getElapsedSeconds(), 1.0 / 60.0, 1, 0),
             _stepTime(app::getElapsedSeconds(), 1.0 / 60.0, 1, 0),
             _renderState(_viewport, RenderMode::GAME, 0, 0, 0, 0),
@@ -81,11 +79,6 @@ namespace core {
     }
 
     void Scenario::drawScreen(const render_state &state) {
-    }
-
-    void Scenario::setViewportController(ViewportControllerRef vp) {
-        _viewportController = vp;
-        _viewportController->setViewport(_viewport);
     }
 
     void Scenario::setRenderMode(RenderMode::mode mode) {
@@ -159,8 +152,6 @@ namespace core {
         if (_stage) {
             _stage->update(_time);
         }
-
-        _viewportController->update(_time);
     }
 
     void Scenario::dispatchDraw() {
