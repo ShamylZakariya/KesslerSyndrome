@@ -55,8 +55,6 @@ namespace core {
             _screenRenderState(_screenViewport, RenderMode::GAME, 0, 0, 0, 0),
             _width(app::getWindowWidth()),
             _height(app::getWindowHeight()) {
-        _viewport->onMotion.connect(this, &Scenario::onViewportMoved);
-        _viewport->onBoundsChanged.connect(this, &Scenario::onViewportBoundsChanged);
         setListening(true);
     }
 
@@ -191,20 +189,5 @@ namespace core {
             _stage->drawScreen(_screenRenderState);
         }
     }
-
-    void Scenario::onViewportMoved(const Viewport &vp) {
-        // forward Viewport::onMotion to Stage::signals.onViewportMotion
-        if (_stage) {
-            _stage->signals.onViewportMotion(vp);
-        }
-    }
-
-    void Scenario::onViewportBoundsChanged(const Viewport &vp) {
-        // forward Viewport::onBoundsChanged to Stage::signals.onViewportBoundsChanged
-        if (_stage) {
-            _stage->signals.onViewportBoundsChanged(vp);
-        }
-    }
-
 
 }

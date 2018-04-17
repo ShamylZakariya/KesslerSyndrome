@@ -301,9 +301,6 @@ namespace core {
             here and objects that want to fire a signal should do so through their Stage.
          */
         struct signals_ {
-            signals::signal<void(const Viewport &)> onViewportMotion;
-            signals::signal<void(const Viewport &)> onViewportBoundsChanged;
-
             signals::signal<void(const StageRef &)> onStagePaused;
             signals::signal<void(const StageRef &)> onStageUnpaused;
 

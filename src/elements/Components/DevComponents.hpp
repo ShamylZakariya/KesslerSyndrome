@@ -81,8 +81,6 @@ protected:
 
     void setupShaderUniforms();
 
-    void onViewportMotion(const core::Viewport &vp);
-
 private:
 
     gl::TextureRef _texture;

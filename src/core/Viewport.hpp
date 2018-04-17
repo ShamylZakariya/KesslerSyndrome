@@ -26,8 +26,8 @@ using namespace std;
 namespace core {
 
     SMART_PTR(IViewport);
-
     SMART_PTR(Viewport);
+    SMART_PTR(ScreenViewport);
 
     class IViewport {
     public:
@@ -290,6 +290,82 @@ namespace core {
         dmat4 _viewMatrix, _inverseViewMatrix, _projectionMatrix, _inverseProjectionMatrix, _viewProjectionMatrix, _inverseViewProjectionMatrix;
 
     };
+    
+    /**
+     ScreenViewport
+     A special viewport for rendering UI, with transforms configured for 1 unit -> 1px
+     */
+    class ScreenViewport : public IViewport {
+    public:
+        ScreenViewport() {
+        }
+        
+        virtual ~ScreenViewport() {
+        }
+        
+        void setSize(int width, int height) {
+            _width = width;
+            _height = height;
+        }
+        
+        ivec2 getSize() const override {
+            return ivec2(_width, _height);
+        }
+        
+        int getWidth() const override {
+            return _width;
+        }
+        
+        int getHeight() const override {
+            return _height;
+        }
+        
+        dvec2 getCenter() const override {
+            return dvec2(_width / 2.0, _height / 2.0);
+        }
+        
+        virtual double getScale() const override {
+            return 1.0;
+        };
+        
+        virtual double getReciprocalScale() const override {
+            return 1.0;
+        };
+        
+        virtual dmat4 getViewMatrix() const override {
+            return mat4();
+        };
+        
+        virtual dmat4 getInverseViewMatrix() const override {
+            return mat4();
+        };
+        
+        virtual dmat4 getProjectionMatrix() const override {
+            return mat4();
+        };
+        
+        virtual dmat4 getInverseProjectionMatrix() const override {
+            return mat4();
+        };
+        
+        virtual dmat4 getViewProjectionMatrix() const override {
+            return mat4();
+        };
+        
+        virtual dmat4 getInverseViewProjectionMatrix() const override {
+            return mat4();
+        };
+        
+        virtual cpBB getFrustum() const override {
+            return cpBBNew(0, 0, _width, _height);
+        };
+        
+    private:
+        
+        int _width, _height;
+        
+    };
+
 
 
 } // namespace core

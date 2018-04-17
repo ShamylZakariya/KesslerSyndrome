@@ -1,19 +1,13 @@
 # Dev Notes
 
 ## PRESENTLY
-Need a dust particle system for terrain/terrain collision
-    - emitBurst doesn't work, at all
-    
-Need to improve cloud layer response to explosions:
-    - My motion away from explosion is garbage... 
-    - Could add "dampers" to the perlin noise generator, like a radial blackness at the explosion point (mapped to the ring topology)
 
-Need to make a camera shake
-    see GDC Juicing Your Cameras with Math video
-    - use perlin noise
-    - have a tension value [0,1] which linearly falls to zero, you add values to it on explosion, say, 0.5
-    - have a shake value which is tension^2 or ^3
-    - compute translate & rotation offsets atop camera actual position which are perlin noise * shake value, modulated by time
+Renter to Texture Viewport
+- Reduce viewport sphagetti
+- Move viewport controller out of scenario - scenario should only know about viewport(s)
+- need some kind of compositor pass in the scenario (does it punt to stage?)
+
+
 
 
 ## BUGS PRIORITY HIGH

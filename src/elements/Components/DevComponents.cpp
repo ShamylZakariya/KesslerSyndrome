@@ -114,11 +114,10 @@ WorldCartesianGridDrawComponent::WorldCartesianGridDrawComponent(gl::TextureRef 
 }
 
 void WorldCartesianGridDrawComponent::onReady(ObjectRef parent, StageRef stage) {
-    stage->signals.onViewportMotion.connect(this, &WorldCartesianGridDrawComponent::onViewportMotion);
-    setupShaderUniforms();
 }
 
 void WorldCartesianGridDrawComponent::draw(const render_state &state) {
+    setupShaderUniforms();
 
     // set up a scale to fill viewport with plane
     cpBB frustum = state.viewport->getFrustum();
@@ -198,11 +197,6 @@ void WorldCartesianGridDrawComponent::setupShaderUniforms() {
     _shader->uniform("AxisColor", _axisColor);
     _shader->uniform("AxisIntensity", static_cast<float>(_axisIntensity));
 }
-
-void WorldCartesianGridDrawComponent::onViewportMotion(const Viewport &vp) {
-    setupShaderUniforms();
-}
-
 
 #pragma mark - MouseViewportControlComponent
 
