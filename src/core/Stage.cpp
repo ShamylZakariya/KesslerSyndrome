@@ -400,7 +400,6 @@ namespace core {
      DrawDispatcherRef _drawDispatcher;
      cpBodyVelocityFunc _bodyVelocityFunc;
      vector<GravitationCalculatorRef> _gravities;
-     ViewportControllerRef _viewportController;
      
      set<collision_type_pair> _monitoredCollisions;
      map<collision_type_pair, vector<EarlyCollisionCallback>> _collisionBeginHandlers, _collisionPreSolveHandlers;
@@ -488,9 +487,7 @@ namespace core {
     }
 
     void Stage::update(const time_state &time) {
-        
-        _viewportController->update(time);
-        
+                
         if (!_paused) {
             _time = time;
         }
@@ -545,6 +542,7 @@ namespace core {
     }
 
     void Stage::draw(const render_state &state) {
+
         //
         //	This may look odd, but Stage is responsible for Pausing, not the owner Scenario. This means that
         //	when the game is paused, the stage is responsible for sending a mock 'paused' time object that reflects
@@ -618,10 +616,6 @@ namespace core {
 
     ViewportRef Stage::getViewport() const {
         return getScenario()->getViewport();
-    }
-
-    ViewportControllerRef Stage::getViewportController() const {
-        return _viewportController;
     }
 
     void Stage::addGravity(const GravitationCalculatorRef &gravityCalculator) {
@@ -852,7 +846,6 @@ namespace core {
 
     void Stage::addedToScenario(ScenarioRef scenario) {
         _scenario = scenario;
-        _viewportController = make_shared<ViewportController>(scenario->getViewport());
     }
 
     void Stage::removeFromScenario() {

@@ -425,8 +425,6 @@ namespace core {
 
         ViewportRef getViewport() const;
 
-        ViewportControllerRef getViewportController() const;
-
         void addGravity(const GravitationCalculatorRef &gravityCalculator);
 
         void removeGravity(const GravitationCalculatorRef &gravityCalculator);
@@ -570,7 +568,6 @@ namespace core {
         DrawDispatcherRef _drawDispatcher;
         cpBodyVelocityFunc _bodyVelocityFunc;
         vector<GravitationCalculatorRef> _gravities;
-        ViewportControllerRef _viewportController;
 
         set<collision_type_pair> _monitoredCollisions;
         map<collision_type_pair, vector<EarlyCollisionCallback>> _collisionBeginHandlers, _collisionPreSolveHandlers;

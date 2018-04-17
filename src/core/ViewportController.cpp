@@ -20,15 +20,26 @@ namespace core {
      double _traumaLevel, _traumaBaselineLevel;
      vector<ci::Perlin> _traumaPerlinNoiseGenerators;
      */
+    
+    ViewportControllerRef ViewportController::create(ViewportRef vp) {
+        auto vc = shared_ptr<ViewportController>(new ViewportController());
+        vc->_setViewport(vp);
+        return vc;
+    }
 
-    ViewportController::ViewportController(ViewportRef vp) :
+    ViewportControllerRef ViewportController::create(ViewportRef vp, const tracking_config &tracking, const trauma_config &trauma) {
+        auto vc = create(vp);
+        vc->setTrackingConfig(tracking);
+        vc->setTraumaConfig(trauma);
+        return vc;
+    }
+
+    ViewportController::ViewportController() :
             _viewport(nullptr),
             _disregardViewportMotion(false),
             _traumaLevel(0),
             _traumaBaselineLevel(0)
     {
-        setViewport(vp);
-        
         // uniquely-seeded perlin noise for shake x, shake y, and shake rotation
         for (int i = 0; i < 3; i++) {
             _traumaPerlinNoiseGenerators.emplace_back(ci::Perlin(4,i));
@@ -36,6 +47,8 @@ namespace core {
     }
 
     void ViewportController::update(const time_state &time) {
+        Component::update(time);
+
         _disregardViewportMotion = true;
         
         // update viewport
@@ -98,21 +111,6 @@ namespace core {
         _traumaBaselineLevel = saturate(_traumaBaselineLevel - _traumaConfig.traumaBaselineDecayRate * time.deltaT);
     }
 
-    void ViewportController::setViewport(ViewportRef vp) {
-        if (_viewport) {
-            _viewport->onMotion.disconnect(this);
-            _viewport->onBoundsChanged.disconnect(this);
-        }
-        _viewport = vp;
-        if (_viewport) {
-            _target = _viewport->getLook();
-            _viewport->onMotion.connect(this, &ViewportController::_onViewportPropertyChanged);
-            _viewport->onBoundsChanged.connect(this, &ViewportController::_onViewportPropertyChanged);
-        } else {
-            _target = { dvec2(0, 0), dvec2(0, 1), 1 };
-        }
-    }
-
     void ViewportController::setLook(const Viewport::look l) {
         _target.world = l.world;
 
@@ -157,8 +155,23 @@ namespace core {
     }
 
 
-#pragma mark -
-#pragma mark Private
+#pragma mark - Private
+    
+    void ViewportController::_setViewport(ViewportRef vp) {
+        if (_viewport) {
+            _viewport->onMotion.disconnect(this);
+            _viewport->onBoundsChanged.disconnect(this);
+        }
+        _viewport = vp;
+        if (_viewport) {
+            _viewport->_controller = shared_from_this_as<ViewportController>();
+            _target = _viewport->getLook();
+            _viewport->onMotion.connect(this, &ViewportController::_onViewportPropertyChanged);
+            _viewport->onBoundsChanged.connect(this, &ViewportController::_onViewportPropertyChanged);
+        } else {
+            _target = { dvec2(0, 0), dvec2(0, 1), 1 };
+        }
+    }
 
     void ViewportController::_onViewportPropertyChanged(const Viewport &vp) {
         if (!_disregardViewportMotion) {

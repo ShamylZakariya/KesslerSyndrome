@@ -11,7 +11,7 @@
 
 #include <cinder/Perlin.h>
 
-#include "Signals.hpp"
+#include "Object.hpp"
 #include "TimeState.hpp"
 #include "Viewport.hpp"
 
@@ -19,7 +19,7 @@ namespace core {
 
     SMART_PTR(ViewportController);
 
-    class ViewportController : public signals::receiver {
+    class ViewportController : public Component {
     public:
 
         struct tracking_config {
@@ -89,23 +89,31 @@ namespace core {
             {}
 
         };
+        
+        static ViewportControllerRef create(ViewportRef vp);
+        static ViewportControllerRef create(ViewportRef vp, const tracking_config &tracking, const trauma_config &trauma);
 
+    private:
+
+        ViewportController();
+        
     public:
-
-        ViewportController(ViewportRef vp);
 
         virtual ~ViewportController() {
         }
 
         ///////////////////////////////////////////////////////////////////////////
+        // Component
 
-        virtual void update(const time_state &time);
+        void update(const time_state &time) override;
+        
+        ///////////////////////////////////////////////////////////////////////////
+        // ViewportController
 
         ViewportRef getViewport() const {
             return _viewport;
         }
 
-        void setViewport(ViewportRef vp);
 
         void setTrackingConfig(tracking_config tc) {
             _trackingConfig = tc;
@@ -171,6 +179,8 @@ namespace core {
         double getCurrentTraumaShake() const { return pow(getCurrentTraumaLevel(), _traumaConfig.shakePower); }
 
     protected:
+
+        void _setViewport(ViewportRef vp);
 
         void _onViewportPropertyChanged(const Viewport &vp);
 

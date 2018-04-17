@@ -67,6 +67,7 @@ private:
 private:
 
     terrain::TerrainObjectRef _terrain;
+    core::ViewportControllerRef _viewportController;
 };
 
 #endif /* IslandTestScenario_hpp */

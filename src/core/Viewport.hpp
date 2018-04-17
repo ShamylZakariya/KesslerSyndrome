@@ -28,6 +28,9 @@ namespace core {
     SMART_PTR(IViewport);
     SMART_PTR(Viewport);
     SMART_PTR(ScreenViewport);
+    
+    // prototype - defined in ViewportController.hpp
+    SMART_PTR(ViewportController);
 
     class IViewport {
     public:
@@ -99,6 +102,13 @@ namespace core {
             return dvec2(getInverseViewProjectionMatrix() * dvec4(screen.x, screen.y, 0.0, 0.0));
         }
 
+        // get this Viewport's ViewportController (may be null)
+        ViewportControllerRef getController() const { return _controller.lock(); }
+        
+    private:
+        friend class ViewportController;
+        
+        ViewportControllerWeakRef _controller;
 
     };
 

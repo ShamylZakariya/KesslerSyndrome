@@ -20,15 +20,15 @@ SvgTestScenario::~SvgTestScenario() {
 
 void SvgTestScenario::setup() {
     setStage(make_shared<Stage>("Hello Svg"));
+    
 
-    auto cameraController = Object::with("ViewportControlComponent", {
-            make_shared<MouseViewportControlComponent>(getViewportController())
-    });
+    getStage()->addObject(Object::with("Grid", { WorldCartesianGridDrawComponent::create(1) }));
 
-    auto grid = Object::with("Grid", {WorldCartesianGridDrawComponent::create(1)});
-
-    getStage()->addObject(grid);
-    getStage()->addObject(cameraController);
+    auto viewportController = ViewportController::create(getViewport());
+    getStage()->addObject(Object::with("ViewportControl", {
+        viewportController,
+        make_shared<MouseViewportControlComponent>(viewportController)
+    }));
 
     testSimpleSvgLoad();
     //testSimpleSvgGroupOriginTransforms();

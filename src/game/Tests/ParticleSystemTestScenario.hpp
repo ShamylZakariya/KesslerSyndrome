@@ -55,7 +55,7 @@ private:
     ParticleSystemRef _explosionPs;
     ParticleEmitterRef _explosionEmitter;
     ParticleEmitter::emission_id _explosionEmissionId;
-
+    core::ViewportControllerRef _viewportController;
 };
 
 #endif /* ParticleSystemTestScenario_hpp */

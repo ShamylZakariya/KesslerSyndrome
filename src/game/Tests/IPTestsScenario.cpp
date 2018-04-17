@@ -29,11 +29,13 @@ IPTestsScenario::~IPTestsScenario() {
 }
 
 void IPTestsScenario::setup() {
-    getViewportController()->setTrackingConfig(ViewportController::tracking_config(0.99,0.99,1));
     setStage(make_shared<Stage>("Image Processing Tests"));
     
+    auto viewportController = ViewportController::create(getViewport());
+
     getStage()->addObject(Object::with("ViewportControlComponent", {
-        make_shared<MouseViewportControlComponent>(getViewportController())
+        viewportController,
+        make_shared<MouseViewportControlComponent>(viewportController)
     }));
     
     auto grid = WorldCartesianGridDrawComponent::create(1);

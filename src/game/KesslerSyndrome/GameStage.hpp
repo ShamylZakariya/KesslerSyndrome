@@ -93,6 +93,7 @@ namespace game {
         core::RadialGravitationCalculatorRef _gravity;
         particles::ParticleEmitterRef _explosionEmitter;
         particles::ParticleEmitterRef _dustEmitter;
+        core::ViewportControllerRef _viewportController;
 
     };
 

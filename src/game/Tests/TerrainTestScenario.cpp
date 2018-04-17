@@ -173,14 +173,18 @@ void TerrainTestScenario::setup() {
             make_shared<MousePickComponent>(ShapeFilters::GRABBABLE),
             make_shared<MousePickDrawComponent>()
     });
+    
+    
 
     auto cutter = Object::with("Cutter", {
             make_shared<terrain::MouseCutterComponent>(_terrain, 4),
             make_shared<terrain::MouseCutterDrawComponent>()
     });
 
-    auto cameraController = Object::with("ViewportControlComponent", {
-            make_shared<MouseViewportControlComponent>(getViewportController())
+    _viewportController = ViewportController::create(getViewport());
+    auto cameraController = Object::with("ViewportControl", {
+        _viewportController,
+        make_shared<MouseViewportControlComponent>(_viewportController)
     });
 
     auto grid = Object::with("Grid", {WorldCartesianGridDrawComponent::create()});
@@ -240,7 +244,7 @@ terrain::WorldRef TerrainTestScenario::testDistantTerrain() {
 
     const vec2 origin(30000, 30000);
 
-    getViewportController()->setLook(origin);
+    _viewportController->setLook(origin);
 
 
     vector<terrain::ShapeRef> shapes = {terrain::Shape::fromContour(rect(origin.x - 200, origin.y - 200, origin.x + 200, origin.y + 200))};
@@ -259,7 +263,7 @@ terrain::WorldRef TerrainTestScenario::testBasicTerrain() {
 
     cpSpaceSetDamping(getStage()->getSpace()->getSpace(), 0.5);
 
-    getViewportController()->setLook(vec2(0, 0));
+    _viewportController->setLook(vec2(0, 0));
 
     vector<terrain::ShapeRef> shapes = {
             terrain::Shape::fromContour(rect(0, 0, 100, 50)),        // 0
@@ -280,7 +284,7 @@ terrain::WorldRef TerrainTestScenario::testBasicTerrain() {
 }
 
 terrain::WorldRef TerrainTestScenario::testComplexTerrain() {
-    getViewportController()->setLook(vec2(0, 0));
+    _viewportController->setLook(vec2(0, 0));
 
     const vec2 boxSize(50, 50);
     auto boxPos = [boxSize](float x, float y) -> vec2 {
@@ -312,7 +316,7 @@ terrain::WorldRef TerrainTestScenario::testComplexTerrain() {
 }
 
 terrain::WorldRef TerrainTestScenario::testSimpleAnchors() {
-    getViewportController()->setLook(vec2(0, 0));
+    _viewportController->setLook(vec2(0, 0));
 
 
     vector<terrain::ShapeRef> shapes = {
@@ -335,7 +339,7 @@ terrain::WorldRef TerrainTestScenario::testSimpleAnchors() {
 }
 
 terrain::WorldRef TerrainTestScenario::testComplexAnchors() {
-    getViewportController()->setLook(vec2(0, 0));
+    _viewportController->setLook(vec2(0, 0));
 
     const vec2 boxSize(50, 50);
     auto boxPos = [boxSize](float x, float y) -> vec2 {
@@ -389,7 +393,7 @@ terrain::WorldRef TerrainTestScenario::testSimplePartitionedTerrain() {
         return polyLine;
     };
 
-    getViewportController()->setLook(vec2(0, 0));
+    _viewportController->setLook(vec2(0, 0));
 
     auto rings = vector<PolyLine2d> {
             ring(vec2(0, 0), 500, 600, 0),
@@ -426,7 +430,7 @@ terrain::WorldRef TerrainTestScenario::testComplexPartitionedTerrainWithAnchors(
         return polyLine;
     };
 
-    getViewportController()->setLook(vec2(0, 0));
+    _viewportController->setLook(vec2(0, 0));
 
     auto rings = vector<PolyLine2d> {
             ring(vec2(0, 0), 500, 600, 0),
@@ -505,7 +509,7 @@ terrain::WorldRef TerrainTestScenario::testFail() {
         return polyLine;
     };
 
-    getViewportController()->setLook(vec2(0, 0));
+    _viewportController->setLook(vec2(0, 0));
 
     auto rings = vector<PolyLine2d> {
             ring(vec2(0, 0), 500, 600, 0),

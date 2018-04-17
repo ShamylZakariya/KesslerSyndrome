@@ -80,10 +80,11 @@ namespace game {
         //  Set up viewport trauma effects
         //
         
-        auto &traumaConfig = getViewportController()->getTraumaConfig();
-        traumaConfig.shakeTranslation = dvec2(40,40);
-        traumaConfig.shakeRotation = 10 * M_PI / 180;
-        traumaConfig.shakeFrequency = 8;
+        _viewportController = ViewportController::create(getViewport());
+        _viewportController->getTraumaConfig().shakeTranslation = dvec2(40,40);
+        _viewportController->getTraumaConfig().shakeRotation = 10 * M_PI / 180;
+        _viewportController->getTraumaConfig().shakeFrequency = 8;
+        addObject(Object::with("ViewportController", { _viewportController }));
 
         //
         //	Load some basic stage properties
@@ -159,7 +160,7 @@ namespace game {
             //
             
             addObject(Object::with("CameraController", {
-                make_shared<MouseViewportControlComponent>(getViewportController(), 0)
+                make_shared<MouseViewportControlComponent>(_viewportController, 0)
             }));
             
             addObject(Object::with("Dragger", {
@@ -436,7 +437,7 @@ namespace game {
         dvec2 emissionDir = normalize(world - _planet->getOrigin());
         _explosionEmitter->emit(world, emissionDir, 1.0, 140, particles::ParticleEmitter::Sawtooth);
         
-        getViewportController()->addTrauma(0.5);
+        _viewportController->addTrauma(0.5);
     }
     
     void GameStage::handleTerrainTerrainContact(cpArbiter *arbiter) {

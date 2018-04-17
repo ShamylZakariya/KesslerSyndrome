@@ -107,6 +107,9 @@ PerlinWorldTestScenario::~PerlinWorldTestScenario() {
 
 void PerlinWorldTestScenario::setup() {
     setStage(make_shared<Stage>("Perlin World"));
+    
+    auto viewportController = ViewportController::create(getViewport());
+    getStage()->addObject(Object::with("ViewportController", { viewportController }));
 
     auto params = game::planet_generation::params(512).defaultCenteringTransform(4);
     
@@ -201,7 +204,7 @@ void PerlinWorldTestScenario::setup() {
     cutter->onCut.connect(this, &PerlinWorldTestScenario::onCutPerformed);
 
     getStage()->addObject(Object::with("ViewportControlComponent", {
-        make_shared<MouseViewportControlComponent>(getViewportController())
+        make_shared<MouseViewportControlComponent>(viewportController)
     }));
     
     //

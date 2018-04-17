@@ -105,8 +105,10 @@ void TerrainAttachmentsTestScenario::setup() {
         make_shared<terrain::MouseCutterDrawComponent>()
     });
     
+    auto viewportController = ViewportController::create(getViewport());
     auto cameraController = Object::with("ViewportControlComponent", {
-        make_shared<MouseViewportControlComponent>(getViewportController())
+        viewportController,
+        make_shared<MouseViewportControlComponent>(viewportController)
     });
     
     auto gridDc = WorldCartesianGridDrawComponent::create();
@@ -170,8 +172,6 @@ terrain::WorldRef TerrainAttachmentsTestScenario::testBasicTerrain() {
     using namespace terrain;
     cpSpaceSetDamping(getStage()->getSpace()->getSpace(), 0.5);
     
-    getViewportController()->setLook(vec2(0, 0));
-    
     vector<ShapeRef> shapes = {
         Shape::fromContour(rect(0, 0, 100, 50)),          // 0
         Shape::fromContour(rect(100, 0, 150, 50)),        // 1 to right of 0 - binds to 0
@@ -213,9 +213,7 @@ terrain::WorldRef TerrainAttachmentsTestScenario::testBasicTerrain() {
 terrain::WorldRef TerrainAttachmentsTestScenario::testBasicAttachmentAdapter() {
     using namespace terrain;
     cpSpaceSetDamping(getStage()->getSpace()->getSpace(), 0.5);
-    
-    getViewportController()->setLook(vec2(0, 0));
-    
+        
     vector<ShapeRef> shapes = {
         Shape::fromContour(rect(0, 0, 100, 50)),          // 0
         Shape::fromContour(rect(100, 0, 150, 50)),        // 1 to right of 0 - binds to 0
