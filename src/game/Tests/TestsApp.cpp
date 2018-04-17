@@ -16,6 +16,8 @@
 #include "EasingTestScenario.hpp"
 #include "ParticleSystemTestScenario.hpp"
 
+#define SCENARIO_FACTORY(s) [](){ return make_pair(#s, make_shared<s>()); }
+
 class TestsApp : public core::App {
 public:
 
@@ -33,13 +35,13 @@ public:
         App::setup();
         
         _scenarioFactories = {
-            [](){ return make_pair("ParticleSystemTestScenario", make_shared<ParticleSystemTestScenario>()); },
-            [](){ return make_pair("PerlinWorldTestScenario", make_shared<PerlinWorldTestScenario>()); },
-            [](){ return make_pair("SvgTestScenario", make_shared<SvgTestScenario>()); },
-            [](){ return make_pair("TerrainAttachmentsTestScenario", make_shared<TerrainAttachmentsTestScenario>()); },
-            [](){ return make_pair("IPTestsScenario", make_shared<IPTestsScenario>()); },
-            [](){ return make_pair("EasingTestScenario", make_shared<EasingTestScenario>()); },
-            [](){ return make_pair("TerrainTestScenario", make_shared<TerrainTestScenario>()); },
+            SCENARIO_FACTORY(ParticleSystemTestScenario),
+            SCENARIO_FACTORY(PerlinWorldTestScenario),
+            SCENARIO_FACTORY(SvgTestScenario),
+            SCENARIO_FACTORY(TerrainAttachmentsTestScenario),
+            SCENARIO_FACTORY(IPTestsScenario),
+            SCENARIO_FACTORY(EasingTestScenario),
+            SCENARIO_FACTORY(TerrainTestScenario),
         };
         
         _index = 0;
