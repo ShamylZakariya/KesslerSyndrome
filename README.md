@@ -11,6 +11,7 @@ An in-progress Tank Wars / Scorched Earth type game, for two players. With destr
 ## Features
 
 - Destructible 2D terrain, where bombs shatter the world, casting rock into orbit. 
+- Cool random world generation via noise & marchine squares
 - Uh, not much else, yet
 
 ## Screenshots
