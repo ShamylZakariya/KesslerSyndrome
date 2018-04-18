@@ -46,6 +46,7 @@ namespace core {
     Scenario::Scenario() :
             InputListener(numeric_limits<int>::max()), // scenario should always be last to receive input after in-game input components
             _viewport(make_shared<Viewport>()),
+            _viewportFboCompositor(make_shared<FboCompositor>()),
             _screenViewport(make_shared<ScreenViewport>()),
             _time(app::getElapsedSeconds(), 1.0 / 60.0, 1, 0),
             _stepTime(app::getElapsedSeconds(), 1.0 / 60.0, 1, 0),
@@ -155,6 +156,11 @@ namespace core {
     }
 
     void Scenario::dispatchDraw() {
+
+        //
+        // establish render state
+        //
+
         _screenRenderState.frame = _renderState.frame = app::getElapsedFrames();
         _screenRenderState.pass = _renderState.pass = 0;
         _screenRenderState.time = _renderState.time = _time.time;
@@ -162,23 +168,46 @@ namespace core {
 
         clear(_renderState);
 
-        if (_stage) {
-            gl::ScopedMatrices sm;
-            gl::setMatricesWindow(_width, _height, false);
-            _viewport->set();
-
-            _stage->draw(_renderState);
-            draw(_renderState);
+        const gl::FboRef &fbo = _viewport->getFbo();
+        if (fbo) {
+            gl::ScopedFramebuffer sfbo(fbo);
+            dispatchSceneDraw();
+        } else {
+            dispatchSceneDraw();
+        }
+        
+        // now composite pass
+        if (fbo) {
+            _viewportFboCompositor->setFbo(fbo);
+            _viewportFboCompositor->composite(_width, _height);
         }
 
+        dispatchScreenDraw();
+    }
+    
+    void Scenario::dispatchSceneDraw() {
+        gl::ScopedMatrices sm;
+        gl::setMatricesWindow(_width, _height, false);
+        _viewport->set();
+        
+        if (_stage) {
+            _stage->draw(_renderState);
+        }
+        
+        draw(_renderState);
+    }
+    
+    void Scenario::dispatchScreenDraw() {
         gl::ScopedMatrices sm;
         gl::setMatricesWindow(_width, _height, true);
-
-        drawScreen(_screenRenderState);
-
+        _screenViewport->set();
+        
         if (_stage) {
             _stage->drawScreen(_screenRenderState);
         }
+
+        drawScreen(_screenRenderState);
     }
+
 
 }

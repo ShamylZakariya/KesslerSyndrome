@@ -14,6 +14,19 @@ namespace core {
         const double MinScale = 1e-5;
     }
 
+#pragma mark - BaseViewport
+    
+    BaseViewport::BaseViewport():
+        // default 24-bit color + alpha without depth
+        _fboFormat(gl::Fbo::Format().disableDepth())
+    {
+    }
+    
+    BaseViewport::~BaseViewport() {}
+
+    
+#pragma mark - Viewport
+
     /*
         int _width, _height;
         look _look;
@@ -32,9 +45,19 @@ namespace core {
 
             _width = width;
             _height = height;
+            
+            //
+            // create new fbo
+            //
 
-            //update & notify
+            _fbo = ci::gl::Fbo::create(_width, _height, getFboFormat());
+            
+            //
+            // update & notify
+            //
+
             _updateMatrices();
+
             onMotion(*this);
             onBoundsChanged(*this);
         }

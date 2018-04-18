@@ -12,6 +12,7 @@
 #include <cinder/Area.h>
 #include <chipmunk/chipmunk.h>
 #include <cinder/gl/scoped.h>
+#include <cinder/gl/Fbo.h>
 
 #include "Common.hpp"
 #include "ChipmunkHelpers.hpp"
@@ -25,18 +26,19 @@ using namespace std;
 
 namespace core {
 
-    SMART_PTR(IViewport);
+    SMART_PTR(BaseViewport);
     SMART_PTR(Viewport);
     SMART_PTR(ScreenViewport);
     
     // prototype - defined in ViewportController.hpp
     SMART_PTR(ViewportController);
 
-    class IViewport {
+    class BaseViewport {
     public:
+        
+        BaseViewport();
 
-        virtual ~IViewport() {
-        }
+        virtual ~BaseViewport();
 
         virtual ivec2 getSize() const = 0;
 
@@ -105,14 +107,27 @@ namespace core {
         // get this Viewport's ViewportController (may be null)
         ViewportControllerRef getController() const { return _controller.lock(); }
         
+        virtual void setFboFormat(const gl::Fbo::Format &format) { _fboFormat = format; }
+        const gl::Fbo::Format &getFboFormat() const { return _fboFormat; }
+        
+        // if this Viewport should render into an Fbo instead of directly to screen,
+        // the Viewport should return an Fbo instance here.
+        virtual gl::FboRef getFbo() const { return nullptr; }
+        
+        /**
+         apply the camera for rendering. sets gl::viewport, projection and view matrices
+         */
+        virtual void set() = 0;
+
     private:
         friend class ViewportController;
         
         ViewportControllerWeakRef _controller;
+        gl::Fbo::Format _fboFormat;
 
     };
 
-    class Viewport : public IViewport {
+    class Viewport : public BaseViewport {
     public:
 
         signals::signal<void(const Viewport &)> onMotion;
@@ -281,11 +296,18 @@ namespace core {
          get the current viewport frustum in world coordinates
          */
         cpBB getFrustum() const override;
+        
+        /**
+         get the backing Fbo
+        */
+        gl::FboRef getFbo() const override {
+            return _fbo;
+        }
 
         /**
          apply the camera for rendering. sets gl::viewport, projection and view matrices
          */
-        void set();
+        void set() override;
 
     private:
         
@@ -298,14 +320,15 @@ namespace core {
         int _width, _height;
         look _look;
         dmat4 _viewMatrix, _inverseViewMatrix, _projectionMatrix, _inverseProjectionMatrix, _viewProjectionMatrix, _inverseViewProjectionMatrix;
-
+        gl::FboRef _fbo;
+        
     };
     
     /**
      ScreenViewport
      A special viewport for rendering UI, with transforms configured for 1 unit -> 1px
      */
-    class ScreenViewport : public IViewport {
+    class ScreenViewport : public BaseViewport {
     public:
         ScreenViewport() {
         }
@@ -369,6 +392,10 @@ namespace core {
         virtual cpBB getFrustum() const override {
             return cpBBNew(0, 0, _width, _height);
         };
+        
+        // this camera is an identity matrix so we don't have anything to do here
+        void set() override {}
+
         
     private:
         

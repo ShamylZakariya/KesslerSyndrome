@@ -3,11 +3,7 @@
 ## PRESENTLY
 
 Renter to Texture Viewport
-- Reduce viewport sphagetti
-- Move viewport controller out of scenario - scenario should only know about viewport(s)
-- need some kind of compositor pass in the scenario (does it punt to stage?)
-
-Tests app should offer all test scenarios, and should just switch between them, lazily create/destroy them
+    - compositor
 
 
 ## BUGS PRIORITY HIGH

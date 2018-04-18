@@ -14,6 +14,7 @@
 #include "ViewportController.hpp"
 #include "RenderState.hpp"
 #include "TimeState.hpp"
+#include "Compositor.hpp"
 
 namespace core {
 
@@ -106,10 +107,16 @@ namespace core {
         virtual void dispatchUpdate();
 
         virtual void dispatchDraw();
+        
+        virtual void dispatchSceneDraw();
+
+        virtual void dispatchScreenDraw();
 
     private:
 
         ViewportRef _viewport;
+        FboCompositorRef _viewportFboCompositor;
+        
         ScreenViewportRef _screenViewport;
         time_state _time, _stepTime;
         render_state _renderState, _screenRenderState;
