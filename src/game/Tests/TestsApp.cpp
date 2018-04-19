@@ -15,6 +15,7 @@
 #include "IPTestsScenario.hpp"
 #include "EasingTestScenario.hpp"
 #include "ParticleSystemTestScenario.hpp"
+#include "MultiViewportTestScenario.hpp"
 
 #define SCENARIO_FACTORY(s) [](){ return make_pair(#s, make_shared<s>()); }
 
@@ -35,6 +36,7 @@ public:
         App::setup();
         
         _scenarioFactories = {
+            SCENARIO_FACTORY(MultiViewportTestScenario),
             SCENARIO_FACTORY(ParticleSystemTestScenario),
             SCENARIO_FACTORY(PerlinWorldTestScenario),
             SCENARIO_FACTORY(SvgTestScenario),

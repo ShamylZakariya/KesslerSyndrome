@@ -19,6 +19,7 @@
 		63597BED20766F9D00B65C2A /* GlslProgLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63597BE920766F7700B65C2A /* GlslProgLoader.cpp */; };
 		63611A8D2087990C004EE731 /* Compositor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63611A8B2087990C004EE731 /* Compositor.cpp */; };
 		63611A8E2087990C004EE731 /* Compositor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63611A8B2087990C004EE731 /* Compositor.cpp */; };
+		63611A922088DF96004EE731 /* MultiViewportTestScenario.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63611A8F2088DC14004EE731 /* MultiViewportTestScenario.cpp */; };
 		638BFB1D203F28DE004163A9 /* IPTestsScenario.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 638BFB1B203F28DE004163A9 /* IPTestsScenario.cpp */; };
 		638F4D951F87D7BC004437E8 /* PerlinNoise.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 638F4D931F87D7BC004437E8 /* PerlinNoise.cpp */; };
 		638F4D991F895CE5004437E8 /* TerrainDetail.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 638F4D971F8957F8004437E8 /* TerrainDetail.cpp */; };
@@ -156,6 +157,8 @@
 		63597BEA20766F7700B65C2A /* GlslProgLoader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = GlslProgLoader.hpp; sourceTree = "<group>"; };
 		63611A8B2087990C004EE731 /* Compositor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Compositor.cpp; sourceTree = "<group>"; };
 		63611A8C2087990C004EE731 /* Compositor.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Compositor.hpp; sourceTree = "<group>"; };
+		63611A8F2088DC14004EE731 /* MultiViewportTestScenario.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = MultiViewportTestScenario.cpp; sourceTree = "<group>"; };
+		63611A902088DC14004EE731 /* MultiViewportTestScenario.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = MultiViewportTestScenario.hpp; sourceTree = "<group>"; };
 		638BFB1B203F28DE004163A9 /* IPTestsScenario.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = IPTestsScenario.cpp; sourceTree = "<group>"; };
 		638BFB1C203F28DE004163A9 /* IPTestsScenario.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IPTestsScenario.hpp; sourceTree = "<group>"; };
 		638F4D901F87D4F3004437E8 /* Planet.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Planet.cpp; sourceTree = "<group>"; };
@@ -497,6 +500,8 @@
 				638BFB1C203F28DE004163A9 /* IPTestsScenario.hpp */,
 				63A5ED11204C9432001BD62E /* EasingTestScenario.cpp */,
 				63A5ED12204C9432001BD62E /* EasingTestScenario.hpp */,
+				63611A8F2088DC14004EE731 /* MultiViewportTestScenario.cpp */,
+				63611A902088DC14004EE731 /* MultiViewportTestScenario.hpp */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -631,6 +636,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				63611A922088DF96004EE731 /* MultiViewportTestScenario.cpp in Sources */,
 				63597BED20766F9D00B65C2A /* GlslProgLoader.cpp in Sources */,
 				631CBB712066FEFA006D3E31 /* TerrainCutRecorder.cpp in Sources */,
 				638F4DD31F8BCFEA004437E8 /* SvgTestScenario.cpp in Sources */,
