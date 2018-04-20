@@ -10,6 +10,8 @@
 #define Compositor_hpp
 
 #include "Common.hpp"
+#include "Viewport.hpp"
+
 #include <cinder/Area.h>
 #include <cinder/gl/scoped.h>
 #include <cinder/gl/Fbo.h>
@@ -21,7 +23,7 @@ using namespace std;
 
 namespace core {
 
-    SMART_PTR(Compositor);
+    SMART_PTR(BaseCompositor);
 
     /**
      Compositor is a mechanism to composite the output of one or more Fbos to screen (or some other target).
@@ -57,12 +59,25 @@ namespace core {
         
         void composite(int width, int height) override;
     
-    private:
+    protected:
         
         gl::FboRef _fbo;
         gl::GlslProgRef _shader;
         gl::BatchRef _batch;
 
+    };
+    
+    class ViewportCompositor : public FboCompositor {
+    public:
+        
+        ViewportCompositor(BaseViewportRef viewport);
+        ViewportCompositor(BaseViewportRef viewport, std::string shaderAssetPath);
+        
+        void composite(int width, int height) override;
+
+    protected:
+        
+        BaseViewportRef _viewport;
     };
     
 }

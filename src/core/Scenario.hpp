@@ -83,13 +83,13 @@ namespace core {
             return _renderState.mode;
         }
         
-        virtual void setCompositor(const FboCompositorRef &compositor);
+        virtual void setCompositor(const BaseCompositorRef &compositor);
         
-        const FboCompositorRef &getCompositor() const { return _compositor; }
+        const BaseCompositorRef &getCompositor() const { return _compositor; }
 
-        virtual void setScreenCompositor(const FboCompositorRef &compositor);
+        virtual void setScreenCompositor(const BaseCompositorRef &compositor);
         
-        const FboCompositorRef &getScreenCompositor() const { return _screenCompositor; }
+        const BaseCompositorRef &getScreenCompositor() const { return _screenCompositor; }
         
         /**
          Save a screenshot as PNG to @a path
@@ -123,10 +123,10 @@ namespace core {
     private:
 
         ViewportRef _viewport;
-        FboCompositorRef _compositor;
+        BaseCompositorRef _compositor;
         
         ScreenViewportRef _screenViewport;
-        FboCompositorRef _screenCompositor;
+        BaseCompositorRef _screenCompositor;
         
         time_state _time, _stepTime;
         render_state _renderState, _screenRenderState;

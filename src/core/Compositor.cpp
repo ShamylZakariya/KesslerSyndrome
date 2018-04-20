@@ -55,5 +55,19 @@ namespace core {
         _batch->draw();
     }
 
+#pragma mark - ViewportCompositor
     
+    ViewportCompositor::ViewportCompositor(BaseViewportRef viewport):
+            _viewport(viewport)
+    {}
+    
+    ViewportCompositor::ViewportCompositor(BaseViewportRef viewport, std::string shaderAssetPath):
+            core::FboCompositor(shaderAssetPath),
+            _viewport(viewport)
+    {}
+
+    void ViewportCompositor::composite(int width, int height) {
+        setFbo(_viewport->getFbo());
+        FboCompositor::composite(width,height);
+    }
 }

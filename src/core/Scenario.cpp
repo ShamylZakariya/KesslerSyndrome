@@ -50,9 +50,9 @@ namespace core {
     Scenario::Scenario() :
             InputListener(numeric_limits<int>::max()), // scenario should always be last to receive input after in-game input components
             _viewport(make_shared<Viewport>()),
-            _compositor(make_shared<FboCompositor>()),
+            _compositor(make_shared<ViewportCompositor>(_viewport)),
             _screenViewport(make_shared<ScreenViewport>()),
-            _screenCompositor(make_shared<FboCompositor>()),
+            _screenCompositor(make_shared<ViewportCompositor>(_screenViewport)),
             _time(app::getElapsedSeconds(), 1.0 / 60.0, 1, 0),
             _stepTime(app::getElapsedSeconds(), 1.0 / 60.0, 1, 0),
             _renderState(_viewport, RenderMode::GAME, 0, 0, 0, 0),
@@ -92,11 +92,11 @@ namespace core {
         app::console() << "Scenario[" << this << "]::setRenderMode: " << RenderMode::toString(getRenderMode()) << endl;
     }
     
-    void Scenario::setCompositor(const FboCompositorRef &compositor) {
+    void Scenario::setCompositor(const BaseCompositorRef &compositor) {
         _compositor = compositor;
     }
 
-    void Scenario::setScreenCompositor(const FboCompositorRef &compositor) {
+    void Scenario::setScreenCompositor(const BaseCompositorRef &compositor) {
         _screenCompositor = compositor;
     }
 
@@ -190,7 +190,6 @@ namespace core {
         
         // now composite pass
         if (fbo) {
-            _compositor->setFbo(fbo);
             _compositor->composite(_width, _height);
         }
 
@@ -204,7 +203,6 @@ namespace core {
         
         // now composite screen pass
         if (screenFbo) {
-            _screenCompositor->setFbo(screenFbo);
             _screenCompositor->composite(_width, _height);
         }
     }
