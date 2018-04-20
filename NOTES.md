@@ -2,8 +2,9 @@
 
 ## PRESENTLY
 
-Renter to Texture Viewport
-    - compositor
+Multiple Viewports
+Right now, vis culling is done in Stage::update (539)
+Needs to be done per-viewport, probably should be done during draw pass, not update()
 
 
 ## BUGS PRIORITY HIGH

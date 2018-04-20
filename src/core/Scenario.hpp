@@ -116,9 +116,9 @@ namespace core {
 
         virtual void dispatchDraw();
         
-        virtual void dispatchSceneDraw();
+        virtual void dispatchSceneDraw(const render_state &renderState);
 
-        virtual void dispatchScreenDraw();
+        virtual void dispatchScreenDraw(const render_state &renderState);
 
     private:
 

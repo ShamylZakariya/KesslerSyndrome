@@ -55,11 +55,16 @@ namespace core {
             _screenCompositor(make_shared<ViewportCompositor>(_screenViewport)),
             _time(app::getElapsedSeconds(), 1.0 / 60.0, 1, 0),
             _stepTime(app::getElapsedSeconds(), 1.0 / 60.0, 1, 0),
-            _renderState(_viewport, RenderMode::GAME, 0, 0, 0, 0),
-            _screenRenderState(_screenViewport, RenderMode::GAME, 0, 0, 0, 0),
+            _renderState(RenderMode::GAME, 0, 0, 0, 0),
+            _screenRenderState(RenderMode::GAME, 0, 0, 0, 0),
             _width(app::getWindowWidth()),
-            _height(app::getWindowHeight()) {
+            _height(app::getWindowHeight())
+    {
         setListening(true);
+
+        // TODO: THis will go away once culling is managed correctly
+        _renderState.viewport = _viewport;
+        _screenRenderState.viewport = _viewport;
     }
 
     Scenario::~Scenario() {
@@ -179,35 +184,18 @@ namespace core {
         _screenRenderState.time = _renderState.time = _time.time;
         _screenRenderState.deltaT = _renderState.deltaT = _time.deltaT;
 
+        _renderState.viewport = _viewport;
+        dispatchSceneDraw(_renderState);
+        _compositor->composite(_width, _height);
 
-        const gl::FboRef &fbo = _viewport->getFbo();
-        if (fbo) {
-            gl::ScopedFramebuffer sfbo(fbo);
-            dispatchSceneDraw();
-        } else {
-            dispatchSceneDraw();
-        }
-        
-        // now composite pass
-        if (fbo) {
-            _compositor->composite(_width, _height);
-        }
-
-        const gl::FboRef &screenFbo = _screenViewport->getFbo();
-        if (screenFbo) {
-            gl::ScopedFramebuffer sfbo(screenFbo);
-            dispatchScreenDraw();
-        } else {
-            dispatchScreenDraw();
-        }
-        
-        // now composite screen pass
-        if (screenFbo) {
-            _screenCompositor->composite(_width, _height);
-        }
+        _screenRenderState.viewport = _screenViewport;
+        dispatchScreenDraw(_screenRenderState);
+        _screenCompositor->composite(_width, _height);
     }
     
-    void Scenario::dispatchSceneDraw() {
+    void Scenario::dispatchSceneDraw(const render_state &renderState) {
+        gl::ScopedFramebuffer sfbo(renderState.viewport->getFbo());
+       
         clear(_renderState);
 
         gl::ScopedMatrices sm;
@@ -221,7 +209,9 @@ namespace core {
         draw(_renderState);
     }
     
-    void Scenario::dispatchScreenDraw() {
+    void Scenario::dispatchScreenDraw(const render_state &renderState) {
+        gl::ScopedFramebuffer sfbo(renderState.viewport->getFbo());
+
         gl::clear(ColorA(0,0,0,0));
                 
         gl::ScopedMatrices sm;
