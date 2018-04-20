@@ -245,8 +245,14 @@ namespace core {
 
         void draw(const render_state &);
 
+        // return a set of all registered drawables
         const set<DrawComponentRef> &all() const {
             return _all;
+        }
+        
+        // return a vector of all visible drawables, sorted into their draw order
+        const vector<DrawComponentRef> &visible() const {
+            return _collector.sorted;
         }
 
         /**
@@ -397,14 +403,22 @@ namespace core {
 
         void setPaused(bool paused = true);
 
+        // called when the app window is resized
         virtual void resize(ivec2 newSize);
 
+        // physics step - run fixed-timestep rigid body physics simulation here
         virtual void step(const time_state &time);
 
+        // "loose" physics update. Put time-based non-fixed-timestep game logic here
         virtual void update(const time_state &time);
+        
+        // Stage culls drawables to the viewport in `state; the visible sets are then used in draw() and drawScreen()
+        virtual void prepareToDraw(const render_state &state);
 
+        // draw stage contents
         virtual void draw(const render_state &state);
 
+        // draw screen-space elements (UI, etc)
         virtual void drawScreen(const render_state &state);
 
         virtual void addObject(ObjectRef obj);

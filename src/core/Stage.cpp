@@ -534,11 +534,10 @@ namespace core {
                 }
             }
         }
-
-        // cull visibility sets
-        if (ScenarioRef scenario = _scenario.lock()) {
-            _drawDispatcher->cull(scenario->getRenderState());
-        }
+    }
+    
+    void Stage::prepareToDraw(const render_state &state) {
+        _drawDispatcher->cull(state);
     }
 
     void Stage::draw(const render_state &state) {

@@ -203,6 +203,7 @@ namespace core {
         _viewport->set();
         
         if (_stage) {
+            _stage->prepareToDraw(_renderState);
             _stage->draw(_renderState);
         }
         

@@ -60,10 +60,10 @@ namespace {
         _color(color)
         {}
         
-        void setPosition(dvec2 position) { _position = position; }
+        void setPosition(dvec2 position) { _position = position; notifyMoved(); }
         dvec2 getPosition() const { return _position; }
         
-        void setRadius(double r) { _radius = r; }
+        void setRadius(double r) { _radius = r; notifyMoved(); }
         double getRadius() const { return _radius; }
         
         void setColor(ColorA color) { _color = color; }
@@ -229,10 +229,15 @@ void MultiViewportTestScenario::draw(const render_state &state) {
 
 void MultiViewportTestScenario::drawScreen(const render_state &state)
 {
-    float fps = core::App::get()->getAverageFps();
-    float sps = core::App::get()->getAverageSps();
-    string info = core::strings::format("%.1f %.1f", fps, sps);
-    gl::drawString(info, vec2(10, 10), Color(1, 1, 1));
+    stringstream ss;
+    ss
+        << setprecision(2)
+        << "fps: " << core::App::get()->getAverageFps()
+        << " sps: " << core::App::get()->getAverageSps()
+        << " visible: (" << getStage()->getDrawDispatcher()->visible().size() << "/" << getStage()->getDrawDispatcher()->all().size() << ")";
+
+
+    gl::drawString(ss.str(), vec2(10, 10), Color(1, 1, 1));
 }
 
 void MultiViewportTestScenario::reset()
