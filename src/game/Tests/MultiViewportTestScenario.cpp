@@ -228,7 +228,12 @@ void MultiViewportTestScenario::draw(const render_state &state) {
 }
 
 void MultiViewportTestScenario::drawScreen(const render_state &state)
-{}
+{
+    float fps = core::App::get()->getAverageFps();
+    float sps = core::App::get()->getAverageSps();
+    string info = core::strings::format("%.1f %.1f", fps, sps);
+    gl::drawString(info, vec2(10, 10), Color(1, 1, 1));
+}
 
 void MultiViewportTestScenario::reset()
 {

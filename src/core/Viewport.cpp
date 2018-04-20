@@ -36,7 +36,6 @@ namespace core {
     Viewport::Viewport() :
             _width(0),
             _height(0) {
-        setSize(app::getWindowWidth(), app::getWindowHeight());
         setLook(dvec2(0, 0));
     }
 
@@ -113,5 +112,25 @@ namespace core {
         _inverseViewProjectionMatrix = glm::inverse(_viewProjectionMatrix);
     }
 
-
+#pragma mark - ScreenViewport
+    
+    ScreenViewport::ScreenViewport():
+            _width(0),
+            _height(0)
+    {}
+    
+    ScreenViewport::~ScreenViewport(){}
+    
+    void ScreenViewport::setSize(int width, int height) {
+        if (_width != width || _height != height) {
+            _width = width;
+            _height = height;
+            
+            //
+            // create new fbo
+            //
+            
+            _fbo = ci::gl::Fbo::create(_width, _height, getFboFormat());
+        }
+    }
 }

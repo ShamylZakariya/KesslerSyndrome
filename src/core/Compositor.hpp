@@ -43,8 +43,13 @@ namespace core {
 
     class FboCompositor : public BaseCompositor {
     public:
-        
+
+        // loads default shader asset (kessler/shaders/fbo_compositor.glsl)
         FboCompositor();
+
+        // path to a .glsl shader asset
+        FboCompositor(std::string shaderAssetPath);
+
         ~FboCompositor();
         
         void setFbo(const gl::FboRef &fbo) { _fbo = fbo; }

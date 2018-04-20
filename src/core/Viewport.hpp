@@ -330,16 +330,11 @@ namespace core {
      */
     class ScreenViewport : public BaseViewport {
     public:
-        ScreenViewport() {
-        }
+        ScreenViewport();
         
-        virtual ~ScreenViewport() {
-        }
+        ~ScreenViewport();
         
-        void setSize(int width, int height) {
-            _width = width;
-            _height = height;
-        }
+        void setSize(int width, int height);
         
         ivec2 getSize() const override {
             return ivec2(_width, _height);
@@ -357,49 +352,53 @@ namespace core {
             return dvec2(_width / 2.0, _height / 2.0);
         }
         
-        virtual double getScale() const override {
+        double getScale() const override {
             return 1.0;
         };
         
-        virtual double getReciprocalScale() const override {
+        double getReciprocalScale() const override {
             return 1.0;
         };
         
-        virtual dmat4 getViewMatrix() const override {
+        dmat4 getViewMatrix() const override {
             return mat4();
         };
         
-        virtual dmat4 getInverseViewMatrix() const override {
+        dmat4 getInverseViewMatrix() const override {
             return mat4();
         };
         
-        virtual dmat4 getProjectionMatrix() const override {
+        dmat4 getProjectionMatrix() const override {
             return mat4();
         };
         
-        virtual dmat4 getInverseProjectionMatrix() const override {
+        dmat4 getInverseProjectionMatrix() const override {
             return mat4();
         };
         
-        virtual dmat4 getViewProjectionMatrix() const override {
+        dmat4 getViewProjectionMatrix() const override {
             return mat4();
         };
         
-        virtual dmat4 getInverseViewProjectionMatrix() const override {
+        dmat4 getInverseViewProjectionMatrix() const override {
             return mat4();
         };
         
-        virtual cpBB getFrustum() const override {
+        cpBB getFrustum() const override {
             return cpBBNew(0, 0, _width, _height);
         };
         
+        gl::FboRef getFbo() const override {
+            return _fbo;
+        }
+
         // this camera is an identity matrix so we don't have anything to do here
         void set() override {}
-
         
     private:
         
         int _width, _height;
+        gl::FboRef _fbo;
         
     };
 

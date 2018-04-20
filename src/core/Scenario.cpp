@@ -35,19 +35,24 @@ namespace core {
     }
 
     /*
-        ViewportRef _viewport;
-        shared_ptr<ScreenViewport> _screenViewport;
-        time_state _time, _stepTime;
-        render_state _renderState, _screenRenderState;
-        StageRef _stage;
-        int _width, _height;
+     ViewportRef _viewport;
+     FboCompositorRef _compositor;
+     
+     ScreenViewportRef _screenViewport;
+     FboCompositorRef _screenCompositor;
+     
+     time_state _time, _stepTime;
+     render_state _renderState, _screenRenderState;
+     StageRef _stage;
+     int _width, _height;
      */
 
     Scenario::Scenario() :
             InputListener(numeric_limits<int>::max()), // scenario should always be last to receive input after in-game input components
             _viewport(make_shared<Viewport>()),
-            _viewportFboCompositor(make_shared<FboCompositor>()),
+            _compositor(make_shared<FboCompositor>()),
             _screenViewport(make_shared<ScreenViewport>()),
+            _screenCompositor(make_shared<FboCompositor>()),
             _time(app::getElapsedSeconds(), 1.0 / 60.0, 1, 0),
             _stepTime(app::getElapsedSeconds(), 1.0 / 60.0, 1, 0),
             _renderState(_viewport, RenderMode::GAME, 0, 0, 0, 0),
@@ -85,6 +90,14 @@ namespace core {
     void Scenario::setRenderMode(RenderMode::mode mode) {
         _screenRenderState.mode = _renderState.mode = mode;
         app::console() << "Scenario[" << this << "]::setRenderMode: " << RenderMode::toString(getRenderMode()) << endl;
+    }
+    
+    void Scenario::setCompositor(const FboCompositorRef &compositor) {
+        _compositor = compositor;
+    }
+
+    void Scenario::setScreenCompositor(const FboCompositorRef &compositor) {
+        _screenCompositor = compositor;
     }
 
     void Scenario::screenshot(const ci::fs::path &folderPath, const string &namingPrefix, const string format) {
@@ -166,7 +179,6 @@ namespace core {
         _screenRenderState.time = _renderState.time = _time.time;
         _screenRenderState.deltaT = _renderState.deltaT = _time.deltaT;
 
-        clear(_renderState);
 
         const gl::FboRef &fbo = _viewport->getFbo();
         if (fbo) {
@@ -178,14 +190,28 @@ namespace core {
         
         // now composite pass
         if (fbo) {
-            _viewportFboCompositor->setFbo(fbo);
-            _viewportFboCompositor->composite(_width, _height);
+            _compositor->setFbo(fbo);
+            _compositor->composite(_width, _height);
         }
 
-        dispatchScreenDraw();
+        const gl::FboRef &screenFbo = _screenViewport->getFbo();
+        if (screenFbo) {
+            gl::ScopedFramebuffer sfbo(screenFbo);
+            dispatchScreenDraw();
+        } else {
+            dispatchScreenDraw();
+        }
+        
+        // now composite screen pass
+        if (screenFbo) {
+            _screenCompositor->setFbo(screenFbo);
+            _screenCompositor->composite(_width, _height);
+        }
     }
     
     void Scenario::dispatchSceneDraw() {
+        clear(_renderState);
+
         gl::ScopedMatrices sm;
         gl::setMatricesWindow(_width, _height, false);
         _viewport->set();
@@ -198,6 +224,8 @@ namespace core {
     }
     
     void Scenario::dispatchScreenDraw() {
+        gl::clear(ColorA(0,0,0,0));
+                
         gl::ScopedMatrices sm;
         gl::setMatricesWindow(_width, _height, true);
         _screenViewport->set();

@@ -82,7 +82,15 @@ namespace core {
         RenderMode::mode getRenderMode() const {
             return _renderState.mode;
         }
+        
+        virtual void setCompositor(const FboCompositorRef &compositor);
+        
+        const FboCompositorRef &getCompositor() const { return _compositor; }
 
+        virtual void setScreenCompositor(const FboCompositorRef &compositor);
+        
+        const FboCompositorRef &getScreenCompositor() const { return _screenCompositor; }
+        
         /**
          Save a screenshot as PNG to @a path
          */
@@ -115,9 +123,11 @@ namespace core {
     private:
 
         ViewportRef _viewport;
-        FboCompositorRef _viewportFboCompositor;
+        FboCompositorRef _compositor;
         
         ScreenViewportRef _screenViewport;
+        FboCompositorRef _screenCompositor;
+        
         time_state _time, _stepTime;
         render_state _renderState, _screenRenderState;
         StageRef _stage;

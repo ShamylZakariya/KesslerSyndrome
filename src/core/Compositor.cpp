@@ -32,7 +32,13 @@ namespace core {
             _batch(gl::Batch::create(geom::Rect().rect(Rectf(0, 0, 1, 1)), _shader))
     {
     }
-    
+
+    FboCompositor::FboCompositor(std::string shaderAssetPath):
+    _shader(core::util::loadGlslAsset(shaderAssetPath)),
+    _batch(gl::Batch::create(geom::Rect().rect(Rectf(0, 0, 1, 1)), _shader))
+    {
+    }
+
     FboCompositor::~FboCompositor()
     {}
     
