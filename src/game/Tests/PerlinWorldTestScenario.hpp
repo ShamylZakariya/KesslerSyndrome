@@ -34,8 +34,6 @@ public:
 
     virtual void draw(const render_state &state) override;
 
-    virtual void drawScreen(const render_state &state) override;
-
     virtual bool keyDown(const ci::app::KeyEvent &event) override;
 
     void reset();
@@ -58,11 +56,9 @@ private:
 
 private:
 
-    float _surfaceSolidity;
+    float _surfaceSolidity, _surfaceRoughness;
     int32_t _seed;
 
-    vector<ci::Channel8u> _isoSurfaces;
-    vector<ci::gl::Texture2dRef> _isoTexes;
     vector <segment> _marchSegments;
     vector <polyline> _marchedPolylines;
     terrain::TerrainObjectRef _terrain;

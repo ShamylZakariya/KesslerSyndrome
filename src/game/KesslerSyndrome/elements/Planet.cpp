@@ -36,6 +36,7 @@ namespace game {
             params.terrain.enabled = true;
             params.terrain.seed = surfaceConfig.seed;
             params.terrain.surfaceSolidity = surfaceConfig.surfaceSolidity;
+            params.terrain.surfaceRoughness = surfaceConfig.surfaceRoughness;
             params.terrain.vignetteStart = 0.8;
             params.terrain.vignetteEnd = 0.99;
             params.terrain.pruneFloaters = true;
@@ -43,9 +44,9 @@ namespace game {
             params.anchors.enabled = true;
             params.anchors.seed = coreConfig.seed;
             params.anchors.surfaceSolidity = coreConfig.surfaceSolidity;
+            params.anchors.surfaceRoughness = coreConfig.surfaceRoughness;
             params.anchors.vignetteStart = 0.3;
             params.anchors.vignetteEnd = 0.7;
-            
             
             return params;
         }
@@ -80,6 +81,7 @@ namespace game {
         c.seed = util::xml::readNumericAttribute<int>(configNode, "seed", c.seed);
         c.radius = util::xml::readNumericAttribute<double>(configNode, "radius", c.radius);
         c.surfaceSolidity = util::xml::readNumericAttribute<double>(configNode, "surfaceSolidity", c.surfaceSolidity);
+        c.surfaceRoughness = util::xml::readNumericAttribute<double>(configNode, "surfaceRoughness", c.surfaceRoughness);
 
         return c;
     }

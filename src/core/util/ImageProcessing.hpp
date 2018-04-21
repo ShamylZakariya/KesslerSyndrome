@@ -97,6 +97,9 @@ namespace core {
                 // fill all pixels of channel with noise at a given frequency
                 void perlin(ci::Channel8u &channel, ci::Perlin &noise, double frequency);
                 
+                // add value of the perlin noise function, scaled, to each existing pixel
+                void perlin_add(ci::Channel8u &channel, ci::Perlin &noise, double frequency, double scale);
+                
                 // fill all pixels of channel with noise at a given frequency, where the noise is absoluted and thresholded
                 void perlin_abs_thresh(ci::Channel8u &channel, ci::Perlin &noise, double frequency, uint8_t threshold);
                 

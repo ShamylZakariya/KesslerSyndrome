@@ -46,7 +46,7 @@ public:
             SCENARIO_FACTORY(TerrainTestScenario),
         };
         
-        _index = 0;
+        _index = 2;
         loadScenario();
     }
     

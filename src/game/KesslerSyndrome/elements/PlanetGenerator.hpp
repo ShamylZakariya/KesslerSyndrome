@@ -38,10 +38,14 @@ namespace game { namespace planet_generation {
             
             // Value of zero results in a very wispy planet surface, and 1 results in a very solid surface
             double surfaceSolidity;
-            
+
+            // Value of zero results in smooth planet surface, value of 1 roughens. Range [0,1]
+            double surfaceRoughness;
+
             double vignetteStart;
             
             double vignetteEnd;
+            
 
             generation_params():
             seed(12345),
@@ -49,7 +53,8 @@ namespace game { namespace planet_generation {
             noiseFrequencyScale(1),
             surfaceSolidity(1),
             vignetteStart(0.9),
-            vignetteEnd(1)
+            vignetteEnd(1),
+            surfaceRoughness(0.15)
             {}
         };
 

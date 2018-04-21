@@ -459,7 +459,7 @@ namespace core {
                         
                         while (iter.line()) {
                             while (iter.pixel()) {
-                                float v = noise.fBm(frequency * iter.x(), frequency * iter.y());
+                                const float v = noise.fBm(frequency * iter.x(), frequency * iter.y());
                                 iter.v() = static_cast<uint8_t>(255.f * (v * 0.5f + 0.5f));
                             }
                         }
@@ -481,6 +481,40 @@ namespace core {
                         perlin_area(channel, channel.getBounds(), noise, frequency);
                     }
                 }
+                
+                namespace {
+                    void perlin_add_area(ci::Channel8u &channel, Area area, ci::Perlin &noise, double frequency, double scale) {
+                        Channel8u::Iter iter = channel.getIter(area);
+                        
+                        const float r255 = 1.0f / 255.0f;
+                        while (iter.line()) {
+                            while (iter.pixel()) {
+                                const float pn = scale * noise.fBm(frequency * iter.x(), frequency * iter.y());
+                                const float dest = iter.v() * r255; // renormalize contents to [0,1]
+                                const float result = saturate<float>(dest + pn);
+                                iter.v() = static_cast<uint8_t>(255.f * result);
+                            }
+                        }
+
+                    }
+                }
+                
+                void perlin_add(ci::Channel8u &channel, ci::Perlin &noise, double frequency, double scale) {
+                    const size_t threadCount = get_num_threads();
+                    if (threadCount > 1) {
+                        vector<std::thread> threads;
+                        for (size_t idx = 0; idx < threadCount; idx++) {
+                            Area workingArea = get_thread_working_area(channel.getWidth(), channel.getHeight(), idx);
+                            threads.emplace_back(std::thread(&perlin_add_area, std::ref(channel), workingArea, std::ref(noise), frequency, scale));
+                        }
+                        
+                        for(auto &t : threads) { t.join(); }
+                        
+                    } else {
+                        perlin_add_area(channel, channel.getBounds(), noise, frequency, scale);
+                    }
+                }
+
                 
                 namespace {
                     void perlin_abs_thresh_area(ci::Channel8u &channel, Area area, ci::Perlin &noise, double frequency, uint8_t threshold) {

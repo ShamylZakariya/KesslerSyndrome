@@ -27,11 +27,13 @@ namespace game {
             int seed;
             double radius;
             double surfaceSolidity;
+            double surfaceRoughness;
 
             config() :
                     seed(12345),
                     radius(500),
-                    surfaceSolidity(0.5)
+                    surfaceSolidity(0.5),
+                    surfaceRoughness(0.1)
             {
             }
 

@@ -209,6 +209,17 @@ namespace game { namespace planet_generation {
             int blurRadius = static_cast<int>(lrp<double>(surfaceSolidity, 5, 21));
             map = util::ip::blur(map, blurRadius);
             
+            //
+            //  Add a little high-frequency noise for detail
+            //
+            
+            if (p.surfaceRoughness > 0) {
+                ci::Perlin roughnessNoiseSource(p.noiseOctaves, p.seed + 1);
+                const float roughness = saturate(p.surfaceRoughness);
+                const float frequency = lrp<float>(roughness, 1.0f / 16.0f, 12.0f / 16.0f);
+                util::ip::in_place::perlin_add(map, roughnessNoiseSource, frequency, saturate(roughness));
+            }
+            
             
             //
             // Now apply vignette to prevent blobs from touching edges and, generally,

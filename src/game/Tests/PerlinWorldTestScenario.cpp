@@ -78,10 +78,56 @@ namespace {
     const terrain::material TerrainMaterial(1, 0.5, COLLISION_SHAPE_RADIUS, ShapeFilters::TERRAIN, CollisionType::TERRAIN, MIN_SURFACE_AREA, TERRAIN_COLOR);
     terrain::material AnchorMaterial(1, 1, COLLISION_SHAPE_RADIUS, ShapeFilters::ANCHOR, CollisionType::ANCHOR, MIN_SURFACE_AREA, ANCHOR_COLOR);
 
+    class ImageDrawer : public core::DrawComponent {
+    public:
+        
+        static ObjectRef create(string assetPath, dvec2 position) {
+            return Object::with(assetPath, {
+                make_shared<ImageDrawer>(gl::Texture2d::create(loadImage(app::loadAsset(assetPath))), position)
+            });
+        }
+
+        static ObjectRef create(string name, gl::Texture2dRef image, dvec2 position) {
+            return Object::with(name, {
+                make_shared<ImageDrawer>(image, position)
+            });
+        }
+
+    public:
+        
+        ImageDrawer(gl::Texture2dRef image, dvec2 topLeft):
+        _image(image),
+        _topLeft(topLeft)
+        {}
+        
+        void draw(const render_state &renderState) override {
+            gl::ScopedBlendAlpha sba;
+            gl::ScopedColor sc(ColorA(1,1,1,1));
+            
+            const auto bounds = _image->getBounds();
+            const auto dest = Rectf(_topLeft.x, _topLeft.y, _topLeft.x + bounds.getWidth(), _topLeft.y - bounds.getHeight());
+            gl::draw(_image, bounds, dest);
+        }
+        
+        VisibilityDetermination::style getVisibilityDetermination() const override {
+            return VisibilityDetermination::ALWAYS_DRAW;
+        }
+        
+        int getLayer() const override {
+            return 1;
+        }
+        
+    private:
+        
+        ci::gl::Texture2dRef _image;
+        dvec2 _topLeft;
+        
+    };
+    
 }
 
 /*
- float _surfaceSolidity;
+ float _surfaceSolidity, _surfaceRoughness;
  int32_t _seed;
  
  vector<ci::Channel8u> _isoSurfaces;
@@ -97,6 +143,7 @@ namespace {
 PerlinWorldTestScenario::PerlinWorldTestScenario() :
     _seed(1234),
     _surfaceSolidity(0.5),
+    _surfaceRoughness(0.5),
     _recordCuts(true),
     _playingBackRecordedCuts(false)
 {
@@ -119,17 +166,19 @@ void PerlinWorldTestScenario::setup() {
     params.terrain.pruneFloaters = false;
     params.terrain.partitionSize = 100;
     params.terrain.surfaceSolidity = _surfaceSolidity;
+    params.terrain.surfaceRoughness = _surfaceRoughness;
     params.terrain.material = TerrainMaterial;
     
     params.anchors.seed = _seed + 1;
     params.anchors.noiseOctaves = 2;
     params.anchors.noiseFrequencyScale = 2;
     params.anchors.surfaceSolidity = _surfaceSolidity;
+    params.anchors.surfaceRoughness = 0;
     params.anchors.vignetteStart *= 0.5;
     params.anchors.vignetteEnd *= 0.5;
     params.anchors.material = AnchorMaterial;
 
-    if ((true)) {
+    if ((false)) {
         auto ap = game::planet_generation::params::perimeter_attachment_params(0);
         ap.batchId = 0;
         ap.normalToUpDotTarget = 1;
@@ -174,12 +223,14 @@ void PerlinWorldTestScenario::setup() {
     //
     // debug views of the iso surfaces
     //
-    if ((false)) {
-        _isoSurfaces = vector<Channel8u> { terrainGen.terrainMap, terrainGen.anchorMap };
+    if ((true)) {
+        
+        float left = 1000;
         const auto fmt = ci::gl::Texture2d::Format().mipmap(false).minFilter(GL_NEAREST).magFilter(GL_NEAREST);
-        for(Channel8u isoSurface : _isoSurfaces) {
-            _isoTexes.push_back(ci::gl::Texture2d::create(isoSurface, fmt));
-        }
+        getStage()->addObject(Object::with("Terrain Map Images", {
+            make_shared<ImageDrawer>(ci::gl::Texture2d::create(terrainGen.terrainMap, fmt), dvec2(left,0)),
+            make_shared<ImageDrawer>(ci::gl::Texture2d::create(terrainGen.anchorMap, fmt), dvec2(left + terrainGen.terrainMap.getWidth(), 0)),
+        }));
     }
 
     //
@@ -220,9 +271,6 @@ void PerlinWorldTestScenario::setup() {
 void PerlinWorldTestScenario::cleanup() {
     _terrainCutRecorder.reset();
     _terrain.reset();
-    _isoSurfaces.clear();
-    _isoTexes.clear();
-
     setStage(nullptr);
 }
 
@@ -260,37 +308,40 @@ void PerlinWorldTestScenario::draw(const render_state &state) {
     }
 }
 
-void PerlinWorldTestScenario::drawScreen(const render_state &state) {
-    gl::ScopedModelMatrix smm;
-    gl::scale(0.25, 0.25, 1);
-    int x = 0;
-    for (auto tex : _isoTexes) {
-        gl::color(ColorA(1, 1, 1, 1));
-        gl::translate(vec3(x, 0, 0));
-        gl::draw(tex);
-        x += tex->getWidth();
-    }
-}
-
 bool PerlinWorldTestScenario::keyDown(const ci::app::KeyEvent &event) {
     
     switch(event.getChar()) {
         case 'r':
             reset();
             return true;
+        
         case 's':
             _seed++;
             CI_LOG_D("_seed: " << _seed);
             reset();
             return true;
+            
         case '-':
             _surfaceSolidity = max<float>(_surfaceSolidity - 0.1, 0);
             CI_LOG_D("_surfaceSolidity: " << _surfaceSolidity);
             reset();
             return true;
+        
         case '=':
             _surfaceSolidity = min<float>(_surfaceSolidity + 0.1, 1);
             CI_LOG_D("_surfaceSolidity: " << _surfaceSolidity);
+            reset();
+            return true;
+
+        case '9':
+            _surfaceRoughness = max<float>(_surfaceRoughness - 0.1, 0);
+            CI_LOG_D("_surfaceRoughness: " << _surfaceRoughness);
+            reset();
+            return true;
+
+        case '0':
+            _surfaceRoughness = min<float>(_surfaceRoughness + 0.1, 1);
+            CI_LOG_D("_surfaceRoughness: " << _surfaceRoughness);
             reset();
             return true;
             
