@@ -121,7 +121,7 @@ EasingTestScenario::~EasingTestScenario() {
 void EasingTestScenario::setup() {
     setStage(make_shared<Stage>("Image Processing Tests"));
     
-    auto viewportController = ViewportController::create(getViewport());
+    auto viewportController = ViewportController::create(getMainViewport<Viewport>());
 
     getStage()->addObject(Object::with("ViewportControlComponent", {
         viewportController,
@@ -151,15 +151,6 @@ void EasingTestScenario::setup() {
 
 void EasingTestScenario::cleanup() {
     setStage(nullptr);
-}
-
-void EasingTestScenario::resize(ivec2 size) {
-}
-
-void EasingTestScenario::step(const time_state &time) {
-}
-
-void EasingTestScenario::update(const time_state &time) {
 }
 
 void EasingTestScenario::clear(const render_state &state) {

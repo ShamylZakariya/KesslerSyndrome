@@ -31,15 +31,45 @@ namespace core {
             time.deltaT = lrp<seconds_t>(0.05, time.deltaT, Elapsed);
             time.step++;
         }
+        
+        ViewportComposerRef create_stage_viewport_composer() {
+            auto viewport = make_shared<Viewport>();
+            auto compositor = make_shared<ViewportCompositor>(viewport);
+            return make_shared<ViewportComposer>(viewport, compositor);
+        }
+
+        ViewportComposerRef create_screen_viewport_composer() {
+            auto viewport = make_shared<ScreenViewport>();
+            auto compositor = make_shared<ViewportCompositor>(viewport);
+            return make_shared<ViewportComposer>(viewport, compositor);
+        }
 
     }
+    
+#pragma mark - ViewportComposor
+    
+    ViewportComposer::ViewportComposer(const BaseViewportRef &viewport, const BaseCompositorRef &compositor):
+    _viewports({viewport}),
+    _compositor(compositor)
+    {}
+
+    ViewportComposer::ViewportComposer(const initializer_list<BaseViewportRef> &viewports, const BaseCompositorRef &compositor):
+    _viewports(viewports),
+    _compositor(compositor)
+    {}
+    
+    void ViewportComposer::onScenarioResized(int width, int height) {
+        for (const auto &viewport : _viewports) {
+            viewport->setSize(width, height);
+        }
+    }
+
+    
+#pragma mark - Scenario
 
     /*
-     ViewportRef _viewport;
-     FboCompositorRef _compositor;
-     
-     ScreenViewportRef _screenViewport;
-     FboCompositorRef _screenCompositor;
+     ViewportComposerRef _viewportComposer;
+     ViewportComposerRef _screenViewportComposer;
      
      time_state _time, _stepTime;
      render_state _renderState, _screenRenderState;
@@ -49,10 +79,8 @@ namespace core {
 
     Scenario::Scenario() :
             InputListener(numeric_limits<int>::max()), // scenario should always be last to receive input after in-game input components
-            _viewport(make_shared<Viewport>()),
-            _compositor(make_shared<ViewportCompositor>(_viewport)),
-            _screenViewport(make_shared<ScreenViewport>()),
-            _screenCompositor(make_shared<ViewportCompositor>(_screenViewport)),
+            _viewportComposer(create_stage_viewport_composer()),
+            _screenViewportComposer(create_screen_viewport_composer()),
             _time(app::getElapsedSeconds(), 1.0 / 60.0, 1, 0),
             _stepTime(app::getElapsedSeconds(), 1.0 / 60.0, 1, 0),
             _renderState(RenderMode::GAME, 0, 0, 0, 0),
@@ -61,10 +89,6 @@ namespace core {
             _height(app::getWindowHeight())
     {
         setListening(true);
-
-        // TODO: THis will go away once culling is managed correctly
-        _renderState.viewport = _viewport;
-        _screenRenderState.viewport = _viewport;
     }
 
     Scenario::~Scenario() {
@@ -74,7 +98,7 @@ namespace core {
         return InputListener::isListening() && getStage();
     }
 
-    void Scenario::resize(ivec2 size) {
+    void Scenario::windowResized(ivec2 size) {
     }
 
     void Scenario::step(const time_state &time) {
@@ -92,18 +116,21 @@ namespace core {
     void Scenario::drawScreen(const render_state &state) {
     }
 
+    void Scenario::setViewportComposer(const ViewportComposerRef &composer) {
+        _viewportComposer = composer;
+        _viewportComposer->onScenarioResized(_width, _height);
+    }
+    
+    void Scenario::setScreenViewportComposer(const ViewportComposerRef &composer) {
+        _screenViewportComposer = composer;
+        _screenViewportComposer->onScenarioResized(_width, _height);
+    }
+
     void Scenario::setRenderMode(RenderMode::mode mode) {
         _screenRenderState.mode = _renderState.mode = mode;
         app::console() << "Scenario[" << this << "]::setRenderMode: " << RenderMode::toString(getRenderMode()) << endl;
     }
-    
-    void Scenario::setCompositor(const BaseCompositorRef &compositor) {
-        _compositor = compositor;
-    }
-
-    void Scenario::setScreenCompositor(const BaseCompositorRef &compositor) {
-        _screenCompositor = compositor;
-    }
+        
 
     void Scenario::screenshot(const ci::fs::path &folderPath, const string &namingPrefix, const string format) {
         size_t index = 0;
@@ -135,19 +162,19 @@ namespace core {
         cleanup();
     }
 
-    void Scenario::dispatchResize(const ivec2 &size) {
+    void Scenario::dispatchWindowResize(const ivec2 &size) {
         _width = size.x;
         _height = size.y;
 
         gl::viewport(0, 0, size.x, size.y);
-        _viewport->setSize(size.x, size.y);
-        _screenViewport->setSize(size.x, size.y);
+        _viewportComposer->onScenarioResized(size.x, size.y);
+        _screenViewportComposer->onScenarioResized(size.x, size.y);
 
         if (_stage) {
             _stage->resize(size);
         }
 
-        resize(size);
+        windowResized(size);
     }
 
     void Scenario::dispatchStep() {
@@ -184,13 +211,31 @@ namespace core {
         _screenRenderState.time = _renderState.time = _time.time;
         _screenRenderState.deltaT = _renderState.deltaT = _time.deltaT;
 
-        _renderState.viewport = _viewport;
-        dispatchSceneDraw(_renderState);
-        _compositor->composite(_width, _height);
+        //
+        //  Dispatch stage rendering
+        //
 
-        _screenRenderState.viewport = _screenViewport;
-        dispatchScreenDraw(_screenRenderState);
-        _screenCompositor->composite(_width, _height);
+        for (const auto &viewport : _viewportComposer->getViewports()) {
+            _renderState.viewport = viewport;
+            dispatchSceneDraw(_renderState);
+        }
+
+        //
+        //  Dispatch screen rendering
+        //
+
+        for (const auto &viewport : _screenViewportComposer->getViewports()) {
+            _screenRenderState.viewport = viewport;
+            dispatchScreenDraw(_screenRenderState);
+        }
+
+        //
+        //  Now draw to screen
+        //
+        
+        gl::clear(ColorA(0,0,0,1));
+        _viewportComposer->getCompositor()->composite(_width, _height);
+        _screenViewportComposer->getCompositor()->composite(_width, _height);
     }
     
     void Scenario::dispatchSceneDraw(const render_state &renderState) {
@@ -200,7 +245,7 @@ namespace core {
 
         gl::ScopedMatrices sm;
         gl::setMatricesWindow(_width, _height, false);
-        _viewport->set();
+        renderState.viewport->set();
         
         if (_stage) {
             _stage->prepareToDraw(_renderState);
@@ -217,8 +262,10 @@ namespace core {
                 
         gl::ScopedMatrices sm;
         gl::setMatricesWindow(_width, _height, true);
-        _screenViewport->set();
-        
+        renderState.viewport->set();
+
+        gl::ScopedBlendAlpha sba;
+
         if (_stage) {
             _stage->drawScreen(_screenRenderState);
         }

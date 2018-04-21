@@ -141,7 +141,7 @@ namespace {
 }
 
 void WorldCartesianGridDrawComponent::setupShaderUniforms() {
-    ViewportRef vp = getStage()->getViewport();
+    ViewportRef vp = getStage()->getMainViewport();
 
     // find largest period where rendered texel scale (ratio of one texel to one pixel) is less than or equal to maxTexelScale
     const double textureSize = _texture->getWidth();
@@ -234,7 +234,7 @@ void MouseViewportControlComponent::step(const time_state &time) {
 
 bool MouseViewportControlComponent::mouseDown(const ci::app::MouseEvent &event) {
     _mouseScreen = event.getPos();
-    _mouseWorld = getStage()->getViewport()->screenToWorld(_mouseScreen);
+    _mouseWorld = getStage()->getMainViewport()->screenToWorld(_mouseScreen);
 
     //CI_LOG_D("screen: " << _mouseScreen << " world: " << _mouseWorld << " SPACE: " << isKeyDown(app::KeyEvent::KEY_SPACE) << " ALT: " << event.isAltDown());
 
@@ -258,16 +258,16 @@ bool MouseViewportControlComponent::mouseUp(const ci::app::MouseEvent &event) {
 
 bool MouseViewportControlComponent::mouseMove(const ci::app::MouseEvent &event, const ivec2 &delta) {
     _mouseScreen = event.getPos();
-    _mouseWorld = getStage()->getViewport()->screenToWorld(_mouseScreen);
+    _mouseWorld = getStage()->getMainViewport()->screenToWorld(_mouseScreen);
     return false;
 }
 
 bool MouseViewportControlComponent::mouseDrag(const ci::app::MouseEvent &event, const ivec2 &delta) {
     _mouseScreen = event.getPos();
-    _mouseWorld = getStage()->getViewport()->screenToWorld(_mouseScreen);
+    _mouseWorld = getStage()->getMainViewport()->screenToWorld(_mouseScreen);
 
     if (isKeyDown(app::KeyEvent::KEY_SPACE)) {
-        dvec2 deltaWorld = _viewportController->getViewport()->screenToWorldDir(dvec2(delta));
+        dvec2 deltaWorld = _viewportController->getMainViewport()->screenToWorldDir(dvec2(delta));
         Viewport::look look = _viewportController->getLook();
         look.world -= deltaWorld;
         _viewportController->setLook(look);
@@ -429,7 +429,7 @@ bool TargetTrackingViewportControlComponent::mouseWheel(const ci::app::MouseEven
 }
 
 void TargetTrackingViewportControlComponent::_trackNoSlop(const tracking &t, const time_state &time) {
-    const ivec2 size = _viewportController->getViewport()->getSize();
+    const ivec2 size = _viewportController->getMainViewport()->getSize();
     const double scale = min(size.x, size.y) / (2 * t.radius);
 
     _viewportController->setLook(Viewport::look(t.world, t.up, scale * _scale));
@@ -454,7 +454,7 @@ void TargetTrackingViewportControlComponent::_track(const tracking &t, const tim
         currentLook.up = t.up;
 
         // now apply scale and look::up
-        const ivec2 size = _viewportController->getViewport()->getSize();
+        const ivec2 size = _viewportController->getMainViewport()->getSize();
         const double scale = min(size.x, size.y) / (2 * _trackingAreaRadius);
 
         _viewportController->setLook(currentLook);
@@ -495,7 +495,7 @@ bool MousePickComponent::mouseDown(const ci::app::MouseEvent &event) {
     releaseDragConstraint();
 
     _mouseScreen = event.getPos();
-    _mouseWorld = getStage()->getViewport()->screenToWorld(_mouseScreen);
+    _mouseWorld = getStage()->getMainViewport()->screenToWorld(_mouseScreen);
 
     if (isKeyDown(app::KeyEvent::KEY_SPACE)) {
         return false;
@@ -529,13 +529,13 @@ bool MousePickComponent::mouseUp(const ci::app::MouseEvent &event) {
 
 bool MousePickComponent::mouseMove(const ci::app::MouseEvent &event, const ivec2 &delta) {
     _mouseScreen = event.getPos();
-    _mouseWorld = getStage()->getViewport()->screenToWorld(_mouseScreen);
+    _mouseWorld = getStage()->getMainViewport()->screenToWorld(_mouseScreen);
     return false;
 }
 
 bool MousePickComponent::mouseDrag(const ci::app::MouseEvent &event, const ivec2 &delta) {
     _mouseScreen = event.getPos();
-    _mouseWorld = getStage()->getViewport()->screenToWorld(_mouseScreen);
+    _mouseWorld = getStage()->getMainViewport()->screenToWorld(_mouseScreen);
     return false;
 }
 
@@ -641,7 +641,7 @@ MouseDelegateComponentRef MouseDelegateComponent::onDrag(MouseDragHandler h) {
 bool MouseDelegateComponent::mouseDown(const ci::app::MouseEvent &event) {
     if (_pressHandler) {
         dvec2 screen = event.getPos();
-        dvec2 world = getStage()->getViewport()->screenToWorld(screen);
+        dvec2 world = getStage()->getMainViewport()->screenToWorld(screen);
 
         return _pressHandler(screen, world, event);
     }
@@ -651,7 +651,7 @@ bool MouseDelegateComponent::mouseDown(const ci::app::MouseEvent &event) {
 bool MouseDelegateComponent::mouseUp(const ci::app::MouseEvent &event) {
     if (_releaseHandler) {
         dvec2 screen = event.getPos();
-        dvec2 world = getStage()->getViewport()->screenToWorld(screen);
+        dvec2 world = getStage()->getMainViewport()->screenToWorld(screen);
 
         return _releaseHandler(screen, world, event);
     }
@@ -661,8 +661,8 @@ bool MouseDelegateComponent::mouseUp(const ci::app::MouseEvent &event) {
 bool MouseDelegateComponent::mouseMove(const ci::app::MouseEvent &event, const ivec2 &delta) {
     if (_moveHandler) {
         dvec2 screen = event.getPos();
-        dvec2 world = getStage()->getViewport()->screenToWorld(screen);
-        dvec2 worldDelta = getStage()->getViewport()->screenToWorldDir(delta);
+        dvec2 world = getStage()->getMainViewport()->screenToWorld(screen);
+        dvec2 worldDelta = getStage()->getMainViewport()->screenToWorldDir(delta);
 
         return _moveHandler(screen, world, delta, worldDelta, event);
     }
@@ -673,8 +673,8 @@ bool MouseDelegateComponent::mouseMove(const ci::app::MouseEvent &event, const i
 bool MouseDelegateComponent::mouseDrag(const ci::app::MouseEvent &event, const ivec2 &delta) {
     if (_dragHandler) {
         dvec2 screen = event.getPos();
-        dvec2 world = getStage()->getViewport()->screenToWorld(screen);
-        dvec2 worldDelta = getStage()->getViewport()->screenToWorldDir(delta);
+        dvec2 world = getStage()->getMainViewport()->screenToWorld(screen);
+        dvec2 worldDelta = getStage()->getMainViewport()->screenToWorldDir(delta);
 
         return _dragHandler(screen, world, delta, worldDelta, event);
     }

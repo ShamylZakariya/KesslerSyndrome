@@ -19,8 +19,35 @@
 namespace core {
 
     SMART_PTR(Stage)
-
     SMART_PTR(Scenario)
+    SMART_PTR(ViewportComposer)
+    
+    
+    /**
+     ViewportComposer acts as manager for a set of viewports to be used to render the contents of a Scenario.
+     ViewportComposer also owns the Compositor used to draw the contents of the viewports to screen.
+     Also, the ViewportComposer is responsible for resizing the viewports when the owning scenario is resized.
+     Special multi-viewport setups might prefer to have each viewport be resized to a fraction of Scenario window
+     size.
+     */
+    class ViewportComposer {
+    public:
+
+        ViewportComposer(const BaseViewportRef &viewport, const BaseCompositorRef &compositor);
+        ViewportComposer(const initializer_list<BaseViewportRef> &viewports, const BaseCompositorRef &compositor);
+        
+        virtual void onScenarioResized(int width, int height);
+        
+        const vector<BaseViewportRef> &getViewports() const { return _viewports; }
+        const BaseCompositorRef &getCompositor() const { return _compositor; }
+        
+    private:
+        
+        vector<BaseViewportRef> _viewports;
+        BaseCompositorRef _compositor;
+        
+    };
+    
 
     class Scenario : public InputListener, public signals::receiver, public enable_shared_from_this<Scenario> {
     public:
@@ -31,16 +58,24 @@ namespace core {
 
         bool isListening() const override;
 
-        virtual void setup() {
-        }
+        virtual void setup() {}
 
-        virtual void cleanup() {
-        }
+        virtual void cleanup() {}
 
-        virtual void resize(ivec2 size);
+        /**
+         Called when the application window has resized.
+         */
+        virtual void windowResized(ivec2 size);
 
+        /**
+         Perform fixed-timestep animations (i.e. rigid body physics) here
+         */
         virtual void step(const time_state &time);
 
+        /**
+         Perform time-based animations which don't require a fixed time step.
+         E.g., do your rigid body physics updates in step(), do your time-based animations here.
+         */
         virtual void update(const time_state &time);
 
         /**
@@ -55,14 +90,43 @@ namespace core {
 
         /**
          performs draw with a top-left 1-to-1 ortho projection suitable for UI.
-         Note, there's no ViewportRef available in this pass since it's screen-direct.
          */
         virtual void drawScreen(const render_state &state);
 
-        const ViewportRef &getViewport() const {
-            return _viewport;
-        }
+        /**
+         Assign a ViewportComposer to the Scenario which renders the stage contents.
+         Scenario has a default ViewportComposer for stage rendering with a single Viewport and ViewportCompositor
+         */
+        virtual void setViewportComposer(const ViewportComposerRef &composer);
+        
+        /**
+         Get the ViewportComposer used to render the stage
+         */
+        const ViewportComposerRef &getViewportComposer() const { return _viewportComposer; }
+        
+        /**
+         Get the zeroth camera in the ViewportComposer
+         */
+        template<typename T>
+        shared_ptr<T> getMainViewport() const { return static_pointer_cast<T>(_viewportComposer->getViewports().front()); }
 
+        /**
+         Assign a ViewportComposer to the Scenario which renders Screen-space contents.
+         Scenario has a default ViewportComposer for screen rendering with a single ScreenViewport and ViewportCompositor
+         */
+        virtual void setScreenViewportComposer(const ViewportComposerRef &composer);
+        
+        /**
+         Get the ViewportComposer used to render the screen-space contents.
+         */
+        const ViewportComposerRef &getScreenViewportComposer() const { return _screenViewportComposer; }
+        
+        /**
+         Get the zeroth camera in the screen ViewportComposer
+         */
+        template<typename T>
+        shared_ptr<T> getMainScreenViewport() const { return static_pointer_cast<T>(_screenViewportComposer->getViewports().front()); }
+        
         // time state used for animation
         const time_state &getTime() const {
             return _time;
@@ -83,14 +147,6 @@ namespace core {
             return _renderState.mode;
         }
         
-        virtual void setCompositor(const BaseCompositorRef &compositor);
-        
-        const BaseCompositorRef &getCompositor() const { return _compositor; }
-
-        virtual void setScreenCompositor(const BaseCompositorRef &compositor);
-        
-        const BaseCompositorRef &getScreenCompositor() const { return _screenCompositor; }
-        
         /**
          Save a screenshot as PNG to @a path
          */
@@ -108,7 +164,7 @@ namespace core {
 
         virtual void dispatchCleanup();
 
-        virtual void dispatchResize(const ivec2 &size);
+        virtual void dispatchWindowResize(const ivec2 &size);
 
         virtual void dispatchStep();
 
@@ -122,11 +178,8 @@ namespace core {
 
     private:
 
-        ViewportRef _viewport;
-        BaseCompositorRef _compositor;
-        
-        ScreenViewportRef _screenViewport;
-        BaseCompositorRef _screenCompositor;
+        ViewportComposerRef _viewportComposer;
+        ViewportComposerRef _screenViewportComposer;
         
         time_state _time, _stepTime;
         render_state _renderState, _screenRenderState;

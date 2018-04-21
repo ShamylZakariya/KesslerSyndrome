@@ -24,7 +24,7 @@ void SvgTestScenario::setup() {
 
     getStage()->addObject(Object::with("Grid", { WorldCartesianGridDrawComponent::create(1) }));
 
-    auto viewportController = ViewportController::create(getViewport());
+    auto viewportController = ViewportController::create(getMainViewport<Viewport>());
     getStage()->addObject(Object::with("ViewportControl", {
         viewportController,
         make_shared<MouseViewportControlComponent>(viewportController)
@@ -36,17 +36,6 @@ void SvgTestScenario::setup() {
 
 void SvgTestScenario::cleanup() {
     setStage(nullptr);
-}
-
-void SvgTestScenario::resize(ivec2 size) {
-
-}
-
-void SvgTestScenario::step(const time_state &time) {
-
-}
-
-void SvgTestScenario::update(const time_state &time) {
 }
 
 void SvgTestScenario::clear(const render_state &state) {
@@ -64,10 +53,11 @@ void SvgTestScenario::drawScreen(const render_state &state) {
     string info = core::strings::format("%.1f %.1f", fps, sps);
     gl::drawString(info, vec2(10, 10), Color(1, 1, 1));
 
-    stringstream ss;
-    Viewport::look look = getViewport()->getLook();
-    double scale = getViewport()->getScale();
+    auto viewport = getMainViewport<Viewport>();
+    Viewport::look look = viewport->getLook();
+    double scale = viewport->getScale();
 
+    stringstream ss;
     ss << std::setprecision(3) << "world (" << look.world.x << ", " << look.world.y << ") scale: " << scale << " up: ("
        << look.up.x << ", " << look.up.y << ")";
     gl::drawString(ss.str(), vec2(10, 40), Color(1, 1, 1));

@@ -96,7 +96,7 @@ ParticleSystemTestScenario::~ParticleSystemTestScenario() {
 void ParticleSystemTestScenario::setup() {
     setStage(make_shared<Stage>("Particle System Tests"));
 
-    _viewportController = ViewportController::create(getViewport());
+    _viewportController = ViewportController::create(getMainViewport<Viewport>());
     _viewportController->setTrackingConfig(ViewportController::tracking_config(0.99,0.99,1));
     
     auto trauma = ViewportController::trauma_config();
@@ -188,12 +188,6 @@ void ParticleSystemTestScenario::cleanup() {
     setStage(nullptr);
 }
 
-void ParticleSystemTestScenario::resize(ivec2 size) {
-}
-
-void ParticleSystemTestScenario::step(const time_state &time) {
-}
-
 void ParticleSystemTestScenario::update(const time_state &time) {
     if (_explosionEmissionId != 0) {
         _viewportController->setTraumaBaseline(0.25);
@@ -215,10 +209,11 @@ void ParticleSystemTestScenario::drawScreen(const render_state &state) {
     string info = core::strings::format("perf: %.1f %.1f", fps, sps);
     gl::drawString(info, vec2(10, 10), Color(1, 1, 1));
 
-    stringstream ss;
-    Viewport::look look = getViewport()->getLook();
-    double scale = getViewport()->getScale();
+    auto vp = getMainViewport<Viewport>();
+    Viewport::look look = vp->getLook();
+    double scale = vp->getScale();
 
+    stringstream ss;
     ss << std::setprecision(3) << "world (" << look.world.x << ", " << look.world.y << ") scale: " << scale << " up: ("
     << look.up.x << ", " << look.up.y << ") trauma: " << _viewportController->getCurrentTraumaLevel();
     gl::drawString(ss.str(), vec2(10, 40), Color(1, 1, 1));

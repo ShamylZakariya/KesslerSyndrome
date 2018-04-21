@@ -57,7 +57,7 @@ namespace core {
     }
 
     void App::resize() {
-        _scenario->dispatchResize(getWindowSize());
+        _scenario->dispatchWindowResize(getWindowSize());
     }
 
     void App::step() {
@@ -93,7 +93,7 @@ namespace core {
 
         if (_scenario) {
             _scenario->dispatchSetup();
-            _scenario->dispatchResize(getWindowSize());
+            _scenario->dispatchWindowResize(getWindowSize());
         }
     }
 

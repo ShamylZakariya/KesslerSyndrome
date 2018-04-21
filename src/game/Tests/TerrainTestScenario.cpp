@@ -174,14 +174,12 @@ void TerrainTestScenario::setup() {
             make_shared<MousePickDrawComponent>()
     });
     
-    
-
     auto cutter = Object::with("Cutter", {
             make_shared<terrain::MouseCutterComponent>(_terrain, 4),
             make_shared<terrain::MouseCutterDrawComponent>()
     });
 
-    _viewportController = ViewportController::create(getViewport());
+    _viewportController = ViewportController::create(getMainViewport<Viewport>());
     auto cameraController = Object::with("ViewportControl", {
         _viewportController,
         make_shared<MouseViewportControlComponent>(_viewportController)
@@ -198,15 +196,6 @@ void TerrainTestScenario::setup() {
 void TerrainTestScenario::cleanup() {
     _terrain.reset();
     setStage(nullptr);
-}
-
-void TerrainTestScenario::resize(ivec2 size) {
-}
-
-void TerrainTestScenario::step(const time_state &time) {
-}
-
-void TerrainTestScenario::update(const time_state &time) {
 }
 
 void TerrainTestScenario::clear(const render_state &state) {

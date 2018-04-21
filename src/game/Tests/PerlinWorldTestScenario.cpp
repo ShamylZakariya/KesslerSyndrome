@@ -108,7 +108,7 @@ PerlinWorldTestScenario::~PerlinWorldTestScenario() {
 void PerlinWorldTestScenario::setup() {
     setStage(make_shared<Stage>("Perlin World"));
     
-    auto viewportController = ViewportController::create(getViewport());
+    auto viewportController = ViewportController::create(getMainViewport<Viewport>());
     getStage()->addObject(Object::with("ViewportController", { viewportController }));
 
     auto params = game::planet_generation::params(512).defaultCenteringTransform(4);
@@ -224,15 +224,6 @@ void PerlinWorldTestScenario::cleanup() {
     _isoTexes.clear();
 
     setStage(nullptr);
-}
-
-void PerlinWorldTestScenario::resize(ivec2 size) {
-}
-
-void PerlinWorldTestScenario::step(const time_state &time) {
-}
-
-void PerlinWorldTestScenario::update(const time_state &time) {
 }
 
 void PerlinWorldTestScenario::clear(const render_state &state) {

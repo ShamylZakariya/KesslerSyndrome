@@ -437,7 +437,10 @@ namespace core {
             return _time;
         }
 
-        ViewportRef getViewport() const;
+        /**
+         Get the owning-Scenario's main viewport
+         */
+        ViewportRef getMainViewport() const;
 
         void addGravity(const GravitationCalculatorRef &gravityCalculator);
 

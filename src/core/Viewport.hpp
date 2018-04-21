@@ -39,6 +39,8 @@ namespace core {
         BaseViewport();
 
         virtual ~BaseViewport();
+        
+        virtual void setSize(int width, int height) = 0;
 
         virtual ivec2 getSize() const = 0;
 
@@ -169,7 +171,7 @@ namespace core {
          manage the current viewport
          */
 
-        void setSize(int width, int height);
+        void setSize(int width, int height) override;
 
         ivec2 getSize() const override {
             return ivec2(_width, _height);
@@ -334,7 +336,7 @@ namespace core {
         
         ~ScreenViewport();
         
-        void setSize(int width, int height);
+        void setSize(int width, int height) override;
         
         ivec2 getSize() const override {
             return ivec2(_width, _height);

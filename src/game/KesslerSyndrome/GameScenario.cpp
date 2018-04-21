@@ -34,15 +34,6 @@ namespace game {
         setStage(nullptr);
     }
 
-    void GameScenario::resize(ivec2 size) {
-    }
-
-    void GameScenario::step(const time_state &time) {
-    }
-
-    void GameScenario::update(const time_state &time) {
-    }
-
     void GameScenario::drawScreen(const render_state &state) {
 
         //
@@ -54,10 +45,12 @@ namespace game {
         string info = core::strings::format("%.1f %.1f", fps, sps);
         gl::drawString(info, vec2(10, 10), Color(1, 1, 1));
 
-        stringstream ss;
-        Viewport::look look = getViewport()->getLook();
-        double scale = getViewport()->getScale();
 
+        auto vp = getMainViewport<Viewport>();
+        Viewport::look look = vp->getLook();
+        double scale = vp->getScale();
+
+        stringstream ss;
         ss << std::setprecision(3) << "world (" << look.world.x << ", " << look.world.y << ") scale: " << scale
            << " up: (" << look.up.x << ", " << look.up.y << ")";
         gl::drawString(ss.str(), vec2(10, 40), Color(1, 1, 1));

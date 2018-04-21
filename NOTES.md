@@ -5,6 +5,12 @@
 Multiple Viewports
 Right now, vis culling is done in Stage::update (539)
 Needs to be done per-viewport, probably should be done during draw pass, not update()
+Do I still need Scenario::clear????
+COnsider that viewportCompositor always acts on Viewport instances, and screenViewportCompositor always acts on ScreenViewport instances
+ViewportController doesn't scale about mouse correctly, feels like tracking is not at 1.0, or some error is creeping in
+
+Terrain
+Consider adding a low-magnitude, high-frequency perlin noise to "roughen up" the terrain perimeter
 
 
 ## BUGS PRIORITY HIGH

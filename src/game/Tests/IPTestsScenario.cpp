@@ -31,7 +31,7 @@ IPTestsScenario::~IPTestsScenario() {
 void IPTestsScenario::setup() {
     setStage(make_shared<Stage>("Image Processing Tests"));
     
-    auto viewportController = ViewportController::create(getViewport());
+    auto viewportController = ViewportController::create(getMainViewport<Viewport>());
 
     getStage()->addObject(Object::with("ViewportControlComponent", {
         viewportController,
@@ -71,15 +71,6 @@ void IPTestsScenario::cleanup() {
     _channelTextures.clear();
 }
 
-void IPTestsScenario::resize(ivec2 size) {
-}
-
-void IPTestsScenario::step(const time_state &time) {
-}
-
-void IPTestsScenario::update(const time_state &time) {
-}
-
 void IPTestsScenario::clear(const render_state &state) {
     gl::clear(Color(0.2, 0.2, 0.2));
 }
@@ -105,10 +96,11 @@ void IPTestsScenario::drawScreen(const render_state &state) {
     string info = core::strings::format("%.1f %.1f", fps, sps);
     gl::drawString(info, vec2(10, 10), Color(1, 1, 1));
     
-    stringstream ss;
-    Viewport::look look = getViewport()->getLook();
-    double scale = getViewport()->getScale();
+    auto viewport = getMainViewport<Viewport>();
+    Viewport::look look = viewport->getLook();
+    double scale = viewport->getScale();
     
+    stringstream ss;
     ss << std::setprecision(3) << "look (" << look.world.x << ", " << look.world.y << ") scale: " << scale << " up: (" << look.up.x << ", " << look.up.y << ")";
     gl::drawString(ss.str(), vec2(10, 40), Color(1, 1, 1));
 

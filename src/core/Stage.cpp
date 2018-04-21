@@ -613,8 +613,8 @@ namespace core {
         return result;
     }
 
-    ViewportRef Stage::getViewport() const {
-        return getScenario()->getViewport();
+    ViewportRef Stage::getMainViewport() const {
+        return getScenario()->getMainViewport<Viewport>();
     }
 
     void Stage::addGravity(const GravitationCalculatorRef &gravityCalculator) {

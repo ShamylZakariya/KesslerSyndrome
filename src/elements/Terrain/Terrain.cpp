@@ -86,7 +86,7 @@ namespace terrain {
 
     bool MouseCutterComponent::mouseDown(const ci::app::MouseEvent &event) {
         _mouseScreen = event.getPos();
-        _mouseWorld = getStage()->getViewport()->screenToWorld(_mouseScreen);
+        _mouseWorld = getStage()->getMainViewport()->screenToWorld(_mouseScreen);
         
         _cutting = true;
         _cutStart = _cutEnd = _mouseWorld;
@@ -97,7 +97,7 @@ namespace terrain {
     bool MouseCutterComponent::mouseUp(const ci::app::MouseEvent &event) {
         if (_cutting) {
             if (_terrain) {
-                const float radius = _radius / getStage()->getViewport()->getScale();
+                const float radius = _radius / getStage()->getMainViewport()->getScale();
                 _terrain->getWorld()->cut(_cutStart, _cutEnd, radius);
 
                 // notify
@@ -111,13 +111,13 @@ namespace terrain {
 
     bool MouseCutterComponent::mouseMove(const ci::app::MouseEvent &event, const ivec2 &delta) {
         _mouseScreen = event.getPos();
-        _mouseWorld = getStage()->getViewport()->screenToWorld(_mouseScreen);
+        _mouseWorld = getStage()->getMainViewport()->screenToWorld(_mouseScreen);
         return false;
     }
 
     bool MouseCutterComponent::mouseDrag(const ci::app::MouseEvent &event, const ivec2 &delta) {
         _mouseScreen = event.getPos();
-        _mouseWorld = getStage()->getViewport()->screenToWorld(_mouseScreen);
+        _mouseWorld = getStage()->getMainViewport()->screenToWorld(_mouseScreen);
         if (_cutting) {
             _cutEnd = _mouseWorld;
         }

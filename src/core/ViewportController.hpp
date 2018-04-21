@@ -110,7 +110,7 @@ namespace core {
         ///////////////////////////////////////////////////////////////////////////
         // ViewportController
 
-        ViewportRef getViewport() const {
+        ViewportRef getMainViewport() const {
             return _viewport;
         }
 
