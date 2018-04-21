@@ -53,7 +53,7 @@ namespace core {
     _compositor(compositor)
     {}
 
-    ViewportComposer::ViewportComposer(const initializer_list<BaseViewportRef> &viewports, const BaseCompositorRef &compositor):
+    ViewportComposer::ViewportComposer(const vector<BaseViewportRef> &viewports, const BaseCompositorRef &compositor):
     _viewports(viewports),
     _compositor(compositor)
     {}

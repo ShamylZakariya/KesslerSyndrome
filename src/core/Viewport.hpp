@@ -106,9 +106,6 @@ namespace core {
             return dvec2(getInverseViewProjectionMatrix() * dvec4(screen.x, screen.y, 0.0, 0.0));
         }
 
-        // get this Viewport's ViewportController (may be null)
-        ViewportControllerRef getController() const { return _controller.lock(); }
-        
         virtual void setFboFormat(const gl::Fbo::Format &format) { _fboFormat = format; }
         const gl::Fbo::Format &getFboFormat() const { return _fboFormat; }
         
@@ -122,9 +119,7 @@ namespace core {
         virtual void set() = 0;
 
     private:
-        friend class ViewportController;
-        
-        ViewportControllerWeakRef _controller;
+
         gl::Fbo::Format _fboFormat;
 
     };

@@ -164,7 +164,6 @@ namespace core {
         }
         _viewport = vp;
         if (_viewport) {
-            _viewport->_controller = shared_from_this_as<ViewportController>();
             _target = _viewport->getLook();
             _viewport->onMotion.connect(this, &ViewportController::_onViewportPropertyChanged);
             _viewport->onBoundsChanged.connect(this, &ViewportController::_onViewportPropertyChanged);

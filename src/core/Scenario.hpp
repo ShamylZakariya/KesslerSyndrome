@@ -33,15 +33,16 @@ namespace core {
     class ViewportComposer {
     public:
 
+        ViewportComposer(){}
         ViewportComposer(const BaseViewportRef &viewport, const BaseCompositorRef &compositor);
-        ViewportComposer(const initializer_list<BaseViewportRef> &viewports, const BaseCompositorRef &compositor);
+        ViewportComposer(const vector<BaseViewportRef> &viewports, const BaseCompositorRef &compositor);
         
         virtual void onScenarioResized(int width, int height);
         
         const vector<BaseViewportRef> &getViewports() const { return _viewports; }
         const BaseCompositorRef &getCompositor() const { return _compositor; }
         
-    private:
+    protected:
         
         vector<BaseViewportRef> _viewports;
         BaseCompositorRef _compositor;

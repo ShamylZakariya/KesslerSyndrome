@@ -11,6 +11,7 @@
 #include "App.hpp"
 #include "DevComponents.hpp"
 #include "ImageProcessing.hpp"
+#include "GlslProgLoader.hpp"
 
 #include <cinder/gl/scoped.h>
 
@@ -165,7 +166,30 @@ namespace {
 
     };
     
-    ObjectRef createCharacter(Player player, dvec2 position) {
+    class CharacterTracker : public core::Component {
+    public:
+        
+        CharacterTracker(const ViewportRef &viewport):
+        _viewport(viewport) {}
+        
+        void onReady(ObjectRef parent, StageRef stage) override {
+            Component::onReady(parent, stage);
+            _state = getSibling<CharacterState>();
+        }
+        
+        void update(const time_state &time) override {
+            auto state = _state.lock();
+            _viewport->setLook(state->getPosition());
+        }
+        
+    protected:
+        
+        weak_ptr<CharacterState> _state;
+        ViewportRef _viewport;
+        
+    };
+    
+    ObjectRef createCharacter(Player player, dvec2 position, ViewportRef viewport) {
         ColorA color;
         switch (player) {
             case Player::A:
@@ -179,9 +203,87 @@ namespace {
         auto state = make_shared<CharacterState>(color, position, 10, 10);
         auto drawer = make_shared<CharacterDrawComponent>();
         auto control = make_shared<CharacterControlComponent>(player);
+        auto tracker = make_shared<CharacterTracker>(viewport);
         
-        return core::Object::with("Character", { state, drawer, control });
+        return core::Object::with("Character", { state, drawer, control, tracker });
     }
+    
+    class SplitViewCompositor : public BaseCompositor {
+    public:
+        
+        SplitViewCompositor(const BaseViewportRef &viewportA, const BaseViewportRef &viewportB):
+                _viewportA(viewportA),
+                _viewportB(viewportB),
+                _shader(util::loadGlslAsset("kessler/shaders/fbo_compositor.glsl")),
+                _batch(gl::Batch::create(geom::Rect().rect(Rectf(0, 0, 1, 1)), _shader))
+        {
+        }
+        
+        void composite(int width, int height) override {
+            gl::ScopedViewport sv(0,0,width,height);
+            
+            gl::ScopedMatrices sm;
+            gl::setMatricesWindow( width, height, true );
+            
+            const float leftWidth = floor(width/2.0f);
+            const float rightWidth = width - leftWidth;
+            
+            {
+                gl::ScopedMatrices sm;
+                gl::scale(leftWidth, height, 1);
+                
+                _viewportA->getFbo()->getColorTexture()->bind(0);
+                _shader->uniform("ColorTex", 0);
+
+                _batch->draw();
+            }
+
+            {
+                gl::ScopedMatrices sm;
+                gl::translate(leftWidth, 0, 0);
+                gl::scale(rightWidth, height, 1);
+                
+                _viewportB->getFbo()->getColorTexture()->bind(0);
+                _shader->uniform("ColorTex", 0);
+                
+                _batch->draw();
+            }
+
+        }
+
+    private:
+
+        BaseViewportRef _viewportA, _viewportB;
+        gl::GlslProgRef _shader;
+        gl::BatchRef _batch;
+        
+    };
+    
+    class SplitViewComposer : public ViewportComposer {
+    public:
+        
+        SplitViewComposer() {
+            _leftViewport = make_shared<Viewport>();
+            _rightViewport = make_shared<Viewport>();
+            _viewports = { _leftViewport, _rightViewport };
+            _compositor = make_shared<SplitViewCompositor>(_viewports[0], _viewports[1]);
+        }
+        
+        const ViewportRef &getLeftViewport() const { return _leftViewport; }
+        const ViewportRef &getRightViewport() const { return _rightViewport; }
+
+        void onScenarioResized(int width, int height) override {
+            const float leftWidth = floor(width/2.0f);
+            const float rightWidth = width - leftWidth;
+            _leftViewport->setSize(leftWidth, height);
+            _rightViewport->setSize(rightWidth, height);
+        }
+        
+    private:
+        
+        ViewportRef _leftViewport, _rightViewport;
+        
+    };
     
 }
 
@@ -194,15 +296,18 @@ MultiViewportTestScenario::~MultiViewportTestScenario()
 void MultiViewportTestScenario::setup()
 {
     setStage(make_shared<Stage>("Multi-Viewport Test"));
-    
+
     auto grid = WorldCartesianGridDrawComponent::create(1);
     grid->setFillColor(ColorA(0.2, 0.22, 0.25, 1.0));
     grid->setGridColor(ColorA(1, 1, 1, 0.1));
     grid->setAxisColor(ColorA(0.2,1,1,1));
     getStage()->addObject(Object::with("Grid", {grid}));
     
-    getStage()->addObject( createCharacter(Player::A, dvec2(10,10)));
-    getStage()->addObject( createCharacter(Player::B, dvec2(100,100)));
+    auto svc = make_shared<SplitViewComposer>();
+    setViewportComposer(svc);
+    
+    getStage()->addObject( createCharacter(Player::A, dvec2(10,10), svc->getLeftViewport()));
+    getStage()->addObject( createCharacter(Player::B, dvec2(100,100), svc->getRightViewport()));
     
     getStage()->addObject(Object::with("Zelda", {
         make_shared<ImageDrawer>(gl::Texture2d::create(loadImage(app::loadAsset("tests/zelda.png"))), dvec2(0,0))
