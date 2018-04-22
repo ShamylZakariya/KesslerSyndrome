@@ -37,8 +37,8 @@ namespace core {
                 positiveX(0.99),
                 negativeX(0.99),
                 up(0.99),
-                positiveScale(1),
-                negativeScale(1)
+                positiveScale(0.99),
+                negativeScale(0.99)
             {}
 
             tracking_config(double panFactor, double upFactor, double scaleFactor) :
@@ -147,9 +147,9 @@ namespace core {
 
         void setScale(double scale);
         
-        // set the scale, anchoring whatever's under `aboutScreenPoint to remain in same position on the screen.
+        // set the scale, immediately, anchoring whatever's under `aboutScreenPoint to remain in same position on the screen.
         // this is a helper for zooming under mouse cursors
-        void setScale(double scale, dvec2 aboutScreenPoint);
+        void scaleAboutScreenPoint(double scale, dvec2 aboutScreenPoint);
 
         double getScale() const {
             return _target.scale;

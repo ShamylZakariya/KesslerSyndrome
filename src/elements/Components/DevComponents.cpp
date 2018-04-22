@@ -282,7 +282,7 @@ bool MouseViewportControlComponent::mouseWheel(const ci::app::MouseEvent &event)
             wheelScale = 0.1 * zoom,
             dz = (event.getWheelIncrement() * wheelScale);
     
-    _viewportController->setScale(zoom + dz, dvec2(event.getX(), event.getY()));
+    _viewportController->scaleAboutScreenPoint(zoom + dz, dvec2(event.getX(), event.getY()));
 
     return true;
 }

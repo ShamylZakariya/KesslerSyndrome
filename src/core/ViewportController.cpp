@@ -58,19 +58,35 @@ namespace core {
         
         const dvec2 lookWorldError = _target.world - look.world;
         if (lookWorldError.x > 0) {
-            const double f = std::pow(_trackingConfig.positiveX, rate);
-            look.world.x += f * lookWorldError.x;
+            if (_trackingConfig.positiveX < 1) {
+                const double f = std::pow(_trackingConfig.positiveX, rate);
+                look.world.x += f * lookWorldError.x;
+            } else {
+                look.world.x = _target.world.x;
+            }
         } else {
-            const double f = std::pow(_trackingConfig.negativeX, rate);
-            look.world.x += f * lookWorldError.x;
+            if (_trackingConfig.negativeX < 1) {
+                const double f = std::pow(_trackingConfig.negativeX, rate);
+                look.world.x += f * lookWorldError.x;
+            } else {
+                look.world.x = _target.world.x;
+            }
         }
 
         if (lookWorldError.y > 0) {
-            const double f = std::pow(_trackingConfig.positiveY, rate);
-            look.world.y += f * lookWorldError.y;
+            if (_trackingConfig.positiveY < 1) {
+                const double f = std::pow(_trackingConfig.positiveY, rate);
+                look.world.y += f * lookWorldError.y;
+            } else {
+                look.world.y = _target.world.y;
+            }
         } else {
-            const double f = std::pow(_trackingConfig.negativeY, rate);
-            look.world.y += f * lookWorldError.y;
+            if (_trackingConfig.negativeY < 1) {
+                const double f = std::pow(_trackingConfig.negativeY, rate);
+                look.world.y += f * lookWorldError.y;
+            } else {
+                look.world.y = _target.world.y;
+            }
         }
         
         {
@@ -82,13 +98,21 @@ namespace core {
         
         const double scaleError = _target.scale - look.scale;
         if (scaleError > 0) {
-            const double f = std::pow(_trackingConfig.positiveScale, rate);
-            look.scale += f * scaleError;
-        } else {
-            const double f = std::pow(_trackingConfig.negativeScale, rate);
-            look.scale += f * scaleError;
+            if (_trackingConfig.positiveScale < 1) {
+                const double f = std::pow(_trackingConfig.positiveScale, rate);
+                look.scale += f * scaleError;
+            } else {
+                look.scale = _target.scale;
+            }
+        } else if (scaleError < 0) {
+            if (_trackingConfig.negativeScale < 1) {
+                const double f = std::pow(_trackingConfig.negativeScale, rate);
+                look.scale += f * scaleError;
+            } else {
+                look.scale = _target.scale;
+            }
         }
-        
+                
         // apply trauma shake
         const double shake = getCurrentTraumaShake();
         if (shake > 0) {
@@ -120,29 +144,34 @@ namespace core {
         } else {
             _target.up = dvec2(0, 1);
         }
+        
+        _target.scale = max<double>(l.scale, 0.0);
     }
 
     void ViewportController::setScale(double scale) {
         _target.scale = max(scale, 0.0);
     }
     
-    void ViewportController::setScale(double scale, dvec2 aboutScreenPoint) {
-        setScale(scale);
+    void ViewportController::scaleAboutScreenPoint(double scale, dvec2 aboutScreenPoint) {
         _disregardViewportMotion = true;
-
         
-        // determine where aboutScreenPoint is in worldSpace
+        // determine where aboutScreenPoint is in worldSpace right now
         dvec2 aboutScreenPointWorld = _viewport->screenToWorld(aboutScreenPoint);
-        
-        auto previousLook = _viewport->getLook();
-        _viewport->setLook(_target);
-        
+
+        // assign new scale
+        auto look = _viewport->getLook();
+        look.scale = scale;
+        _viewport->setLook(look);
+
+        // determine where that point will be, post scale
         dvec2 postScaleAboutScreenPointWorld = _viewport->screenToWorld(aboutScreenPoint);
         dvec2 delta = postScaleAboutScreenPointWorld - aboutScreenPointWorld;
         
-        _viewport->setLook(previousLook);
+        look.world -= delta;
+        _viewport->setLook(look);
 
-        _target.world -= delta;
+        // now sync our target to our viewport
+        _target = look;
         _disregardViewportMotion = false;
     }
     
