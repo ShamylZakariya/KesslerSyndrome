@@ -206,6 +206,22 @@ namespace core {
         double getReciprocalScale() const override {
             return 1.0 / _look.scale;
         }
+        
+        /**
+         By default, calling setLook centers the given world position directly at the center of the viewport.
+         You can bias this away from the center by setting the lookCenterOffset in pixel coordinates.
+         A default value of (0,0) centers look targets in the viewport. A value of (-100, -200) would
+         cause the look target to be positioned 100px left of center.x, 200px up from center.y
+         */
+        void setLookCenterOffset(dvec2 offset);
+        
+        dvec2 getLookCenterOffset() const { return _lookCenterOffset; }
+        
+        /**
+         Reset the look center offset such that look targets are positioned directly at the
+         center of the viewport.
+         */
+        void resetLookCenterOffset() { setLookCenterOffset(dvec2(0,0)); }
 
         /**
          center viewport on a position in the world, with a given up-vector
@@ -315,6 +331,7 @@ namespace core {
     private:
 
         int _width, _height;
+        dvec2 _lookCenterOffset;
         look _look;
         dmat4 _viewMatrix, _inverseViewMatrix, _projectionMatrix, _inverseProjectionMatrix, _viewProjectionMatrix, _inverseViewProjectionMatrix;
         gl::FboRef _fbo;

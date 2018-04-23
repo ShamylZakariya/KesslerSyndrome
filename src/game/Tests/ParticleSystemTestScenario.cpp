@@ -96,7 +96,7 @@ ParticleSystemTestScenario::~ParticleSystemTestScenario() {
 void ParticleSystemTestScenario::setup() {
     setStage(make_shared<Stage>("Particle System Tests"));
 
-    _viewportController = ViewportController::create(getMainViewport<Viewport>());
+    _viewportController = make_shared<ViewportController>(getMainViewport<Viewport>());
     _viewportController->setTrackingConfig(ViewportController::tracking_config(0.99,0.99,1));
     
     auto trauma = ViewportController::trauma_config();

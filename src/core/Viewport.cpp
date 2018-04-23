@@ -28,14 +28,17 @@ namespace core {
 #pragma mark - Viewport
 
     /*
-        int _width, _height;
-        look _look;
-        dmat4 _viewMatrix, _inverseViewMatrix, _projectionMatrix, _inverseProjectionMatrix, _viewProjectionMatrix, _inverseViewProjectionMatrix;
+     int _width, _height;
+     dvec2 _lookCenterOffset;
+     look _look;
+     dmat4 _viewMatrix, _inverseViewMatrix, _projectionMatrix, _inverseProjectionMatrix, _viewProjectionMatrix, _inverseViewProjectionMatrix;
+     gl::FboRef _fbo;
      */
 
     Viewport::Viewport() :
             _width(0),
-            _height(0) {
+            _height(0),
+            _lookCenterOffset(0,0) {
         setLook(dvec2(0, 0));
     }
 
@@ -61,6 +64,17 @@ namespace core {
             onBoundsChanged(*this);
         }
     }
+    
+    void Viewport::setLookCenterOffset(dvec2 offset) {
+        if (distanceSquared(offset, _lookCenterOffset) > 1e-6) {
+            _lookCenterOffset = offset;
+
+            // update & notify
+            _updateMatrices();
+            onMotion(*this);
+        }
+    }
+
 
     void Viewport::setLook(const look &l) {
         
@@ -104,8 +118,11 @@ namespace core {
         double rs = 1.0 / _look.scale;
         _projectionMatrix = glm::translate(dvec3(getCenter(), 0)) * glm::ortho(-rs, rs, -rs, rs, -1.0, 1.0);
         _inverseProjectionMatrix = glm::inverse(_projectionMatrix);
+        
+        dvec2 world = _look.world;
+        world -= _lookCenterOffset / _look.scale;
 
-        _viewMatrix = glm::lookAt(dvec3(_look.world, 1), dvec3(_look.world, 0), dvec3(_look.up, 0));
+        _viewMatrix = glm::lookAt(dvec3(world, 1), dvec3(world, 0), dvec3(_look.up, 0));
         _inverseViewMatrix = inverse(_viewMatrix);
 
         _viewProjectionMatrix = _projectionMatrix * _viewMatrix;

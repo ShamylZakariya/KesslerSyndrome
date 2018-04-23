@@ -24,7 +24,7 @@ void SvgTestScenario::setup() {
 
     getStage()->addObject(Object::with("Grid", { WorldCartesianGridDrawComponent::create(1) }));
 
-    auto viewportController = ViewportController::create(getMainViewport<Viewport>());
+    auto viewportController = make_shared<ViewportController>(getMainViewport<Viewport>());
     getStage()->addObject(Object::with("ViewportControl", {
         viewportController,
         make_shared<MouseViewportControlComponent>(viewportController)

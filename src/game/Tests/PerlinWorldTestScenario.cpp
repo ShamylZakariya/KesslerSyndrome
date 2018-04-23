@@ -155,7 +155,7 @@ PerlinWorldTestScenario::~PerlinWorldTestScenario() {
 void PerlinWorldTestScenario::setup() {
     setStage(make_shared<Stage>("Perlin World"));
     
-    auto viewportController = ViewportController::create(getMainViewport<Viewport>());
+    auto viewportController = make_shared<ViewportController>(getMainViewport<Viewport>());
     getStage()->addObject(Object::with("ViewportController", { viewportController }));
 
     auto params = game::planet_generation::params(512).defaultCenteringTransform(4);

@@ -39,6 +39,11 @@ namespace core {
          */
         virtual void composite(int width, int height) = 0;
         
+        /**
+         Standard time update
+         */
+        virtual void update(const time_state &time){}
+        
     };
     
     SMART_PTR(FboCompositor);

@@ -179,7 +179,7 @@ void TerrainTestScenario::setup() {
             make_shared<terrain::MouseCutterDrawComponent>()
     });
 
-    _viewportController = ViewportController::create(getMainViewport<Viewport>());
+    _viewportController = make_shared<ViewportController>(getMainViewport<Viewport>());
     auto cameraController = Object::with("ViewportControl", {
         _viewportController,
         make_shared<MouseViewportControlComponent>(_viewportController)

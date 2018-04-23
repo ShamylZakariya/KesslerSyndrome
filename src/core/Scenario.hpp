@@ -37,10 +37,12 @@ namespace core {
         ViewportComposer(const BaseViewportRef &viewport, const BaseCompositorRef &compositor);
         ViewportComposer(const vector<BaseViewportRef> &viewports, const BaseCompositorRef &compositor);
         
-        virtual void onScenarioResized(int width, int height);
-        
         const vector<BaseViewportRef> &getViewports() const { return _viewports; }
         const BaseCompositorRef &getCompositor() const { return _compositor; }
+
+
+        virtual void onScenarioResized(int width, int height);
+        virtual void update(const time_state &time);
         
     protected:
         

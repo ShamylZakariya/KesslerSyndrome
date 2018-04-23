@@ -121,7 +121,7 @@ EasingTestScenario::~EasingTestScenario() {
 void EasingTestScenario::setup() {
     setStage(make_shared<Stage>("Image Processing Tests"));
     
-    auto viewportController = ViewportController::create(getMainViewport<Viewport>());
+    auto viewportController = make_shared<ViewportController>(getMainViewport<Viewport>());
 
     getStage()->addObject(Object::with("ViewportControlComponent", {
         viewportController,

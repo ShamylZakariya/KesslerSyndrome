@@ -214,9 +214,11 @@ namespace {
         SplitViewCompositor(const BaseViewportRef &viewportA, const BaseViewportRef &viewportB):
                 _viewportA(viewportA),
                 _viewportB(viewportB),
-                _shader(util::loadGlslAsset("kessler/shaders/fbo_compositor.glsl")),
+                _shader(util::loadGlslAsset("kessler/shaders/split_view_compositor.glsl")),
                 _batch(gl::Batch::create(geom::Rect().rect(Rectf(0, 0, 1, 1)), _shader))
         {
+            _initialSpinAngle = M_PI;
+            _spinRate = 0 * M_PI / 180;
         }
         
         void composite(int width, int height) override {
@@ -224,31 +226,27 @@ namespace {
             
             gl::ScopedMatrices sm;
             gl::setMatricesWindow( width, height, true );
+            gl::scale(width, height, 1);
             
-            const float leftWidth = floor(width/2.0f);
-            const float rightWidth = width - leftWidth;
+            gl::ScopedBlendAlpha blender;
             
-            {
-                gl::ScopedMatrices sm;
-                gl::scale(leftWidth, height, 1);
-                
-                _viewportA->getFbo()->getColorTexture()->bind(0);
-                _shader->uniform("ColorTex", 0);
+            vec2 side(std::cos(_spinAngle), std::sin(_spinAngle));
+            
+            _viewportA->getFbo()->getColorTexture()->bind(0);
+            _shader->uniform("ColorTex", 0);
+            _shader->uniform("Tint", ColorA(1,0.5,1,1)); // fuschia tint
+            _shader->uniform("Side", side);
+            _batch->draw();
 
-                _batch->draw();
-            }
-
-            {
-                gl::ScopedMatrices sm;
-                gl::translate(leftWidth, 0, 0);
-                gl::scale(rightWidth, height, 1);
-                
-                _viewportB->getFbo()->getColorTexture()->bind(0);
-                _shader->uniform("ColorTex", 0);
-                
-                _batch->draw();
-            }
-
+            _viewportB->getFbo()->getColorTexture()->bind(0);
+            _shader->uniform("ColorTex", 0);
+            _shader->uniform("Tint", ColorA(0.5,1,1,1)); // cyan tint
+            _shader->uniform("Side", side * -1.0f);
+            _batch->draw();
+        }
+        
+        void update(const time_state &time) override {
+            _spinAngle = _initialSpinAngle + (time.time * _spinRate);
         }
 
     private:
@@ -256,6 +254,7 @@ namespace {
         BaseViewportRef _viewportA, _viewportB;
         gl::GlslProgRef _shader;
         gl::BatchRef _batch;
+        double _initialSpinAngle, _spinRate, _spinAngle;
         
     };
     
@@ -273,10 +272,11 @@ namespace {
         const ViewportRef &getRightViewport() const { return _rightViewport; }
 
         void onScenarioResized(int width, int height) override {
-            const float leftWidth = floor(width/2.0f);
-            const float rightWidth = width - leftWidth;
-            _leftViewport->setSize(leftWidth, height);
-            _rightViewport->setSize(rightWidth, height);
+            _leftViewport->setSize(width, height);
+            _rightViewport->setSize(width, height);
+            
+            _leftViewport->setLookCenterOffset(dvec2(-width/4.0, 0));
+            _rightViewport->setLookCenterOffset(dvec2(width/4.0, 0));
         }
         
     private:

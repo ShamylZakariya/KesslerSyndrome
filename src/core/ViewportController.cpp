@@ -21,29 +21,25 @@ namespace core {
      vector<ci::Perlin> _traumaPerlinNoiseGenerators;
      */
     
-    ViewportControllerRef ViewportController::create(ViewportRef vp) {
-        auto vc = shared_ptr<ViewportController>(new ViewportController());
-        vc->_setViewport(vp);
-        return vc;
-    }
-
-    ViewportControllerRef ViewportController::create(ViewportRef vp, const tracking_config &tracking, const trauma_config &trauma) {
-        auto vc = create(vp);
-        vc->setTrackingConfig(tracking);
-        vc->setTraumaConfig(trauma);
-        return vc;
-    }
-
-    ViewportController::ViewportController() :
-            _viewport(nullptr),
+    ViewportController::ViewportController(ViewportRef viewport) :
             _disregardViewportMotion(false),
             _traumaLevel(0),
             _traumaBaselineLevel(0)
     {
-        // uniquely-seeded perlin noise for shake x, shake y, and shake rotation
-        for (int i = 0; i < 3; i++) {
-            _traumaPerlinNoiseGenerators.emplace_back(ci::Perlin(4,i));
-        }
+        _setViewport(viewport);
+        _setup();
+    }
+
+    ViewportController::ViewportController(ViewportRef viewport, const tracking_config &tracking, const trauma_config &trauma) :
+    _viewport(viewport),
+    _disregardViewportMotion(false),
+    _trackingConfig(tracking),
+    _traumaConfig(trauma),
+    _traumaLevel(0),
+    _traumaBaselineLevel(0)
+    {
+        _setViewport(viewport);
+        _setup();
     }
 
     void ViewportController::update(const time_state &time) {
@@ -185,6 +181,13 @@ namespace core {
 
 
 #pragma mark - Private
+    
+    void ViewportController::_setup() {
+        // uniquely-seeded perlin noise for shake x, shake y, and shake rotation
+        for (int i = 0; i < 3; i++) {
+            _traumaPerlinNoiseGenerators.emplace_back(ci::Perlin(4,i));
+        }
+    }
     
     void ViewportController::_setViewport(ViewportRef vp) {
         if (_viewport) {

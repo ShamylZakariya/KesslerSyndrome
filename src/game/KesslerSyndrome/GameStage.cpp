@@ -80,7 +80,7 @@ namespace game {
         //  Set up viewport trauma effects
         //
         
-        _viewportController = ViewportController::create(getMainViewport());
+        _viewportController = make_shared<ViewportController>(getMainViewport());
         _viewportController->getTraumaConfig().shakeTranslation = dvec2(40,40);
         _viewportController->getTraumaConfig().shakeRotation = 10 * M_PI / 180;
         _viewportController->getTraumaConfig().shakeFrequency = 8;

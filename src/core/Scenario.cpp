@@ -63,7 +63,10 @@ namespace core {
             viewport->setSize(width, height);
         }
     }
-
+    
+    void ViewportComposer::update(const time_state &time) {
+        _compositor->update(time);
+    }
     
 #pragma mark - Scenario
 
@@ -198,6 +201,9 @@ namespace core {
         if (_stage) {
             _stage->update(_time);
         }
+
+        _viewportComposer->update(_time);
+        _screenViewportComposer->update(_time);
     }
 
     void Scenario::dispatchDraw() {

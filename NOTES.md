@@ -2,15 +2,14 @@
 
 ## PRESENTLY
 
-Multiple Viewports
-Right now, vis culling is done in Stage::update (539)
-Needs to be done per-viewport, probably should be done during draw pass, not update()
-Do I still need Scenario::clear????
-COnsider that viewportCompositor always acts on Viewport instances, and screenViewportCompositor always acts on ScreenViewport instances
-ViewportController doesn't scale about mouse correctly, feels like tracking is not at 1.0, or some error is creeping in
+Viewport::look needs a reference point. Right now, setting a look in world space centers that point in the viewport. 
+What I need is a way of saying the center is (0,0) and looking specifying a look reference point as (-100,-200) would put the look target 100px left of center.x, and 200px up from center.y
 
-Terrain
-Consider adding a low-magnitude, high-frequency perlin noise to "roughen up" the terrain perimeter
+Do I still need Scenario::clear????
+Consider that viewportCompositor always acts on Viewport instances, and screenViewportCompositor always acts on ScreenViewport instances
+
+ScreenComposite
+Look into glBlendFuncSeparate - it allows separate SRC/DST factors for RGB vs ALPHA. ci::gl::ScopedBlend supports it.
 
 
 ## BUGS PRIORITY HIGH
