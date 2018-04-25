@@ -308,6 +308,12 @@ namespace {
             _compositor = _splitViewCompositor = make_shared<SplitViewCompositor>(_viewports[0], _viewports[1]);
         }
         
+        void setFirstTarget(const TrackableRef &target) { _firstTarget = target; }
+        const TrackableRef &getFirstTarget() const { return _firstTarget; }
+
+        void setSecondTarget(const TrackableRef &target) { _secondTarget = target; }
+        const TrackableRef &getSecondTarget() const { return _secondTarget; }
+        
         const ViewportRef &getFirstViewport() const { return _firstViewport; }
         const ViewportRef &getSecondViewport() const { return _secondViewport; }
         
@@ -323,16 +329,6 @@ namespace {
             
             _firstViewport->setSize(width, height);
             _secondViewport->setSize(width, height);
-            
-            _firstViewport->setLookCenterOffset(dvec2(-width/4.0, -300));
-            _secondViewport->setLookCenterOffset(dvec2(width/4.0, 50));
-            
-            _viewportEdgesScreenSpace = {
-                LineSegment(dvec2(0,0), dvec2(width, 0)),
-                LineSegment(dvec2(width,0), dvec2(width, height)),
-                LineSegment(dvec2(width,height), dvec2(0, height)),
-                LineSegment(dvec2(0,height), dvec2(0, 0)),
-            };
         }
         
         void update(const time_state &time) override {
@@ -372,9 +368,6 @@ namespace {
             // compute the look center offset. when:
             // voronoiMix == 0, look center offset is zero, making viewports look directly at the look.world position, which will be the midpoint of the two targets
             // voronoiMix == 1, track a position offset perpendicularly from the split
-            const dvec2 center = (a + b) * 0.5;
-            const double segmentLength = max(_width, _height) * 1.41421356237;
-            const LineSegment splitSegment(center + splitDir * segmentLength * 0.5, center - splitDir * segmentLength * 0.5);
             const dvec2 anchor = -dir * length(dvec2(dir.x * _width/4, dir.y * _height/4));
             _firstViewport->setLookCenterOffset(anchor * voronoiMix);
             _secondViewport->setLookCenterOffset(-anchor * voronoiMix);
@@ -390,7 +383,6 @@ namespace {
         TrackableRef _firstTarget, _secondTarget;
         ViewportRef _firstViewport, _secondViewport;
         shared_ptr<SplitViewCompositor> _splitViewCompositor;
-        vector<LineSegment> _viewportEdgesScreenSpace;
         double _scale;
         
     };
