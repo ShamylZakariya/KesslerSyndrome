@@ -301,7 +301,8 @@ namespace {
                 _firstTarget(firstTarget),
                 _secondTarget(secondTarget),
                 _firstViewport(firstViewport),
-                _secondViewport(secondViewport)
+                _secondViewport(secondViewport),
+                _scale(1)
         {
             _viewports = { _firstViewport, _secondViewport };
             _compositor = _splitViewCompositor = make_shared<SplitViewCompositor>(_viewports[0], _viewports[1]);
@@ -331,34 +332,51 @@ namespace {
         void update(const time_state &time) override {
             ViewportComposer::update(time);
             
-            _trackTargets(time);
             
             // first compute the split, in world space
             const dvec2 screenCenter(_width/2, _height/2);
-            const dvec2 a = _firstViewport->getLook().world;
-            const dvec2 b = _secondViewport->getLook().world;
-            const dvec2 dir = normalize(b-a);
+            const dvec2 a = _firstTarget->getPosition();
+            const dvec2 b = _secondTarget->getPosition();
+            const double worldDistance = length(b-a);
+            const dvec2 dir = (b-a) / worldDistance;
             const dvec2 splitDir = rotateCCW(dir);
-
+            
             _splitViewCompositor->setSplitSideDir(dir);
 
-            // now compute the split segment so we can determine halved centroids
+            // compute the voronoi mix component. when:
+            // voronoiMix == 0, then both characters can be rendered on screen without a split
+            // voronoiMix == 1, we have full separation
+            const double screenDistance = worldDistance * _scale;
+            const double maxEllipticalDistScreen = length(dvec2(dir.x * _width/2, dir.y * _height/2));
+            const double minEllipticalDistScreen = maxEllipticalDistScreen * 0.5;
+            const double voronoiMix = saturate(((screenDistance / 2)  - minEllipticalDistScreen) / (maxEllipticalDistScreen - minEllipticalDistScreen));
+
+            // compute the tracking targets. when:
+            // voronoiMix == 0, viewports both track the midpoint of the two targets
+            // voronoiMix == 1, viewports track the targets directly
+            const dvec2 firstTargetPositionWorld = _firstTarget->getPosition();
+            const dvec2 secondTargetPositionWorld = _secondTarget->getPosition();
+            const dvec2 targetMidpointWorld = (firstTargetPositionWorld + secondTargetPositionWorld) * 0.5;
+            const dvec2 firstLookWorld = lrp(voronoiMix, targetMidpointWorld, firstTargetPositionWorld);
+            const dvec2 secondLookWorld = lrp(voronoiMix, targetMidpointWorld, secondTargetPositionWorld);
+            _firstViewport->setLook(firstLookWorld, dvec2(0,1), _scale);
+            _secondViewport->setLook(secondLookWorld, dvec2(0,1), _scale);
+
+
+            // compute the look center offset. when:
+            // voronoiMix == 0, look center offset is zero, making viewports look directly at the look.world position, which will be the midpoint of the two targets
+            // voronoiMix == 1, track a position offset perpendicularly from the split
             const dvec2 center = (a + b) * 0.5;
             const double segmentLength = max(_width, _height) * 1.41421356237;
             const LineSegment splitSegment(center + splitDir * segmentLength * 0.5, center - splitDir * segmentLength * 0.5);
-            
-            
-            dvec2 anchor = -dir * length(dvec2(_width/4 * dir.x, _height/4 * dir.y));
-            _firstViewport->setLookCenterOffset(anchor);
-            _secondViewport->setLookCenterOffset(-anchor);
+            const dvec2 anchor = -dir * length(dvec2(dir.x * _width/4, dir.y * _height/4));
+            _firstViewport->setLookCenterOffset(anchor * voronoiMix);
+            _secondViewport->setLookCenterOffset(-anchor * voronoiMix);
         }
         
     protected:
         
-        void _trackTargets(const time_state &time) {
-            _firstViewport->setLook(_firstTarget->getPosition());
-            _secondViewport->setLook(_secondTarget->getPosition());
-        }
+        
         
     private:
         
@@ -367,6 +385,7 @@ namespace {
         ViewportRef _firstViewport, _secondViewport;
         shared_ptr<SplitViewCompositor> _splitViewCompositor;
         vector<LineSegment> _viewportEdgesScreenSpace;
+        double _scale;
         
     };
     
