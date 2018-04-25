@@ -12,7 +12,6 @@
 // base stuff
 
 #include "Common.hpp"
-#include "BlendMode.hpp"
 #include "ChipmunkHelpers.hpp"
 #include "Exception.hpp"
 #include "InputDispatcher.hpp"

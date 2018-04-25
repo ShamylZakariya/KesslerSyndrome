@@ -14,4 +14,6 @@ using namespace std;
 #define CLASS_NAME(ptr)        ((typeid(*(ptr))).name())
 #define SMART_PTR(cname)    class cname; typedef std::shared_ptr< class cname > cname ## Ref; typedef std::weak_ptr< class cname > cname ## WeakRef;
 
+#define ALPHA_EPSILON (1.0/255.0)
+
 #endif /* Common_h */

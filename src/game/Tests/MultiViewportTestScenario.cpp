@@ -19,58 +19,7 @@ using namespace ci;
 using namespace core;
 
 namespace {
-    
-    struct LineSegment {
-    public:
         
-        LineSegment(dvec2 a, dvec2 b):
-        a(a),
-        b(b),
-        dir(normalize(b-a))
-        {}
-        
-        dvec2 getA() const { return a; }
-        dvec2 getB() const { return b; }
-        dvec2 getDir() const { return dir; }
-        
-        bool intersect(const LineSegment &other, dvec2 &intersection, bool bounded = true) const {
-            
-            //
-            // http://jeffreythompson.org/collision-detection/line-line.php
-            //
-            
-            // early exit for parallel lines
-            const double epsilon = 1e-7;
-            if(abs(dot(dir, other.dir)) > 1 - epsilon) {
-                return false;
-            }
-            
-            const double x1 = a.x, y1 = a.y, x2 = b.x, y2 = b.y;
-            const double x3 = other.a.x, y3 = other.a.y, x4 = other.b.x, y4 = other.b.y;
-            
-            const double uA = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / ((y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1));
-            const double uB = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / ((y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1));
-            
-            if (!bounded || (uA >= 0 && uA <= 1 && uB >= 0 && uB <= 1)) {
-                intersection.x = x1 + (uA * (x2 - x1));
-                intersection.y = y1 + (uA * (y2 - y1));
-                return true;
-            }
-            
-            return false;
-        }
-        
-        bool intersects(const LineSegment &other, bool bounded = true) const {
-            dvec2 _;
-            return intersect(other, _, bounded);
-        }
-        
-    private:
-
-        dvec2 a, b, dir;
-        
-    };
-    
     class ImageDrawer : public core::DrawComponent {
     public:
         
@@ -341,7 +290,6 @@ namespace {
             const dvec2 b = _secondTarget->getPosition();
             const double worldDistance = length(b-a);
             const dvec2 dir = (b-a) / worldDistance;
-            const dvec2 splitDir = rotateCCW(dir);
             
             _splitViewCompositor->setSplitSideDir(dir);
 
