@@ -268,8 +268,8 @@ namespace {
             _viewportB->getFbo()->getColorTexture()->bind(1);
             _shader->uniform("ColorTex0", 0);
             _shader->uniform("ColorTex1", 1);
-            _shader->uniform("Tint0", ColorA(1,0.5,1,1)); // fuschia tint
-            _shader->uniform("Tint1", ColorA(0.5,1,1,1)); // cyan tint
+            _shader->uniform("Tint0", ColorA(1,1,1,1));
+            _shader->uniform("Tint1", ColorA(1,1,1,1));
             _shader->uniform("Side", _side);
             _batch->draw();
         }
@@ -310,6 +310,12 @@ namespace {
         
         const ViewportRef &getFirstViewport() const { return _firstViewport; }
         const ViewportRef &getSecondViewport() const { return _secondViewport; }
+        
+        void setScale(double scale) {
+            _scale = max(scale, 0.0);
+        }
+        
+        double getScale() const { return _scale; }
         
         void onScenarioResized(int width, int height) override {
             _width = width;
@@ -391,7 +397,12 @@ namespace {
     
 }
 
-MultiViewportTestScenario::MultiViewportTestScenario()
+/*
+ double _scale;
+*/
+
+MultiViewportTestScenario::MultiViewportTestScenario():
+    _scale(1)
 {}
 
 MultiViewportTestScenario::~MultiViewportTestScenario()
@@ -424,10 +435,13 @@ void MultiViewportTestScenario::setup()
     }));
     
     // track 'r' for resetting scenario
-    getStage()->addObject(Object::with("KeyboardDelegate",{
-        KeyboardDelegateComponent::create(0,{ cinder::app::KeyEvent::KEY_r })
-        ->onPress([&](int keyCode){
+    getStage()->addObject(Object::with("InputDelegation",{
+        KeyboardDelegateComponent::create(0,{ cinder::app::KeyEvent::KEY_r })->onPress([&](int keyCode){
             this->reset();
+        }),
+        MouseDelegateComponent::create(0)->onWheel([&](dvec2 screen, dvec2 world, double deltaWheel, const ci::app::MouseEvent &event)->bool{
+            this->_scale += deltaWheel * 0.1;
+            return true;
         })
     }));
     
@@ -436,6 +450,15 @@ void MultiViewportTestScenario::setup()
 void MultiViewportTestScenario::cleanup()
 {
     setStage(nullptr);
+}
+
+void MultiViewportTestScenario::update(const time_state &time) {
+    Scenario::update(time);
+    
+    auto svc = static_pointer_cast<SplitViewComposer>(getViewportComposer());
+    double scale = svc->getScale();
+    scale = lrp<double>(0.25, scale, _scale);
+    svc->setScale(scale);
 }
 
 void MultiViewportTestScenario::draw(const render_state &state) {

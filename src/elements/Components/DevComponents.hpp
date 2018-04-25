@@ -340,6 +340,7 @@ public:
     typedef function<bool(dvec2 screen, dvec2 world, const ci::app::MouseEvent &event)> MouseReleaseHandler;
     typedef function<bool(dvec2 screen, dvec2 world, ivec2 deltaScreen, dvec2 deltaWorld, const ci::app::MouseEvent &event)> MouseMoveHandler;
     typedef function<bool(dvec2 screen, dvec2 world, ivec2 deltaScreen, dvec2 deltaWorld, const ci::app::MouseEvent &event)> MouseDragHandler;
+    typedef function<bool(dvec2 screen, dvec2 world, double deltaWheel, const ci::app::MouseEvent &event)> MouseWheelHandler;
 
     static MouseDelegateComponentRef create(int dispatchReceiptIndex);
 
@@ -354,6 +355,8 @@ public:
     MouseDelegateComponentRef onMove(MouseMoveHandler);
 
     MouseDelegateComponentRef onDrag(MouseDragHandler);
+    
+    MouseDelegateComponentRef onWheel(MouseWheelHandler);
 
     bool mouseDown(const ci::app::MouseEvent &event) override;
 
@@ -362,6 +365,9 @@ public:
     bool mouseMove(const ci::app::MouseEvent &event, const ivec2 &delta) override;
 
     bool mouseDrag(const ci::app::MouseEvent &event, const ivec2 &delta) override;
+    
+    bool mouseWheel(const ci::app::MouseEvent &event) override;
+
 
 private:
 
@@ -369,6 +375,7 @@ private:
     MouseReleaseHandler _releaseHandler;
     MouseMoveHandler _moveHandler;
     MouseDragHandler _dragHandler;
+    MouseWheelHandler _wheelHandler;
 
 };
 

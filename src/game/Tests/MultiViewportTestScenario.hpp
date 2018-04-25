@@ -23,10 +23,15 @@ public:
     
     void setup() override;
     void cleanup() override;
+    void update(const time_state &time) override;
     void draw(const render_state &state) override;
     void drawScreen(const render_state &state) override;
     
     void reset();
+    
+private:
+    
+    double _scale;
         
 };
 #endif /* MultiViewportTestScenario_hpp */

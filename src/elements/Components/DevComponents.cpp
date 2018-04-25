@@ -638,10 +638,15 @@ MouseDelegateComponentRef MouseDelegateComponent::onDrag(MouseDragHandler h) {
     return shared_from_this_as<MouseDelegateComponent>();
 }
 
+MouseDelegateComponentRef MouseDelegateComponent::onWheel(MouseWheelHandler h) {
+    _wheelHandler = h;
+    return shared_from_this_as<MouseDelegateComponent>();
+}
+
 bool MouseDelegateComponent::mouseDown(const ci::app::MouseEvent &event) {
     if (_pressHandler) {
-        dvec2 screen = event.getPos();
-        dvec2 world = getStage()->getMainViewport()->screenToWorld(screen);
+        const dvec2 screen = event.getPos();
+        const dvec2 world = getStage()->getMainViewport()->screenToWorld(screen);
 
         return _pressHandler(screen, world, event);
     }
@@ -650,8 +655,8 @@ bool MouseDelegateComponent::mouseDown(const ci::app::MouseEvent &event) {
 
 bool MouseDelegateComponent::mouseUp(const ci::app::MouseEvent &event) {
     if (_releaseHandler) {
-        dvec2 screen = event.getPos();
-        dvec2 world = getStage()->getMainViewport()->screenToWorld(screen);
+        const dvec2 screen = event.getPos();
+        const dvec2 world = getStage()->getMainViewport()->screenToWorld(screen);
 
         return _releaseHandler(screen, world, event);
     }
@@ -660,9 +665,9 @@ bool MouseDelegateComponent::mouseUp(const ci::app::MouseEvent &event) {
 
 bool MouseDelegateComponent::mouseMove(const ci::app::MouseEvent &event, const ivec2 &delta) {
     if (_moveHandler) {
-        dvec2 screen = event.getPos();
-        dvec2 world = getStage()->getMainViewport()->screenToWorld(screen);
-        dvec2 worldDelta = getStage()->getMainViewport()->screenToWorldDir(delta);
+        const dvec2 screen = event.getPos();
+        const dvec2 world = getStage()->getMainViewport()->screenToWorld(screen);
+        const dvec2 worldDelta = getStage()->getMainViewport()->screenToWorldDir(delta);
 
         return _moveHandler(screen, world, delta, worldDelta, event);
     }
@@ -672,13 +677,24 @@ bool MouseDelegateComponent::mouseMove(const ci::app::MouseEvent &event, const i
 
 bool MouseDelegateComponent::mouseDrag(const ci::app::MouseEvent &event, const ivec2 &delta) {
     if (_dragHandler) {
-        dvec2 screen = event.getPos();
-        dvec2 world = getStage()->getMainViewport()->screenToWorld(screen);
-        dvec2 worldDelta = getStage()->getMainViewport()->screenToWorldDir(delta);
+        const dvec2 screen = event.getPos();
+        const dvec2 world = getStage()->getMainViewport()->screenToWorld(screen);
+        const dvec2 worldDelta = getStage()->getMainViewport()->screenToWorldDir(delta);
 
         return _dragHandler(screen, world, delta, worldDelta, event);
     }
 
+    return false;
+}
+
+bool MouseDelegateComponent::mouseWheel(const ci::app::MouseEvent &event) {
+    if (_wheelHandler) {
+        const dvec2 screen = event.getPos();
+        const dvec2 world = getStage()->getMainViewport()->screenToWorld(screen);
+        const double deltaWheel = event.getWheelIncrement();
+        return _wheelHandler(screen, world, deltaWheel, event);
+    }
+    
     return false;
 }
 
