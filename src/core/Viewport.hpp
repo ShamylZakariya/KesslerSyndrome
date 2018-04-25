@@ -211,7 +211,8 @@ namespace core {
          By default, calling setLook centers the given world position directly at the center of the viewport.
          You can bias this away from the center by setting the lookCenterOffset in pixel coordinates.
          A default value of (0,0) centers look targets in the viewport. A value of (-100, -200) would
-         cause the look target to be positioned 100px left of center.x, 200px up from center.y
+         cause the look target to be positioned 100px left of center.x, 200px down from center.y.
+         Lower-left coordinate origin.
          */
         void setLookCenterOffset(dvec2 offset);
         
