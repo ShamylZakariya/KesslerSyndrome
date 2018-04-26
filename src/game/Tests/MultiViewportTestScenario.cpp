@@ -12,6 +12,7 @@
 #include "DevComponents.hpp"
 #include "ImageProcessing.hpp"
 #include "GlslProgLoader.hpp"
+#include "Easing.hpp"
 
 #include <cinder/gl/scoped.h>
 
@@ -19,7 +20,7 @@ using namespace ci;
 using namespace core;
 
 namespace {
-        
+    
     class ImageDrawer : public core::DrawComponent {
     public:
         
@@ -219,6 +220,8 @@ namespace {
             _shader->uniform("ColorTex1", 1);
             _shader->uniform("Tint0", ColorA(1,1,1,1));
             _shader->uniform("Tint1", ColorA(1,1,1,1));
+            _shader->uniform("ShadowWidth", static_cast<float>(_shadowWidth));
+            _shader->uniform("ShadowColor", _shadowColor);
             _shader->uniform("Side", _side);
             _batch->draw();
         }
@@ -232,12 +235,20 @@ namespace {
         
         dvec2 getSplitSideDir() const { return _side; }
         
+        void setShadowColor(ColorA color) { _shadowColor = color; }
+        ColorA getShadowColor() const { return _shadowColor; }
+        
+        void setShadowWidth(double width) { _shadowWidth = max<double>(width, 0); }
+        double getShadowWidth() const { return _shadowWidth; }
+        
     private:
         
         BaseViewportRef _viewportA, _viewportB;
         gl::GlslProgRef _shader;
         gl::BatchRef _batch;
         vec2 _side;
+        ColorA _shadowColor;
+        double _shadowWidth;
         
     };
     
@@ -291,7 +302,6 @@ namespace {
             const double worldDistance = length(b-a);
             const dvec2 dir = (b-a) / worldDistance;
             
-            _splitViewCompositor->setSplitSideDir(dir);
 
             // compute the voronoi mix component. when:
             // voronoiMix == 0, then both characters can be rendered on screen without a split
@@ -307,8 +317,9 @@ namespace {
             const dvec2 firstTargetPositionWorld = _firstTarget->getPosition();
             const dvec2 secondTargetPositionWorld = _secondTarget->getPosition();
             const dvec2 targetMidpointWorld = (firstTargetPositionWorld + secondTargetPositionWorld) * 0.5;
-            const dvec2 firstLookWorld = lrp(voronoiMix, targetMidpointWorld, firstTargetPositionWorld);
-            const dvec2 secondLookWorld = lrp(voronoiMix, targetMidpointWorld, secondTargetPositionWorld);
+            const double lookMix = util::easing::quad_ease_in_out(voronoiMix);
+            const dvec2 firstLookWorld = lrp(lookMix, targetMidpointWorld, firstTargetPositionWorld);
+            const dvec2 secondLookWorld = lrp(lookMix, targetMidpointWorld, secondTargetPositionWorld);
             _firstViewport->setLook(firstLookWorld, dvec2(0,1), _scale);
             _secondViewport->setLook(secondLookWorld, dvec2(0,1), _scale);
 
@@ -316,9 +327,18 @@ namespace {
             // compute the look center offset. when:
             // voronoiMix == 0, look center offset is zero, making viewports look directly at the look.world position, which will be the midpoint of the two targets
             // voronoiMix == 1, track a position offset perpendicularly from the split
-            const dvec2 anchor = -dir * length(dvec2(dir.x * _width/4, dir.y * _height/4));
-            _firstViewport->setLookCenterOffset(anchor * voronoiMix);
-            _secondViewport->setLookCenterOffset(-anchor * voronoiMix);
+            const double fudge = 1.1;
+            const dvec2 centerOffset = -dir * maxEllipticalDistScreen * 0.5 * fudge;
+            const double centerOffsetMix = util::easing::quad_ease_in_out(voronoiMix);
+            _firstViewport->setLookCenterOffset(centerOffset * centerOffsetMix);
+            _secondViewport->setLookCenterOffset(-centerOffset * centerOffsetMix);
+            
+            // update the shader
+            // shadow effect fased in as voronoi mix goes to 1
+            _splitViewCompositor->setSplitSideDir(dir);
+            _splitViewCompositor->setShadowColor(ColorA(0,0,0, voronoiMix * 0.5));
+            _splitViewCompositor->setShadowWidth(50);
+
         }
         
     protected:

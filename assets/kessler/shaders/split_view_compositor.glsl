@@ -20,6 +20,8 @@ uniform sampler2D ColorTex1;
 uniform vec4 Tint0;
 uniform vec4 Tint1;
 uniform vec2 Side;
+uniform float ShadowWidth;
+uniform vec4 ShadowColor;
 
 in vec2 TexCoord;
 
@@ -34,4 +36,13 @@ void main(void) {
 
     oColor = mix(color0, color1, step(0, d));
     oColor.a = 1;
+
+    if (d > 0) {
+        vec2 line = vec2(-Side.y, Side.x);
+        d = dot(sideDir, line);
+        vec2 projectedToSplit = vec2(0.5,0.5) + d * line;
+        float distanceFromSplit = distance(TexCoord, projectedToSplit);
+        float shadow = 1 - min((distanceFromSplit * ShadowWidth * 2), 1);
+        oColor.rgb = mix(oColor.rgb, ShadowColor.rgb, shadow * ShadowColor.a);
+    }
 }
