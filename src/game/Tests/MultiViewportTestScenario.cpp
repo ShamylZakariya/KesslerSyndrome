@@ -13,6 +13,7 @@
 #include "ImageProcessing.hpp"
 #include "GlslProgLoader.hpp"
 #include "Easing.hpp"
+#include "Tracking.hpp"
 
 #include <cinder/gl/scoped.h>
 
@@ -53,15 +54,7 @@ namespace {
         
     };
     
-    SMART_PTR(Trackable);
-
-    class Trackable {
-    public:
-        virtual ~Trackable(){}
-        virtual dvec2 getPosition() const = 0;
-    };
-    
-    class CharacterState : public core::Component, public Trackable {
+    class CharacterState : public core::Component, public core::Trackable {
     public:
         CharacterState(ColorA color, dvec2 startPosition, double radius, double speed = 4 ):
         _position(startPosition),

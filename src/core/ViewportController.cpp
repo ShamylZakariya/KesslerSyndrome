@@ -12,10 +12,8 @@ namespace core {
 
     /*
      ViewportRef _viewport;
-     Viewport::look _target;
      bool _disregardViewportMotion;
      
-     tracking_config _trackingConfig;
      trauma_config _traumaConfig;
      double _traumaLevel, _traumaBaselineLevel;
      vector<ci::Perlin> _traumaPerlinNoiseGenerators;
@@ -31,9 +29,9 @@ namespace core {
     }
 
     ViewportController::ViewportController(ViewportRef viewport, const tracking_config &tracking, const trauma_config &trauma) :
+    Tracker(tracking),
     _viewport(viewport),
     _disregardViewportMotion(false),
-    _trackingConfig(tracking),
     _traumaConfig(trauma),
     _traumaLevel(0),
     _traumaBaselineLevel(0)
@@ -47,67 +45,8 @@ namespace core {
 
         _disregardViewportMotion = true;
         
-        // update viewport
-                
-        const double rate = 1.0 / time.deltaT;
-        Viewport::look look = _viewport->getLook();
-        
-        const dvec2 lookWorldError = _target.world - look.world;
-        if (lookWorldError.x > 0) {
-            if (_trackingConfig.positiveX < 1) {
-                const double f = std::pow(_trackingConfig.positiveX, rate);
-                look.world.x += f * lookWorldError.x;
-            } else {
-                look.world.x = _target.world.x;
-            }
-        } else {
-            if (_trackingConfig.negativeX < 1) {
-                const double f = std::pow(_trackingConfig.negativeX, rate);
-                look.world.x += f * lookWorldError.x;
-            } else {
-                look.world.x = _target.world.x;
-            }
-        }
-
-        if (lookWorldError.y > 0) {
-            if (_trackingConfig.positiveY < 1) {
-                const double f = std::pow(_trackingConfig.positiveY, rate);
-                look.world.y += f * lookWorldError.y;
-            } else {
-                look.world.y = _target.world.y;
-            }
-        } else {
-            if (_trackingConfig.negativeY < 1) {
-                const double f = std::pow(_trackingConfig.negativeY, rate);
-                look.world.y += f * lookWorldError.y;
-            } else {
-                look.world.y = _target.world.y;
-            }
-        }
-        
-        {
-            const dvec2 lookUpError = _target.up - look.up;
-            const double f = std::pow(_trackingConfig.up, rate);
-            look.up += f * lookUpError;
-            look.up = normalize(look.up);
-        }
-        
-        const double scaleError = _target.scale - look.scale;
-        if (scaleError > 0) {
-            if (_trackingConfig.positiveScale < 1) {
-                const double f = std::pow(_trackingConfig.positiveScale, rate);
-                look.scale += f * scaleError;
-            } else {
-                look.scale = _target.scale;
-            }
-        } else if (scaleError < 0) {
-            if (_trackingConfig.negativeScale < 1) {
-                const double f = std::pow(_trackingConfig.negativeScale, rate);
-                look.scale += f * scaleError;
-            } else {
-                look.scale = _target.scale;
-            }
-        }
+        // perform tracking
+        Viewport::look look = Tracker::update(_viewport->getLook(), time);
                 
         // apply trauma shake
         const double shake = getCurrentTraumaShake();
@@ -129,23 +68,6 @@ namespace core {
         // now decay trauma and trauma baseline
         _traumaLevel = saturate(_traumaLevel - _traumaConfig.traumaDecayRate * time.deltaT);
         _traumaBaselineLevel = saturate(_traumaBaselineLevel - _traumaConfig.traumaBaselineDecayRate * time.deltaT);
-    }
-
-    void ViewportController::setLook(const Viewport::look l) {
-        _target.world = l.world;
-
-        double len = glm::length(l.up);
-        if (len > 1e-3) {
-            _target.up = l.up / len;
-        } else {
-            _target.up = dvec2(0, 1);
-        }
-        
-        _target.scale = max<double>(l.scale, 0.0);
-    }
-
-    void ViewportController::setScale(double scale) {
-        _target.scale = max(scale, 0.0);
     }
     
     void ViewportController::scaleAboutScreenPoint(double scale, dvec2 aboutScreenPoint) {

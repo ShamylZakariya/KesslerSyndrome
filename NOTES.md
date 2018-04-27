@@ -2,13 +2,11 @@
 
 ## PRESENTLY
 
-Viewport::look needs a reference point. Right now, setting a look in world space centers that point in the viewport. 
-What I need is a way of saying the center is (0,0) and looking specifying a look reference point as (-100,-200) would put the look target 100px left of center.x, and 200px up from center.y
+I need to implement some kind of viewport tracking smoothing in SplitViewComposer (or something "handed" to SplitViewComposer which does same)
 
 Do I still need Scenario::clear????
-Consider that viewportCompositor always acts on Viewport instances, and screenViewportCompositor always acts on ScreenViewport instances
 
-ScreenComposite
+ScreenComposite fugliness
 Look into glBlendFuncSeparate - it allows separate SRC/DST factors for RGB vs ALPHA. ci::gl::ScopedBlend supports it.
 
 

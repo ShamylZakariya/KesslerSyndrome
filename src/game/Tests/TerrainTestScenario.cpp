@@ -233,7 +233,7 @@ terrain::WorldRef TerrainTestScenario::testDistantTerrain() {
 
     const vec2 origin(30000, 30000);
 
-    _viewportController->setLook(origin);
+    _viewportController->setTarget(origin);
 
 
     vector<terrain::ShapeRef> shapes = {terrain::Shape::fromContour(rect(origin.x - 200, origin.y - 200, origin.x + 200, origin.y + 200))};
@@ -252,7 +252,7 @@ terrain::WorldRef TerrainTestScenario::testBasicTerrain() {
 
     cpSpaceSetDamping(getStage()->getSpace()->getSpace(), 0.5);
 
-    _viewportController->setLook(vec2(0, 0));
+    _viewportController->setTarget(vec2(0, 0));
 
     vector<terrain::ShapeRef> shapes = {
             terrain::Shape::fromContour(rect(0, 0, 100, 50)),        // 0
@@ -273,7 +273,7 @@ terrain::WorldRef TerrainTestScenario::testBasicTerrain() {
 }
 
 terrain::WorldRef TerrainTestScenario::testComplexTerrain() {
-    _viewportController->setLook(vec2(0, 0));
+    _viewportController->setTarget(vec2(0, 0));
 
     const vec2 boxSize(50, 50);
     auto boxPos = [boxSize](float x, float y) -> vec2 {
@@ -305,7 +305,7 @@ terrain::WorldRef TerrainTestScenario::testComplexTerrain() {
 }
 
 terrain::WorldRef TerrainTestScenario::testSimpleAnchors() {
-    _viewportController->setLook(vec2(0, 0));
+    _viewportController->setTarget(vec2(0, 0));
 
 
     vector<terrain::ShapeRef> shapes = {
@@ -328,7 +328,7 @@ terrain::WorldRef TerrainTestScenario::testSimpleAnchors() {
 }
 
 terrain::WorldRef TerrainTestScenario::testComplexAnchors() {
-    _viewportController->setLook(vec2(0, 0));
+    _viewportController->setTarget(vec2(0, 0));
 
     const vec2 boxSize(50, 50);
     auto boxPos = [boxSize](float x, float y) -> vec2 {
@@ -382,7 +382,7 @@ terrain::WorldRef TerrainTestScenario::testSimplePartitionedTerrain() {
         return polyLine;
     };
 
-    _viewportController->setLook(vec2(0, 0));
+    _viewportController->setTarget(vec2(0, 0));
 
     auto rings = vector<PolyLine2d> {
             ring(vec2(0, 0), 500, 600, 0),
@@ -419,7 +419,7 @@ terrain::WorldRef TerrainTestScenario::testComplexPartitionedTerrainWithAnchors(
         return polyLine;
     };
 
-    _viewportController->setLook(vec2(0, 0));
+    _viewportController->setTarget(vec2(0, 0));
 
     auto rings = vector<PolyLine2d> {
             ring(vec2(0, 0), 500, 600, 0),
@@ -498,7 +498,7 @@ terrain::WorldRef TerrainTestScenario::testFail() {
         return polyLine;
     };
 
-    _viewportController->setLook(vec2(0, 0));
+    _viewportController->setTarget(vec2(0, 0));
 
     auto rings = vector<PolyLine2d> {
             ring(vec2(0, 0), 500, 600, 0),

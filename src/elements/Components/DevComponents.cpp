@@ -221,14 +221,14 @@ void MouseViewportControlComponent::step(const time_state &time) {
     const bool fast = (isKeyDown(ci::app::KeyEvent::KEY_LSHIFT)||isKeyDown(ci::app::KeyEvent::KEY_RSHIFT));
     const double radsPerSec = (fast ? 100 : 10) * M_PI / 180;
     if (isKeyDown(ci::app::KeyEvent::KEY_q)) {
-        Viewport::look look = _viewportController->getLook();
-        look.up = rotate(look.up, -radsPerSec * time.deltaT);
-        _viewportController->setLook(look);
+        Viewport::look target = _viewportController->getTarget();
+        target.up = rotate(target.up, -radsPerSec * time.deltaT);
+        _viewportController->setTarget(target);
         //_viewport->setRotation(_viewport->getRotation() - radsPerSec * time.deltaT);
     } else if (isKeyDown(ci::app::KeyEvent::KEY_e)) {
-        Viewport::look look = _viewportController->getLook();
-        look.up = rotate(look.up, +radsPerSec * time.deltaT);
-        _viewportController->setLook(look);
+        Viewport::look target = _viewportController->getTarget();
+        target.up = rotate(target.up, +radsPerSec * time.deltaT);
+        _viewportController->setTarget(target);
     }
 }
 
@@ -240,7 +240,7 @@ bool MouseViewportControlComponent::mouseDown(const ci::app::MouseEvent &event) 
 
     // capture alt key for re-centering
     if (event.isAltDown()) {
-        _viewportController->setLook(_mouseWorld);
+        _viewportController->setTarget(_mouseWorld);
         return true;
     }
 
@@ -268,9 +268,9 @@ bool MouseViewportControlComponent::mouseDrag(const ci::app::MouseEvent &event, 
 
     if (isKeyDown(app::KeyEvent::KEY_SPACE)) {
         dvec2 deltaWorld = _viewportController->getMainViewport()->screenToWorldDir(dvec2(delta));
-        Viewport::look look = _viewportController->getLook();
-        look.world -= deltaWorld;
-        _viewportController->setLook(look);
+        Viewport::look target = _viewportController->getTarget();
+        target.world -= deltaWorld;
+        _viewportController->setTarget(target);
         return true;
     }
 
@@ -278,7 +278,7 @@ bool MouseViewportControlComponent::mouseDrag(const ci::app::MouseEvent &event, 
 }
 
 bool MouseViewportControlComponent::mouseWheel(const ci::app::MouseEvent &event) {
-    const float zoom = _viewportController->getScale(),
+    const float zoom = _viewportController->getTarget().scale,
             wheelScale = 0.1 * zoom,
             dz = (event.getWheelIncrement() * wheelScale);
     
@@ -324,42 +324,41 @@ void KeyboardViewportControlComponent::step(const core::time_state &time) {
     const bool fast = (isKeyDown(ci::app::KeyEvent::KEY_LSHIFT)||isKeyDown(ci::app::KeyEvent::KEY_RSHIFT));
     const double scale = (fast ? _fastScalar : 1) * time.deltaT;
 
-    Viewport::look look = _viewportController->getLook();
+    Viewport::look target = _viewportController->getTarget();
     
     if (isMonitoredKeyDown(KeyEvent::KEY_RIGHTBRACKET)) {
-        look.scale += _scaleRate * scale;
+        target.scale += _scaleRate * scale;
     }
 
     if (isMonitoredKeyDown(KeyEvent::KEY_LEFTBRACKET)) {
-        look.scale -= _scaleRate * scale;
+        target.scale -= _scaleRate * scale;
     }
 
     if (isMonitoredKeyDown(KeyEvent::KEY_q)) {
-        look.up = rotate(look.up, -_rotateRate * scale);
+        target.up = rotate(target.up, -_rotateRate * scale);
     }
     
     if (isKeyDown(KeyEvent::KEY_e)) {
-        look.up = rotate(look.up, +_rotateRate * scale);
+        target.up = rotate(target.up, +_rotateRate * scale);
     }
     
     if (isMonitoredKeyDown(KeyEvent::KEY_w)) {
-        look.world.y += (_panRate.y * scale) / look.scale;
+        target.world.y += (_panRate.y * scale) / target.scale;
     }
 
     if (isMonitoredKeyDown(KeyEvent::KEY_s)) {
-        look.world.y -= (_panRate.y * scale) / look.scale;
+        target.world.y -= (_panRate.y * scale) / target.scale;
     }
 
     if (isMonitoredKeyDown(KeyEvent::KEY_d)) {
-        look.world.x += (_panRate.x * scale) / look.scale;
+        target.world.x += (_panRate.x * scale) / target.scale;
     }
     
     if (isMonitoredKeyDown(KeyEvent::KEY_a)) {
-        look.world.x -= (_panRate.x * scale) / look.scale;
+        target.world.x -= (_panRate.x * scale) / target.scale;
     }
     
-    _viewportController->setLook(look);
-    _viewportController->setScale(look.scale);
+    _viewportController->setTarget(target);
 }
 
 #pragma mark - TargetTrackingViewportController
@@ -432,11 +431,11 @@ void TargetTrackingViewportControlComponent::_trackNoSlop(const tracking &t, con
     const ivec2 size = _viewportController->getMainViewport()->getSize();
     const double scale = min(size.x, size.y) / (2 * t.radius);
 
-    _viewportController->setLook(Viewport::look(t.world, t.up, scale * _scale));
+    _viewportController->setTarget(Viewport::look(t.world, t.up, scale * _scale));
 }
 
 void TargetTrackingViewportControlComponent::_track(const tracking &t, const time_state &time) {
-    Viewport::look currentLook = _viewportController->getLook();
+    Viewport::look currentLook = _viewportController->getTarget();
 
     const double outerDistance = distance(t.world, currentLook.world) + t.radius;
     if (outerDistance > _trackingAreaDeadZoneRadius) {
@@ -456,9 +455,9 @@ void TargetTrackingViewportControlComponent::_track(const tracking &t, const tim
         // now apply scale and look::up
         const ivec2 size = _viewportController->getMainViewport()->getSize();
         const double scale = min(size.x, size.y) / (2 * _trackingAreaRadius);
+        currentLook.scale = scale * _scale;
 
-        _viewportController->setLook(currentLook);
-        _viewportController->setScale(scale * _scale);
+        _viewportController->setTarget(currentLook);
     }
 }
 

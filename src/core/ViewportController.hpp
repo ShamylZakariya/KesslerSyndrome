@@ -14,44 +14,14 @@
 #include "Object.hpp"
 #include "TimeState.hpp"
 #include "Viewport.hpp"
+#include "Tracking.hpp"
 
 namespace core {
     
     SMART_PTR(ViewportController);
     
-    class ViewportController : public Component {
+    class ViewportController : public Component, public Tracker {
     public:
-        
-        struct tracking_config {
-            double positiveY;
-            double negativeY;
-            double positiveX;
-            double negativeX;
-            double up;
-            double positiveScale;
-            double negativeScale;
-            
-            tracking_config():
-            positiveY(0.99),
-            negativeY(0.99),
-            positiveX(0.99),
-            negativeX(0.99),
-            up(0.99),
-            positiveScale(0.99),
-            negativeScale(0.99)
-            {}
-            
-            tracking_config(double panFactor, double upFactor, double scaleFactor) :
-            positiveY(panFactor),
-            negativeY(panFactor),
-            positiveX(panFactor),
-            negativeX(panFactor),
-            up(upFactor),
-            positiveScale(scaleFactor),
-            negativeScale(scaleFactor)
-            {}
-            
-        };
         
         struct trauma_config {
             // max translational shake effect
@@ -108,46 +78,9 @@ namespace core {
             return _viewport;
         }
         
-        
-        void setTrackingConfig(tracking_config tc) {
-            _trackingConfig = tc;
-        }
-        
-        tracking_config &getTrackingConfig() {
-            return _trackingConfig;
-        }
-        
-        const tracking_config &getTrackingConfig() const {
-            return _trackingConfig;
-        }
-        
-        void setLook(Viewport::look l);
-        
-        void setLook(const dvec2 world, const dvec2 up, double scale) {
-            setLook(Viewport::look(world, up, scale));
-        }
-        
-        void setLook(const dvec2 world, const dvec2 up) {
-            setLook(Viewport::look(world, up, _target.scale));
-        }
-        
-        void setLook(const dvec2 world) {
-            setLook(Viewport::look(world, _target.up, _target.scale));
-        }
-        
-        Viewport::look getLook() const {
-            return _target;
-        }
-        
-        void setScale(double scale);
-        
         // set the scale, immediately, anchoring whatever's under `aboutScreenPoint to remain in same position on the screen.
         // this is a helper for zooming under mouse cursors
         void scaleAboutScreenPoint(double scale, dvec2 aboutScreenPoint);
-        
-        double getScale() const {
-            return _target.scale;
-        }
         
         void setTraumaConfig(trauma_config tc) {
             _traumaConfig = tc;
@@ -183,10 +116,8 @@ namespace core {
     private:
         
         ViewportRef _viewport;
-        Viewport::look _target;
         bool _disregardViewportMotion;
         
-        tracking_config _trackingConfig;
         trauma_config _traumaConfig;
         double _traumaLevel, _traumaBaselineLevel;
         vector<ci::Perlin> _traumaPerlinNoiseGenerators;

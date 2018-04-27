@@ -20,6 +20,8 @@
 		63611A8D2087990C004EE731 /* Compositor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63611A8B2087990C004EE731 /* Compositor.cpp */; };
 		63611A8E2087990C004EE731 /* Compositor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63611A8B2087990C004EE731 /* Compositor.cpp */; };
 		63611A922088DF96004EE731 /* MultiViewportTestScenario.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63611A8F2088DC14004EE731 /* MultiViewportTestScenario.cpp */; };
+		636364052093743C00806152 /* Tracking.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 636364032093743C00806152 /* Tracking.cpp */; };
+		636364062093743C00806152 /* Tracking.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 636364032093743C00806152 /* Tracking.cpp */; };
 		638BFB1D203F28DE004163A9 /* IPTestsScenario.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 638BFB1B203F28DE004163A9 /* IPTestsScenario.cpp */; };
 		638F4D951F87D7BC004437E8 /* PerlinNoise.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 638F4D931F87D7BC004437E8 /* PerlinNoise.cpp */; };
 		638F4D991F895CE5004437E8 /* TerrainDetail.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 638F4D971F8957F8004437E8 /* TerrainDetail.cpp */; };
@@ -155,6 +157,8 @@
 		63611A8C2087990C004EE731 /* Compositor.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Compositor.hpp; sourceTree = "<group>"; };
 		63611A8F2088DC14004EE731 /* MultiViewportTestScenario.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = MultiViewportTestScenario.cpp; sourceTree = "<group>"; };
 		63611A902088DC14004EE731 /* MultiViewportTestScenario.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = MultiViewportTestScenario.hpp; sourceTree = "<group>"; };
+		636364032093743C00806152 /* Tracking.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Tracking.cpp; sourceTree = "<group>"; };
+		636364042093743C00806152 /* Tracking.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Tracking.hpp; sourceTree = "<group>"; };
 		638BFB1B203F28DE004163A9 /* IPTestsScenario.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = IPTestsScenario.cpp; sourceTree = "<group>"; };
 		638BFB1C203F28DE004163A9 /* IPTestsScenario.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IPTestsScenario.hpp; sourceTree = "<group>"; };
 		638F4D901F87D4F3004437E8 /* Planet.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Planet.cpp; sourceTree = "<group>"; };
@@ -394,6 +398,8 @@
 				632623021E7D9A630051ABE2 /* ViewportController.hpp */,
 				63611A8B2087990C004EE731 /* Compositor.cpp */,
 				63611A8C2087990C004EE731 /* Compositor.hpp */,
+				636364032093743C00806152 /* Tracking.cpp */,
+				636364042093743C00806152 /* Tracking.hpp */,
 			);
 			path = core;
 			sourceTree = "<group>";
@@ -648,6 +654,7 @@
 				638F4DB61F8BCFCE004437E8 /* TerrainWorld.cpp in Sources */,
 				6332FF89202378C200279B7F /* PlanetGenerator.cpp in Sources */,
 				63E29EFD1F9E3F5D00CAF39E /* ParticleSystem.cpp in Sources */,
+				636364062093743C00806152 /* Tracking.cpp in Sources */,
 				638F4DB71F8BCFCE004437E8 /* ViewportController.cpp in Sources */,
 				638F4DB81F8BCFCE004437E8 /* ChipmunkHelpers.cpp in Sources */,
 				638F4DB91F8BCFCE004437E8 /* Object.cpp in Sources */,
@@ -689,6 +696,7 @@
 				63F93C511F8714B200F537CA /* ViewportController.cpp in Sources */,
 				63F93C521F8714B200F537CA /* ChipmunkHelpers.cpp in Sources */,
 				63F93C531F8714B200F537CA /* Object.cpp in Sources */,
+				636364052093743C00806152 /* Tracking.cpp in Sources */,
 				63F93C541F8714B200F537CA /* Viewport.cpp in Sources */,
 				630873582049A3FE000BCE27 /* PlanetGreebling.cpp in Sources */,
 				63F93C551F8714B200F537CA /* InputDispatcher.cpp in Sources */,
