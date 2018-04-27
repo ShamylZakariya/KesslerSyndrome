@@ -46,7 +46,7 @@ namespace core {
         _disregardViewportMotion = true;
         
         // perform tracking
-        Viewport::look look = Tracker::update(_viewport->getLook(), time);
+        Viewport::look look = Tracker::apply(_viewport->getLook(), time);
                 
         // apply trauma shake
         const double shake = getCurrentTraumaShake();

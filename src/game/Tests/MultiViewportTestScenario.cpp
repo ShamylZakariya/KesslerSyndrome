@@ -245,14 +245,25 @@ namespace {
         
     };
     
+    /*
+     int _width, _height;
+     TrackableRef _firstTarget, _secondTarget;
+     TrackerRef _firstTracker, _secondTracker;
+     ViewportRef _firstViewport, _secondViewport;
+     shared_ptr<SplitViewCompositor> _splitViewCompositor;
+     double _scale;
+     */
+    
     class SplitViewComposer : public ViewportComposer {
     public:
         
-        SplitViewComposer(const TrackableRef &firstTarget, const TrackableRef &secondTarget, const ViewportRef &firstViewport, const ViewportRef &secondViewport):
+        SplitViewComposer(const TrackableRef &firstTarget, const TrackableRef &secondTarget, const ViewportRef &firstViewport, const ViewportRef &secondViewport, const TrackerRef &firstTracker = nullptr, const TrackerRef &secondTracker = nullptr):
                 _width(0),
                 _height(0),
                 _firstTarget(firstTarget),
                 _secondTarget(secondTarget),
+                _firstTracker(firstTracker ? firstTracker : make_shared<Tracker>(Tracker::tracking_config(0.975))),
+                _secondTracker(secondTracker ? secondTracker : make_shared<Tracker>(Tracker::tracking_config(0.975))),
                 _firstViewport(firstViewport),
                 _secondViewport(secondViewport),
                 _scale(1)
@@ -270,6 +281,12 @@ namespace {
         const ViewportRef &getFirstViewport() const { return _firstViewport; }
         const ViewportRef &getSecondViewport() const { return _secondViewport; }
         
+        void setFirstTracker(const TrackerRef &tracker) { _firstTracker = tracker; }
+        const TrackerRef &getFirstTracker() const { return _firstTracker; }
+
+        void setSecondTracker(const TrackerRef &tracker) { _secondTracker = tracker; }
+        const TrackerRef &getSecondTracker() const { return _secondTracker; }
+
         void setScale(double scale) {
             _scale = max(scale, 0.0);
         }
@@ -313,9 +330,15 @@ namespace {
             const double lookMix = util::easing::quad_ease_in_out(voronoiMix);
             const dvec2 firstLookWorld = lrp(lookMix, targetMidpointWorld, firstTargetPositionWorld);
             const dvec2 secondLookWorld = lrp(lookMix, targetMidpointWorld, secondTargetPositionWorld);
-            _firstViewport->setLook(firstLookWorld, dvec2(0,1), _scale);
-            _secondViewport->setLook(secondLookWorld, dvec2(0,1), _scale);
-
+            
+            // run the tracking targets through our tracker for smoothing
+            _firstTracker->setTarget(Viewport::look(firstLookWorld, dvec2(0,1), _scale));
+            _secondTracker->setTarget(Viewport::look(secondLookWorld, dvec2(0,1), _scale));
+            auto firstLook = _firstTracker->apply(_firstViewport->getLook(), time);
+            auto secondLook = _secondTracker->apply(_secondViewport->getLook(), time);
+            _firstViewport->setLook(firstLook);
+            _secondViewport->setLook(secondLook);
+            
 
             // compute the look center offset. when:
             // voronoiMix == 0, look center offset is zero, making viewports look directly at the look.world position, which will be the midpoint of the two targets
@@ -336,12 +359,9 @@ namespace {
         
     protected:
         
-        
-        
-    private:
-        
         int _width, _height;
         TrackableRef _firstTarget, _secondTarget;
+        TrackerRef _firstTracker, _secondTracker;
         ViewportRef _firstViewport, _secondViewport;
         shared_ptr<SplitViewCompositor> _splitViewCompositor;
         double _scale;
@@ -373,13 +393,13 @@ void MultiViewportTestScenario::setup()
     
     auto viewportA = make_shared<Viewport>();
     auto viewportB = make_shared<Viewport>();
-    auto characterA = createCharacter(Player::A, dvec2(10,10), viewportA);
-    auto characterB = createCharacter(Player::B, dvec2(100,100), viewportB);
-    getStage()->addObject(characterA);
-    getStage()->addObject(characterB);
+    auto playerA = createCharacter(Player::A, dvec2(10,10), viewportA);
+    auto playerB = createCharacter(Player::B, dvec2(100,100), viewportB);
+    getStage()->addObject(playerA);
+    getStage()->addObject(playerB);
     
-    TrackableRef trackableA = characterA->getComponent<CharacterState>();
-    TrackableRef trackableB = characterB->getComponent<CharacterState>();
+    TrackableRef trackableA = playerA->getComponent<CharacterState>();
+    TrackableRef trackableB = playerB->getComponent<CharacterState>();
     auto svc = make_shared<SplitViewComposer>(trackableA, trackableB, viewportA, viewportB);
     setViewportComposer(svc);
     

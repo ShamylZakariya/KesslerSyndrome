@@ -56,7 +56,17 @@ namespace core {
             positiveScale(scaleFactor),
             negativeScale(scaleFactor)
             {}
-            
+
+            tracking_config(double factor) :
+            positiveY(factor),
+            negativeY(factor),
+            positiveX(factor),
+            negativeX(factor),
+            up(factor),
+            positiveScale(factor),
+            negativeScale(factor)
+            {}
+
         };
         
     public:
@@ -95,7 +105,7 @@ namespace core {
             return _target;
         }
         
-        virtual Viewport::look update(Viewport::look look, const time_state &time);
+        virtual Viewport::look apply(Viewport::look look, const time_state &time);
         
     protected:
         

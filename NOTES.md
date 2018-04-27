@@ -1,13 +1,11 @@
 # Dev Notes
 
-## PRESENTLY
+## Thoughts
 
-I need to implement some kind of viewport tracking smoothing in SplitViewComposer (or something "handed" to SplitViewComposer which does same)
-
-Do I still need Scenario::clear????
-
-ScreenComposite fugliness
-Look into glBlendFuncSeparate - it allows separate SRC/DST factors for RGB vs ALPHA. ci::gl::ScopedBlend supports it.
+- TargetTrackingViewportControlComponent is... way obsolete at this point. But it has good ideas!
+- Do I still need Scenario::clear????
+- ScreenComposite fugliness
+    - Look into glBlendFuncSeparate - it allows separate SRC/DST factors for RGB vs ALPHA. ci::gl::ScopedBlend supports it.
 
 
 ## BUGS PRIORITY HIGH

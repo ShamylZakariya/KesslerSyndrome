@@ -44,7 +44,7 @@ namespace core {
         _target.scale = max(l.scale, 1e-7);
     }
     
-    Viewport::look Tracker::update(Viewport::look look, const time_state &time) {
+    Viewport::look Tracker::apply(Viewport::look look, const time_state &time) {
         TrackableRef trackableTarget = getTrackableTarget();
         if (trackableTarget) {
             _target.world = trackableTarget->getPosition();
