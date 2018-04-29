@@ -41,8 +41,8 @@ void main(void) {
         vec2 line = vec2(-Side.y, Side.x);
         d = dot(sideDir, line);
         vec2 projectedToSplit = vec2(0.5,0.5) + d * line;
-        float distanceFromSplit = distance(TexCoord, projectedToSplit);
-        float shadow = 1 - min((distanceFromSplit * ShadowWidth * 2), 1);
+        float distanceFromSplit = distance(TexCoord, projectedToSplit) * 2;
+        float shadow = 1 - min((distanceFromSplit / ShadowWidth), 1);
         oColor.rgb = mix(oColor.rgb, ShadowColor.rgb, shadow * ShadowColor.a);
     }
 }

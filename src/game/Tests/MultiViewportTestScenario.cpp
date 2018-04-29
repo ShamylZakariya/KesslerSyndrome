@@ -186,6 +186,15 @@ namespace {
         return core::Object::with("Character", { state, drawer, control });
     }
     
+    /*
+     BaseViewportRef _viewportA, _viewportB;
+     gl::GlslProgRef _shader;
+     gl::BatchRef _batch;
+     vec2 _side;
+     ColorA _shadowColor;
+     double _shadowWidth;
+     */
+    
     class SplitViewCompositor : public BaseCompositor {
     public:
         
@@ -194,7 +203,9 @@ namespace {
         _viewportB(viewportB),
         _shader(util::loadGlslAsset("kessler/shaders/split_view_compositor.glsl")),
         _batch(gl::Batch::create(geom::Rect().rect(Rectf(0, 0, 1, 1)), _shader)),
-        _side(0,1)
+        _side(0,1),
+        _shadowColor(ColorA(0,0,0,1)),
+        _shadowWidth(0.5)
         {
         }
         
@@ -213,7 +224,7 @@ namespace {
             _shader->uniform("ColorTex1", 1);
             _shader->uniform("Tint0", ColorA(1,1,1,1));
             _shader->uniform("Tint1", ColorA(1,1,1,1));
-            _shader->uniform("ShadowWidth", static_cast<float>(_shadowWidth));
+            _shader->uniform("ShadowWidth", _shadowWidth);
             _shader->uniform("ShadowColor", _shadowColor);
             _shader->uniform("Side", _side);
             _batch->draw();
@@ -231,7 +242,10 @@ namespace {
         void setShadowColor(ColorA color) { _shadowColor = color; }
         ColorA getShadowColor() const { return _shadowColor; }
         
-        void setShadowWidth(double width) { _shadowWidth = max<double>(width, 0); }
+        /**
+         ShadowWidth is expressed in terms of [0,1] where 0 means no width, 1 means shadow extends all the way across the split.
+         */
+        void setShadowWidth(double width) { _shadowWidth = saturate<float>(static_cast<float>(width)); }
         double getShadowWidth() const { return _shadowWidth; }
         
     private:
@@ -241,7 +255,7 @@ namespace {
         gl::BatchRef _batch;
         vec2 _side;
         ColorA _shadowColor;
-        double _shadowWidth;
+        float _shadowWidth;
         
     };
     
@@ -270,6 +284,7 @@ namespace {
         {
             _viewports = { _firstViewport, _secondViewport };
             _compositor = _splitViewCompositor = make_shared<SplitViewCompositor>(_viewports[0], _viewports[1]);
+            _splitViewCompositor->setShadowWidth(0.5);
         }
         
         void setFirstTarget(const TrackableRef &target) { _firstTarget = target; }
@@ -353,8 +368,6 @@ namespace {
             // shadow effect fased in as voronoi mix goes to 1
             _splitViewCompositor->setSplitSideDir(dir);
             _splitViewCompositor->setShadowColor(ColorA(0,0,0, voronoiMix * 0.5));
-            _splitViewCompositor->setShadowWidth(50);
-
         }
         
     protected:
