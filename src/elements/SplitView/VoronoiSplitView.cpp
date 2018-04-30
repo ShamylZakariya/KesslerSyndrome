@@ -14,12 +14,12 @@ using namespace core;
 namespace vsv {
     
     /*
-     BaseViewportRef _viewportA, _viewportB;
+     core::BaseViewportRef _viewportA, _viewportB;
      gl::GlslProgRef _shader;
      gl::BatchRef _batch;
      vec2 _side;
      ColorA _shadowColor;
-     double _shadowWidth;
+     float _shadowWidth, _shadowIntensity;
      */
     
     
@@ -29,8 +29,9 @@ namespace vsv {
     _shader(util::loadGlslAsset("core/elements/shaders/voronoi_split_view_compositor.glsl")),
     _batch(gl::Batch::create(geom::Rect().rect(Rectf(0, 0, 1, 1)), _shader)),
     _side(0,1),
-    _shadowColor(ColorA(0,0,0,1)),
-    _shadowWidth(0.5)
+    _shadowColor(ColorA(0.1,0.1,0.1,1)),
+    _shadowWidth(0.5),
+    _shadowIntensity(1)
     {
     }
     
@@ -50,7 +51,7 @@ namespace vsv {
         _shader->uniform("Tint0", ColorA(1,1,1,1));
         _shader->uniform("Tint1", ColorA(1,1,1,1));
         _shader->uniform("ShadowWidth", _shadowWidth);
-        _shader->uniform("ShadowColor", _shadowColor);
+        _shader->uniform("ShadowColor", ColorA(_shadowColor, _shadowColor.a * _shadowIntensity));
         _shader->uniform("Side", _side);
         _batch->draw();
     }
@@ -142,7 +143,7 @@ namespace vsv {
         // update the shader
         // shadow effect fased in as voronoi mix goes to 1
         _vspc->setSplitSideDir(dir);
-        _vspc->setShadowColor(ColorA(0,0,0, voronoiMix * 0.5));
+        _vspc->setShadowIntensity(curvedVoronoiMix);
     }
     
 }

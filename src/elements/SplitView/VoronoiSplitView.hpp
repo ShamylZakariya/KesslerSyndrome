@@ -16,6 +16,13 @@
 
 namespace vsv {
     
+    SMART_PTR(VoronoiSplitViewCompositor);
+    SMART_PTR(VoronoiSplitViewComposer);
+
+    /**
+     Implements the compositor for VoronoiSplitViewComposer.
+     You will not interact with this directly, it's created by VoronoiSplitViewComposer.
+     */
     class VoronoiSplitViewCompositor : public core::BaseCompositor {
     public:
         
@@ -35,8 +42,11 @@ namespace vsv {
         /**
          ShadowWidth is expressed in terms of [0,1] where 0 means no width, 1 means shadow extends all the way across the split.
          */
-        void setShadowWidth(double width) { _shadowWidth = saturate<float>(static_cast<float>(width)); }
+        void setShadowWidth(double width) { _shadowWidth = saturate<float>(width); }
         double getShadowWidth() const { return _shadowWidth; }
+        
+        void setShadowIntensity(double intensity) { _shadowIntensity = saturate<float>(intensity); }
+        double getShadowIntensity() const { return _shadowIntensity; }
         
     private:
         
@@ -45,17 +55,33 @@ namespace vsv {
         gl::BatchRef _batch;
         vec2 _side;
         ColorA _shadowColor;
-        float _shadowWidth;
+        float _shadowWidth, _shadowIntensity;
         
     };
     
-    
+    /**
+     Implements a simplified, 2-player "voronoi" split view, per:
+     https://www.gdcvault.com/play/1023146/Math-for-Game-Programmers-Juicing
+     This is not an arbitrary N-player split, just two.
+     
+     Usage is simple - VoronoiSplitViewComposer needs two "Trackable" things (e.g. player state) and two viewports.
+     Construct it, and set it as the Scenario's ViewportComposer.
+     
+     TrackableRef trackableA = playerA->getComponent<CharacterState>();
+     TrackableRef trackableB = playerB->getComponent<CharacterState>();
+     auto svc = make_shared<vsv::VoronoiSplitViewComposer>(trackableA, trackableB, viewportA, viewportB);
+     scenario->setViewportComposer(svc);
+
+     */
     class VoronoiSplitViewComposer : public core::ViewportComposer {
     public:
         
         VoronoiSplitViewComposer(const core::TrackableRef &firstTarget, const core::TrackableRef &secondTarget,
                                  const core::ViewportRef &firstViewport, const core::ViewportRef &secondViewport,
                                  const core::TrackerRef &firstTracker = nullptr, const core::TrackerRef &secondTracker = nullptr);
+        
+        // get access to the VoronoiSplitViewCompositor; you can use it to set shadow width, color, etc.
+        const VoronoiSplitViewCompositorRef getVoronoiSplitViewCompositor() const { return _vspc; }
         
         void setFirstTarget(const core::TrackableRef &target) { _firstTarget = target; }
         const core::TrackableRef &getFirstTarget() const { return _firstTarget; }
@@ -88,7 +114,7 @@ namespace vsv {
         core::TrackableRef _firstTarget, _secondTarget;
         core::TrackerRef _firstTracker, _secondTracker;
         core::ViewportRef _firstViewport, _secondViewport;
-        shared_ptr<VoronoiSplitViewCompositor> _vspc;
+        VoronoiSplitViewCompositorRef _vspc;
         double _scale;
         
     };
