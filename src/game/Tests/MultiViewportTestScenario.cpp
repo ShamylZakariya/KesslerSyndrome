@@ -14,6 +14,7 @@
 #include "GlslProgLoader.hpp"
 #include "Easing.hpp"
 #include "Tracking.hpp"
+#include "VoronoiSplitView.hpp"
 
 #include <cinder/gl/scoped.h>
 
@@ -186,201 +187,6 @@ namespace {
         return core::Object::with("Character", { state, drawer, control });
     }
     
-    /*
-     BaseViewportRef _viewportA, _viewportB;
-     gl::GlslProgRef _shader;
-     gl::BatchRef _batch;
-     vec2 _side;
-     ColorA _shadowColor;
-     double _shadowWidth;
-     */
-    
-    class SplitViewCompositor : public BaseCompositor {
-    public:
-        
-        SplitViewCompositor(const BaseViewportRef &viewportA, const BaseViewportRef &viewportB):
-        _viewportA(viewportA),
-        _viewportB(viewportB),
-        _shader(util::loadGlslAsset("kessler/shaders/split_view_compositor.glsl")),
-        _batch(gl::Batch::create(geom::Rect().rect(Rectf(0, 0, 1, 1)), _shader)),
-        _side(0,1),
-        _shadowColor(ColorA(0,0,0,1)),
-        _shadowWidth(0.5)
-        {
-        }
-        
-        void composite(int width, int height) override {
-            gl::ScopedViewport sv(0,0,width,height);
-            
-            gl::ScopedMatrices sm;
-            gl::setMatricesWindow( width, height, true );
-            gl::scale(width, height, 1);
-            
-            gl::ScopedBlendAlpha blender;
-            
-            _viewportA->getFbo()->getColorTexture()->bind(0);
-            _viewportB->getFbo()->getColorTexture()->bind(1);
-            _shader->uniform("ColorTex0", 0);
-            _shader->uniform("ColorTex1", 1);
-            _shader->uniform("Tint0", ColorA(1,1,1,1));
-            _shader->uniform("Tint1", ColorA(1,1,1,1));
-            _shader->uniform("ShadowWidth", _shadowWidth);
-            _shader->uniform("ShadowColor", _shadowColor);
-            _shader->uniform("Side", _side);
-            _batch->draw();
-        }
-        
-        void update(const time_state &time) override {
-        }
-        
-        void setSplitSideDir(dvec2 dir) {
-            _side = dir;
-        }
-        
-        dvec2 getSplitSideDir() const { return _side; }
-        
-        void setShadowColor(ColorA color) { _shadowColor = color; }
-        ColorA getShadowColor() const { return _shadowColor; }
-        
-        /**
-         ShadowWidth is expressed in terms of [0,1] where 0 means no width, 1 means shadow extends all the way across the split.
-         */
-        void setShadowWidth(double width) { _shadowWidth = saturate<float>(static_cast<float>(width)); }
-        double getShadowWidth() const { return _shadowWidth; }
-        
-    private:
-        
-        BaseViewportRef _viewportA, _viewportB;
-        gl::GlslProgRef _shader;
-        gl::BatchRef _batch;
-        vec2 _side;
-        ColorA _shadowColor;
-        float _shadowWidth;
-        
-    };
-    
-    /*
-     int _width, _height;
-     TrackableRef _firstTarget, _secondTarget;
-     TrackerRef _firstTracker, _secondTracker;
-     ViewportRef _firstViewport, _secondViewport;
-     shared_ptr<SplitViewCompositor> _splitViewCompositor;
-     double _scale;
-     */
-    
-    class SplitViewComposer : public ViewportComposer {
-    public:
-        
-        SplitViewComposer(const TrackableRef &firstTarget, const TrackableRef &secondTarget, const ViewportRef &firstViewport, const ViewportRef &secondViewport, const TrackerRef &firstTracker = nullptr, const TrackerRef &secondTracker = nullptr):
-                _width(0),
-                _height(0),
-                _firstTarget(firstTarget),
-                _secondTarget(secondTarget),
-                _firstTracker(firstTracker ? firstTracker : make_shared<Tracker>(Tracker::tracking_config(0.975))),
-                _secondTracker(secondTracker ? secondTracker : make_shared<Tracker>(Tracker::tracking_config(0.975))),
-                _firstViewport(firstViewport),
-                _secondViewport(secondViewport),
-                _scale(1)
-        {
-            _viewports = { _firstViewport, _secondViewport };
-            _compositor = _splitViewCompositor = make_shared<SplitViewCompositor>(_viewports[0], _viewports[1]);
-            _splitViewCompositor->setShadowWidth(0.5);
-        }
-        
-        void setFirstTarget(const TrackableRef &target) { _firstTarget = target; }
-        const TrackableRef &getFirstTarget() const { return _firstTarget; }
-
-        void setSecondTarget(const TrackableRef &target) { _secondTarget = target; }
-        const TrackableRef &getSecondTarget() const { return _secondTarget; }
-        
-        const ViewportRef &getFirstViewport() const { return _firstViewport; }
-        const ViewportRef &getSecondViewport() const { return _secondViewport; }
-        
-        void setFirstTracker(const TrackerRef &tracker) { _firstTracker = tracker; }
-        const TrackerRef &getFirstTracker() const { return _firstTracker; }
-
-        void setSecondTracker(const TrackerRef &tracker) { _secondTracker = tracker; }
-        const TrackerRef &getSecondTracker() const { return _secondTracker; }
-
-        void setScale(double scale) {
-            _scale = max(scale, 0.0);
-        }
-        
-        double getScale() const { return _scale; }
-        
-        void onScenarioResized(int width, int height) override {
-            _width = width;
-            _height = height;
-            
-            _firstViewport->setSize(width, height);
-            _secondViewport->setSize(width, height);
-        }
-        
-        void update(const time_state &time) override {
-            ViewportComposer::update(time);
-            
-            
-            // first compute the split, in world space
-            const dvec2 screenCenter(_width/2, _height/2);
-            const dvec2 a = _firstTarget->getPosition();
-            const dvec2 b = _secondTarget->getPosition();
-            const double worldDistance = length(b-a);
-            const dvec2 dir = (b-a) / worldDistance;
-            
-
-            // compute the voronoi mix component. when:
-            // voronoiMix == 0, then both characters can be rendered on screen without a split
-            // voronoiMix == 1, we have full separation
-            const double screenDistance = worldDistance * _scale;
-            const double maxEllipticalDistScreen = length(dvec2(dir.x * _width/2, dir.y * _height/2));
-            const double minEllipticalDistScreen = maxEllipticalDistScreen * 0.5;
-            const double voronoiMix = saturate(((screenDistance / 2)  - minEllipticalDistScreen) / (maxEllipticalDistScreen - minEllipticalDistScreen));
-
-            // compute the tracking targets. when:
-            // voronoiMix == 0, viewports both track the midpoint of the two targets
-            // voronoiMix == 1, viewports track the targets directly
-            const dvec2 firstTargetPositionWorld = _firstTarget->getPosition();
-            const dvec2 secondTargetPositionWorld = _secondTarget->getPosition();
-            const dvec2 targetMidpointWorld = (firstTargetPositionWorld + secondTargetPositionWorld) * 0.5;
-            const double lookMix = util::easing::quad_ease_in_out(voronoiMix);
-            const dvec2 firstLookWorld = lrp(lookMix, targetMidpointWorld, firstTargetPositionWorld);
-            const dvec2 secondLookWorld = lrp(lookMix, targetMidpointWorld, secondTargetPositionWorld);
-            
-            // run the tracking targets through our tracker for smoothing
-            _firstTracker->setTarget(Viewport::look(firstLookWorld, dvec2(0,1), _scale));
-            _secondTracker->setTarget(Viewport::look(secondLookWorld, dvec2(0,1), _scale));
-            auto firstLook = _firstTracker->apply(_firstViewport->getLook(), time);
-            auto secondLook = _secondTracker->apply(_secondViewport->getLook(), time);
-            _firstViewport->setLook(firstLook);
-            _secondViewport->setLook(secondLook);
-            
-
-            // compute the look center offset. when:
-            // voronoiMix == 0, look center offset is zero, making viewports look directly at the look.world position, which will be the midpoint of the two targets
-            // voronoiMix == 1, track a position offset perpendicularly from the split
-            const double fudge = 1.1;
-            const dvec2 centerOffset = -dir * maxEllipticalDistScreen * 0.5 * fudge;
-            const double centerOffsetMix = util::easing::quad_ease_in_out(voronoiMix);
-            _firstViewport->setLookCenterOffset(centerOffset * centerOffsetMix);
-            _secondViewport->setLookCenterOffset(-centerOffset * centerOffsetMix);
-            
-            // update the shader
-            // shadow effect fased in as voronoi mix goes to 1
-            _splitViewCompositor->setSplitSideDir(dir);
-            _splitViewCompositor->setShadowColor(ColorA(0,0,0, voronoiMix * 0.5));
-        }
-        
-    protected:
-        
-        int _width, _height;
-        TrackableRef _firstTarget, _secondTarget;
-        TrackerRef _firstTracker, _secondTracker;
-        ViewportRef _firstViewport, _secondViewport;
-        shared_ptr<SplitViewCompositor> _splitViewCompositor;
-        double _scale;
-        
-    };
-    
 }
 
 /*
@@ -413,10 +219,10 @@ void MultiViewportTestScenario::setup()
     
     TrackableRef trackableA = playerA->getComponent<CharacterState>();
     TrackableRef trackableB = playerB->getComponent<CharacterState>();
-    auto svc = make_shared<SplitViewComposer>(trackableA, trackableB, viewportA, viewportB);
+    auto svc = make_shared<vsv::VoronoiSplitViewComposer>(trackableA, trackableB, viewportA, viewportB);
     setViewportComposer(svc);
     
-    getStage()->addObject(Object::with("Zelda", {
+     getStage()->addObject(Object::with("Zelda", {
         make_shared<ImageDrawer>(gl::Texture2d::create(loadImage(app::loadAsset("tests/zelda.png"))), dvec2(0,0))
     }));
     
@@ -441,7 +247,7 @@ void MultiViewportTestScenario::cleanup()
 void MultiViewportTestScenario::update(const time_state &time) {
     Scenario::update(time);
     
-    auto svc = static_pointer_cast<SplitViewComposer>(getViewportComposer());
+    auto svc = static_pointer_cast<vsv::VoronoiSplitViewComposer>(getViewportComposer());
     double scale = svc->getScale();
     scale = lrp<double>(0.25, scale, _scale);
     svc->setScale(scale);

@@ -22,6 +22,8 @@
 		63611A922088DF96004EE731 /* MultiViewportTestScenario.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63611A8F2088DC14004EE731 /* MultiViewportTestScenario.cpp */; };
 		636364052093743C00806152 /* Tracking.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 636364032093743C00806152 /* Tracking.cpp */; };
 		636364062093743C00806152 /* Tracking.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 636364032093743C00806152 /* Tracking.cpp */; };
+		6363640A209756F500806152 /* VoronoiSplitView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63636408209756F500806152 /* VoronoiSplitView.cpp */; };
+		6363640B209756F500806152 /* VoronoiSplitView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63636408209756F500806152 /* VoronoiSplitView.cpp */; };
 		638BFB1D203F28DE004163A9 /* IPTestsScenario.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 638BFB1B203F28DE004163A9 /* IPTestsScenario.cpp */; };
 		638F4D951F87D7BC004437E8 /* PerlinNoise.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 638F4D931F87D7BC004437E8 /* PerlinNoise.cpp */; };
 		638F4D991F895CE5004437E8 /* TerrainDetail.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 638F4D971F8957F8004437E8 /* TerrainDetail.cpp */; };
@@ -159,6 +161,8 @@
 		63611A902088DC14004EE731 /* MultiViewportTestScenario.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = MultiViewportTestScenario.hpp; sourceTree = "<group>"; };
 		636364032093743C00806152 /* Tracking.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Tracking.cpp; sourceTree = "<group>"; };
 		636364042093743C00806152 /* Tracking.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Tracking.hpp; sourceTree = "<group>"; };
+		63636408209756F500806152 /* VoronoiSplitView.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = VoronoiSplitView.cpp; sourceTree = "<group>"; };
+		63636409209756F500806152 /* VoronoiSplitView.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = VoronoiSplitView.hpp; sourceTree = "<group>"; };
 		638BFB1B203F28DE004163A9 /* IPTestsScenario.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = IPTestsScenario.cpp; sourceTree = "<group>"; };
 		638BFB1C203F28DE004163A9 /* IPTestsScenario.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IPTestsScenario.hpp; sourceTree = "<group>"; };
 		638F4D901F87D4F3004437E8 /* Planet.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Planet.cpp; sourceTree = "<group>"; };
@@ -413,6 +417,15 @@
 			path = game;
 			sourceTree = "<group>";
 		};
+		63636407209756C800806152 /* SplitView */ = {
+			isa = PBXGroup;
+			children = (
+				63636408209756F500806152 /* VoronoiSplitView.cpp */,
+				63636409209756F500806152 /* VoronoiSplitView.hpp */,
+			);
+			path = SplitView;
+			sourceTree = "<group>";
+		};
 		638F4D8F1F87D4E8004437E8 /* elements */ = {
 			isa = PBXGroup;
 			children = (
@@ -444,6 +457,7 @@
 		63F93C1B1F86F6C000F537CA /* elements */ = {
 			isa = PBXGroup;
 			children = (
+				63636407209756C800806152 /* SplitView */,
 				63E29EEF1F97A4B400CAF39E /* ParticleSystem */,
 				63F93C221F86F70D00F537CA /* Components */,
 				63F93C1C1F86F6C000F537CA /* Terrain */,
@@ -650,6 +664,7 @@
 				63611A8E2087990C004EE731 /* Compositor.cpp in Sources */,
 				638F4DB41F8BCFCE004437E8 /* DevComponents.cpp in Sources */,
 				638F4DB51F8BCFCE004437E8 /* Terrain.cpp in Sources */,
+				6363640B209756F500806152 /* VoronoiSplitView.cpp in Sources */,
 				6332FF852020C67700279B7F /* TerrainDetail_Svg.cpp in Sources */,
 				638F4DB61F8BCFCE004437E8 /* TerrainWorld.cpp in Sources */,
 				6332FF89202378C200279B7F /* PlanetGenerator.cpp in Sources */,
@@ -674,6 +689,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6363640A209756F500806152 /* VoronoiSplitView.cpp in Sources */,
 				63597BEC20766F8F00B65C2A /* GlslProgLoader.cpp in Sources */,
 				638F4DA21F898602004437E8 /* Background.cpp in Sources */,
 				638F4DA11F897FB7004437E8 /* GameConstants.cpp in Sources */,

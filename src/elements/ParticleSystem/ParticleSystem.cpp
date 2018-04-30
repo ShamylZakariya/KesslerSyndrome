@@ -672,7 +672,7 @@ namespace particles {
     }
     
     gl::GlslProgRef ParticleSystemDrawComponent::createDefaultShader() const {
-        return core::util::loadGlslAsset("kessler/shaders/particle_system.glsl");
+        return core::util::loadGlslAsset("core/elements/shaders/particle_system.glsl");
     }
 
     void ParticleSystemDrawComponent::writeStableParticleValues(const BaseParticleSimulationRef &sim) {

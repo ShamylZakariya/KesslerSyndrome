@@ -51,7 +51,7 @@ namespace core {
     class FboCompositor : public BaseCompositor {
     public:
 
-        // loads default shader asset (kessler/shaders/fbo_compositor.glsl)
+        // loads default shader asset (core/shaders/fbo_compositor.glsl)
         FboCompositor();
 
         // path to a .glsl shader asset

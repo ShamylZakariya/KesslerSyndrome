@@ -28,7 +28,7 @@ namespace core {
      */
     
     FboCompositor::FboCompositor():
-            _shader(core::util::loadGlslAsset("kessler/shaders/fbo_compositor.glsl")),
+            _shader(core::util::loadGlslAsset("core/shaders/fbo_compositor.glsl")),
             _batch(gl::Batch::create(geom::Rect().rect(Rectf(0, 0, 1, 1)), _shader))
     {
     }
