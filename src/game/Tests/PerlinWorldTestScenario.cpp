@@ -32,8 +32,8 @@ namespace {
 
     const double COLLISION_SHAPE_RADIUS = 0;
     const double MIN_SURFACE_AREA = 2;
-    const ci::Color TERRAIN_COLOR(0.3, 0.3, 0.3);
-    const ci::Color ANCHOR_COLOR(0, 0, 0);
+    const Color TERRAIN_COLOR(0.3, 0.3, 0.3);
+    const Color ANCHOR_COLOR(0, 0, 0);
 
     namespace CollisionType {
 
@@ -119,7 +119,7 @@ namespace {
         
     private:
         
-        ci::gl::Texture2dRef _image;
+        gl::Texture2dRef _image;
         dvec2 _topLeft;
         
     };
@@ -130,8 +130,8 @@ namespace {
  float _surfaceSolidity, _surfaceRoughness;
  int32_t _seed;
  
- vector<ci::Channel8u> _isoSurfaces;
- vector<ci::gl::Texture2dRef> _isoTexes;
+ vector<Channel8u> _isoSurfaces;
+ vector<gl::Texture2dRef> _isoTexes;
  vector <segment> _marchSegments;
  vector <polyline> _marchedPolylines;
  
@@ -207,10 +207,10 @@ void PerlinWorldTestScenario::setup() {
         config.drawLayer = DrawLayers::ATTACHMENTS;
         
         config.greebleDescriptors = {
-            game::GreeblingParticleSystem::greeble_descriptor(ci::ColorA(1,1,1,1), 0.25, 0, 1.00, 2.0, 1),
-            game::GreeblingParticleSystem::greeble_descriptor(ci::ColorA(1,1,1,1), 0.50, 0, 0.60, 1.0, 1),
-            game::GreeblingParticleSystem::greeble_descriptor(ci::ColorA(1,1,1,1), 1.00, 0, 0.25, 0.5, 1),
-            game::GreeblingParticleSystem::greeble_descriptor(ci::ColorA(1,1,1,1), 2.00, 0, 0.10, 0.25, 1),
+            game::GreeblingParticleSystem::greeble_descriptor(ColorA(1,1,1,1), 0.25, 0, 1.00, 2.0, 1),
+            game::GreeblingParticleSystem::greeble_descriptor(ColorA(1,1,1,1), 0.50, 0, 0.60, 1.0, 1),
+            game::GreeblingParticleSystem::greeble_descriptor(ColorA(1,1,1,1), 1.00, 0, 0.25, 0.5, 1),
+            game::GreeblingParticleSystem::greeble_descriptor(ColorA(1,1,1,1), 2.00, 0, 0.10, 0.25, 1),
         };
         
         for(auto v : terrainGen.attachmentsByBatchId) {
@@ -226,10 +226,10 @@ void PerlinWorldTestScenario::setup() {
     if ((true)) {
         
         float left = 1000;
-        const auto fmt = ci::gl::Texture2d::Format().mipmap(false).minFilter(GL_NEAREST).magFilter(GL_NEAREST);
+        const auto fmt = gl::Texture2d::Format().mipmap(false).minFilter(GL_NEAREST).magFilter(GL_NEAREST);
         getStage()->addObject(Object::with("Terrain Map Images", {
-            make_shared<ImageDrawer>(ci::gl::Texture2d::create(terrainGen.terrainMap, fmt), dvec2(left,0)),
-            make_shared<ImageDrawer>(ci::gl::Texture2d::create(terrainGen.anchorMap, fmt), dvec2(left + terrainGen.terrainMap.getWidth(), 0)),
+            make_shared<ImageDrawer>(gl::Texture2d::create(terrainGen.terrainMap, fmt), dvec2(left,0)),
+            make_shared<ImageDrawer>(gl::Texture2d::create(terrainGen.anchorMap, fmt), dvec2(left + terrainGen.terrainMap.getWidth(), 0)),
         }));
     }
 
@@ -308,7 +308,7 @@ void PerlinWorldTestScenario::draw(const render_state &state) {
     }
 }
 
-bool PerlinWorldTestScenario::keyDown(const ci::app::KeyEvent &event) {
+bool PerlinWorldTestScenario::keyDown(const app::KeyEvent &event) {
     
     switch(event.getChar()) {
         case 'r':
@@ -365,11 +365,11 @@ bool PerlinWorldTestScenario::keyDown(const ci::app::KeyEvent &event) {
     }
     
     switch(event.getCode()) {
-        case ci::app::KeyEvent::KEY_BACKQUOTE: {
+        case app::KeyEvent::KEY_BACKQUOTE: {
             setRenderMode(RenderMode::mode((int(getRenderMode()) + 1) % RenderMode::COUNT));
             return true;
         }
-        case ci::app::KeyEvent::KEY_BACKSPACE: {
+        case app::KeyEvent::KEY_BACKSPACE: {
             CI_LOG_D("Clearing cut recorder");
             _terrainCutRecorder->clearCuts();
             _terrainCutRecorder->save();
@@ -385,7 +385,7 @@ void PerlinWorldTestScenario::reset() {
     setup();
 }
 
-vector <PerlinWorldTestScenario::polyline> PerlinWorldTestScenario::marchToPerimeters(ci::Channel8u &iso, size_t expectedContours) const {
+vector <PerlinWorldTestScenario::polyline> PerlinWorldTestScenario::marchToPerimeters(Channel8u &iso, size_t expectedContours) const {
     
     std::vector<PolyLine2d> polylines = terrain::detail::march(iso, 0.5, dmat4(), 0.01);
 
@@ -395,24 +395,24 @@ vector <PerlinWorldTestScenario::polyline> PerlinWorldTestScenario::marchToPerim
 
     CI_LOG_D("Generated " << polylines.size() << " contours");
 
-    ci::Rand rng;
+    Rand rng;
     vector <polyline> ret;
     for (const auto &pl : polylines) {
         CI_LOG_D("polyline: " << ret.size() << " num vertices: " << pl.size());
-        ret.push_back({terrain::detail::polyline2d_to_2f(pl), ci::Color(CM_HSV, rng.nextFloat(), 0.7, 0.7)});
+        ret.push_back({terrain::detail::polyline2d_to_2f(pl), Color(CM_HSV, rng.nextFloat(), 0.7, 0.7)});
     }
 
     return ret;
 }
 
-vector <PerlinWorldTestScenario::segment> PerlinWorldTestScenario::testMarch(ci::Channel8u &iso) const {
+vector <PerlinWorldTestScenario::segment> PerlinWorldTestScenario::testMarch(Channel8u &iso) const {
 
     struct segment_consumer {
-        ci::Rand rng;
+        Rand rng;
         vector <segment> segments;
 
         void operator()(int x, int y, const marching_squares::segment &seg) {
-            segments.push_back({seg.a, seg.b, ci::Color(CM_HSV, rng.nextFloat(), 0.7, 0.7)});
+            segments.push_back({seg.a, seg.b, Color(CM_HSV, rng.nextFloat(), 0.7, 0.7)});
         }
     } sc;
 

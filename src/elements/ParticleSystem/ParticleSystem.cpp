@@ -27,11 +27,11 @@ namespace elements {
         }
 
         // scales value by [1-variance to 1+variance]
-        double perturb(ci::Rand &rng, double value, double variance) {
+        double perturb(Rand &rng, double value, double variance) {
             return value * (1.0 + static_cast<double>(rng.nextFloat(-variance, +variance)));
         }
 
-        interpolator<double> perturb(ci::Rand &rng, const interpolator<double> &value, double variance) {
+        interpolator<double> perturb(Rand &rng, const interpolator<double> &value, double variance) {
             interpolator<double> c = value;
             for (auto it(c._values.begin()), end(c._values.end()); it != end; ++it) {
                 *it = *it * (1.0 + static_cast<double>(rng.nextFloat(-variance, +variance)));
@@ -39,7 +39,7 @@ namespace elements {
             return c;
         }
 
-        particle_prototype perturb(ci::Rand &rng, const particle_prototype &value, double variance) {
+        particle_prototype perturb(Rand &rng, const particle_prototype &value, double variance) {
             particle_prototype c = value;
 
             c.lifespan = perturb(rng, c.lifespan, variance);
@@ -362,7 +362,7 @@ namespace elements {
         }
     }
 
-    void ParticleEmitter::Source::apply(ci::Rand &rng, const dvec2 &world, const dvec2 &normalizedDirOrZero, dvec2 &outWorld, dvec2 &outDir) const {
+    void ParticleEmitter::Source::apply(Rand &rng, const dvec2 &world, const dvec2 &normalizedDirOrZero, dvec2 &outWorld, dvec2 &outDir) const {
 
         // plot position
         if (radius > 0) {
@@ -680,7 +680,7 @@ namespace elements {
         const auto activeCount = sim->getActiveCount();
         auto stateBegin = sim->getParticleState().begin();
         auto stateEnd = stateBegin + activeCount;
-        auto rng = ci::Rand();
+        auto rng = Rand();
 
         for (auto state = stateBegin; state != stateEnd; ++state) {
             vec2 rand(rng.nextFloat() * 2.0f - 1.0f, rng.nextFloat() * 2.0f - 1.0f);
@@ -716,7 +716,7 @@ namespace elements {
         const Atlas::Type AtlasType = _config.atlasType;
         const vec2 *AtlasOffsets = Atlas::AtlasOffsets(AtlasType);
         const float AtlasScaling = Atlas::AtlasScaling(AtlasType);
-        const ci::ColorA transparent(0, 0, 0, 0);
+        const ColorA transparent(0, 0, 0, 0);
         const vec2 origin(0, 0);
 
         vec2 shape[4];
@@ -744,8 +744,8 @@ namespace elements {
                 //
 
                 const vec2 up = state->up;
-                const ci::ColorA pc = state->color;
-                const ci::ColorA additiveColor(pc.r * pc.a, pc.g * pc.a, pc.b * pc.a, pc.a * (1 - static_cast<float>(state->additivity)));
+                const ColorA pc = state->color;
+                const ColorA additiveColor(pc.r * pc.a, pc.g * pc.a, pc.b * pc.a, pc.a * (1 - static_cast<float>(state->additivity)));
                 const int atlasIdx = static_cast<int>(state->atlasIdx);
                 const vec2 atlasOffset = AtlasOffsets[atlasIdx];
 

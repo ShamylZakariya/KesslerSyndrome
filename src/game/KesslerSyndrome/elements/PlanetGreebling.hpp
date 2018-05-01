@@ -24,7 +24,7 @@ namespace game {
             struct atlas_detail {
                 
                 // color for greebles of this atlas idx
-                ci::ColorA color;
+                ColorA color;
                 
                 // radius for greebles of this atlas idx
                 double radius;
@@ -37,7 +37,7 @@ namespace game {
                 // each atlas element receives a probability of (probability / (sum of all atlas_detail.probability)
                 size_t probability;
                 
-                atlas_detail(ci::ColorA color, double radius, double upOffset = 0, int probability = 1):
+                atlas_detail(ColorA color, double radius, double upOffset = 0, int probability = 1):
                 color(color),
                 radius(radius),
                 upOffset(upOffset),
@@ -126,7 +126,7 @@ namespace game {
     public:
 
         struct greeble_descriptor {
-            ci::ColorA color;
+            ColorA color;
             double radius;
             double upOffset;
             double swayFactor;
@@ -142,7 +142,7 @@ namespace game {
             probability(1)
             {}
             
-            greeble_descriptor(ci::ColorA color, double radius, double upOffset, double swayFactor, double swayPeriod, size_t probability):
+            greeble_descriptor(ColorA color, double radius, double upOffset, double swayFactor, double swayPeriod, size_t probability):
             color(color),
             radius(radius),
             upOffset(upOffset),
@@ -155,7 +155,7 @@ namespace game {
         struct config {
             int attachmentBatchId;
             int drawLayer;
-            ci::gl::Texture2dRef textureAtlas;
+            gl::Texture2dRef textureAtlas;
             elements::Atlas::Type atlasType;
             vector<greeble_descriptor> greebleDescriptors;
             

@@ -134,13 +134,13 @@ namespace core {
     }
         
 
-    void Scenario::screenshot(const ci::fs::path &folderPath, const string &namingPrefix, const string format) {
+    void Scenario::screenshot(const fs::path &folderPath, const string &namingPrefix, const string format) {
         size_t index = 0;
-        ci::fs::path fullPath;
+        fs::path fullPath;
 
         do {
             fullPath = folderPath / (namingPrefix + str(index++) + "." + format);
-        } while (ci::fs::exists(fullPath));
+        } while (fs::exists(fullPath));
 
         Surface s = app::copyWindowSurface();
         writeImage(fullPath.string(), s, ImageTarget::Options(), format);

@@ -15,28 +15,28 @@ namespace core {
 #pragma mark - XmlMultiTree
 
             /*
-            vector<ci::XmlTree> _trees;
+            vector<XmlTree> _trees;
             */
 
             XmlMultiTree::XmlMultiTree() {
             }
 
-            XmlMultiTree::XmlMultiTree(ci::XmlTree tree) :
+            XmlMultiTree::XmlMultiTree(XmlTree tree) :
                     _trees({tree}) {
                 _sanityCheck();
             }
 
-            XmlMultiTree::XmlMultiTree(ci::XmlTree firstTree, ci::XmlTree secondTree) :
+            XmlMultiTree::XmlMultiTree(XmlTree firstTree, XmlTree secondTree) :
                     _trees({firstTree, secondTree}) {
                 _sanityCheck();
             }
 
-            XmlMultiTree::XmlMultiTree(const initializer_list <ci::XmlTree> &trees) :
+            XmlMultiTree::XmlMultiTree(const initializer_list <XmlTree> &trees) :
                     _trees(trees) {
                 _sanityCheck();
             }
 
-            XmlMultiTree::XmlMultiTree(const vector <ci::XmlTree> &trees) :
+            XmlMultiTree::XmlMultiTree(const vector <XmlTree> &trees) :
                     _trees(trees) {
                 _sanityCheck();
             }
@@ -72,7 +72,7 @@ namespace core {
             }
 
             XmlMultiTree XmlMultiTree::getChild(string name) const {
-                vector <ci::XmlTree> children;
+                vector <XmlTree> children;
                 for (auto t : _trees) {
                     if (t.hasChild(name)) {
                         children.push_back(t.getChild(name));
@@ -82,7 +82,7 @@ namespace core {
             }
             
             XmlMultiTree XmlMultiTree::getChild(string name, size_t which) const {
-                vector <ci::XmlTree> children;
+                vector <XmlTree> children;
                 for (auto t : _trees) {
                     size_t i = 0;
                     for (const auto &c : t.getChildren()) {
@@ -184,7 +184,7 @@ namespace core {
                 }
             }
 
-            boost::optional<ci::XmlTree> findElement(const ci::XmlTree &node, string tag) {
+            boost::optional<XmlTree> findElement(const XmlTree &node, string tag) {
                 if (node.isElement() && node.getTag() == tag) {
                     return node;
                 } else {
@@ -198,7 +198,7 @@ namespace core {
                 return boost::none;
             }
 
-            boost::optional<ci::XmlTree> findElementWithId(const ci::XmlTree &node, string id) {
+            boost::optional<XmlTree> findElementWithId(const XmlTree &node, string id) {
                 if (node.isElement() && node.hasAttribute("id") && node.getAttribute("id").getValue() == id) {
                     return node;
                 } else {
@@ -212,7 +212,7 @@ namespace core {
                 return boost::none;
             }
 
-            boost::optional<ci::XmlTree> findElement(const ci::XmlTree &node, string tagName, string attributeName, string attributeValue) {
+            boost::optional<XmlTree> findElement(const XmlTree &node, string tagName, string attributeName, string attributeValue) {
                 if (node.isElement() && node.getTag() == tagName && node.hasAttribute(attributeName) && node.getAttribute(attributeName).getValue() == attributeValue) {
                     return node;
                 } else {

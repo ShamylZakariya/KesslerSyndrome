@@ -220,7 +220,7 @@ namespace core {
                                 if (*current == ',') current++;
                             }
 
-                            points.push_back(ci::dvec2(v[0], v[1]));
+                            points.push_back(dvec2(v[0], v[1]));
                             continue;
                         }
 
@@ -862,13 +862,13 @@ namespace core {
 
                 void parsePolylineShape(const XmlTree &shapeNode, Shape2d &shape) {
                     if (shapeNode.hasAttribute("points")) {
-                        vector<ci::dvec2> points;
+                        vector<dvec2> points;
                         parsePolyline(shapeNode.getAttribute("points").getValue(), points);
 
                         if (!points.empty()) {
                             // we don't close polyline shapes
                             shape.moveTo(points.front());
-                            for (vector<ci::dvec2>::const_iterator p(points.begin() + 1), end(points.end()); p != end; ++p) {
+                            for (vector<dvec2>::const_iterator p(points.begin() + 1), end(points.end()); p != end; ++p) {
                                 shape.lineTo(*p);
                             }
                         }
@@ -900,7 +900,7 @@ namespace core {
                 return Rectd(minX, minY, minX + width, minY + height);
             }
 
-            ci::Rectd parseDocumentFrame(const ci::XmlTree &svgNode) {
+            Rectd parseDocumentFrame(const XmlTree &svgNode) {
                 dvec2 parentWorldOrigin(0, 0);
                 dvec2 documentSize(0, 0);
 
@@ -1165,7 +1165,7 @@ namespace core {
                                 shapeName == "polygon";
             }
 
-            void parseShape(const XmlTree &shapeNode, ci::Shape2d &shape) {
+            void parseShape(const XmlTree &shapeNode, Shape2d &shape) {
                 string name = shapeNode.getTag();
 
                 if (name == "path") {

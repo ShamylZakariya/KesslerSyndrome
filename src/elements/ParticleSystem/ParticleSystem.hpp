@@ -171,7 +171,7 @@ namespace elements {
         interpolator<double> mass;
 
         // color interpolator
-        interpolator<ci::ColorA> color;
+        interpolator<ColorA> color;
 
         // initial position of particle. as particle is simulated position will change
         dvec2 position;
@@ -317,7 +317,7 @@ namespace elements {
                     variance(clamp(variance, 0.0, 1.0)) {
             }
 
-            void apply(ci::Rand &rng, const dvec2 &world, const dvec2 &normalizedDirOrZero, dvec2 &outWorld, dvec2 &outDir) const;
+            void apply(Rand &rng, const dvec2 &world, const dvec2 &normalizedDirOrZero, dvec2 &outWorld, dvec2 &outDir) const;
 
         };
 
@@ -421,7 +421,7 @@ namespace elements {
         };
 
         ParticleSimulationWeakRef _simulation;
-        ci::Rand _rng;
+        Rand _rng;
         map <emission_id, emission> _emissions;
         vector <emission_prototype> _prototypes;
         vector <size_t> _prototypeLookup;
@@ -433,7 +433,7 @@ namespace elements {
     public:
 
         struct config : public elements::BaseParticleSystemDrawComponent::config {
-            ci::gl::Texture2dRef textureAtlas;
+            gl::Texture2dRef textureAtlas;
             elements::Atlas::Type atlasType;
             gl::GlslProgRef shader;
 
@@ -496,7 +496,7 @@ namespace elements {
 
             // color for the vertex
             // bound to ciColor (float4)
-            ci::ColorA color;
+            ColorA color;
             
             // atlas index of this particle [0..4]
             // bound to ciBoneIndex

@@ -33,24 +33,24 @@ public:
     
     virtual void drawScreen(const core::render_state &state) override;
     
-    virtual bool keyDown(const ci::app::KeyEvent &event) override;
+    virtual bool keyDown(const app::KeyEvent &event) override;
     
     void reset();
 
 private:
 
-    ci::Channel8u testRemap(int width, int height);
-    ci::Channel8u testDilate(int width, int height);
-    ci::Channel8u testErode(int width, int height);
-    ci::Channel8u testThreshold(int width, int height);
-    ci::Channel8u testPerlinNoise(int width, int height);
-    ci::Channel8u testPerlinNoise2(int width, int height);
-    ci::Channel8u testBlur(int width, int height);
+    Channel8u testRemap(int width, int height);
+    Channel8u testDilate(int width, int height);
+    Channel8u testErode(int width, int height);
+    Channel8u testThreshold(int width, int height);
+    Channel8u testPerlinNoise(int width, int height);
+    Channel8u testPerlinNoise2(int width, int height);
+    Channel8u testBlur(int width, int height);
 
 private:
     
-    vector<ci::Channel8u> _channels;
-    vector<ci::gl::Texture2dRef> _channelTextures;
+    vector<Channel8u> _channels;
+    vector<gl::Texture2dRef> _channelTextures;
     int32_t _seed;
         
 };

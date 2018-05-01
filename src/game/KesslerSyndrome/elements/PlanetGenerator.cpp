@@ -93,7 +93,7 @@ namespace game { namespace planet_generation {
         // step: distance to increment while walking about perimeter
         // visitor: the visitor invoked for each step, signature: bool visitor(dvec2 world, dvec2 contourNormal, bool isOuterContour)
         // if visitor returns false, walk is terminated
-        bool walk_perimeter(const PolyLine2d &contour, double step, double wiggle, ci::Rand &rng, bool isOuterContour, const function<bool(dvec2,dvec2,bool)> &visitor) {
+        bool walk_perimeter(const PolyLine2d &contour, double step, double wiggle, Rand &rng, bool isOuterContour, const function<bool(dvec2,dvec2,bool)> &visitor) {
 
             // TODO: Add wiggle to step
             
@@ -115,7 +115,7 @@ namespace game { namespace planet_generation {
         // allContours: if true, walks inner ("hole") perimeters as well as primary outer perimeter
         // visitor: the visitor invoked for each step, signature: bool visitor(dvec2 world, dvec2 contourNormal, bool isOuterContour)
         // if visitor returns false, walk is terminated
-        void walk_shape_perimeter(const terrain::ShapeRef &shape, double step, double wiggle, ci::Rand &rng, bool allContours, const function<bool(dvec2,dvec2,bool)> &visitor) {
+        void walk_shape_perimeter(const terrain::ShapeRef &shape, double step, double wiggle, Rand &rng, bool allContours, const function<bool(dvec2,dvec2,bool)> &visitor) {
             if (!walk_perimeter(shape->getOuterContour().world, step, wiggle, rng, true, visitor)) {
                 return;
             }
@@ -144,7 +144,7 @@ namespace game { namespace planet_generation {
             const vec2 center(size/2, size/2);
             
             {
-                ci::Perlin pn(p.noiseOctaves, p.seed);
+                Perlin pn(p.noiseOctaves, p.seed);
                 const float frequency = p.noiseFrequencyScale / 32.f;
                 core::util::ip::in_place::perlin_abs_thresh(map, pn, frequency, 12);
             }
@@ -214,7 +214,7 @@ namespace game { namespace planet_generation {
             //
             
             if (p.surfaceRoughness > 0) {
-                ci::Perlin roughnessNoiseSource(p.noiseOctaves, p.seed + 1);
+                Perlin roughnessNoiseSource(p.noiseOctaves, p.seed + 1);
                 const float roughness = saturate(p.surfaceRoughness);
                 const float frequency = lrp<float>(roughness, 1.0f / 16.0f, 12.0f / 16.0f);
                 util::ip::in_place::perlin_add(map, roughnessNoiseSource, frequency, saturate(roughness));
@@ -231,7 +231,7 @@ namespace game { namespace planet_generation {
             return map;
         }
         
-        ci::Channel8u generate_shapes(const params &p, vector <terrain::ShapeRef> &shapes) {
+        Channel8u generate_shapes(const params &p, vector <terrain::ShapeRef> &shapes) {
             Channel8u terrainMap = generate_map(p.terrain, p.size);
             
             const double isoLevel = 0.5;
@@ -249,7 +249,7 @@ namespace game { namespace planet_generation {
             return terrainMap;
         }
         
-        ci::Channel8u generate_anchors(const params &p, vector <terrain::AnchorRef> &anchors) {
+        Channel8u generate_anchors(const params &p, vector <terrain::AnchorRef> &anchors) {
             Channel8u anchorMap = generate_map(p.anchors, p.size);
             
             const double isoLevel = 0.5;
@@ -302,7 +302,7 @@ namespace game { namespace planet_generation {
             const dvec2 origin = params.origin();
             terrain::AttachmentRef attachment;
 
-            ci::Rand rng;
+            Rand rng;
             const double placementNudge = 1e-2;
             const double minPlacementRadius = params.anchors.enabled ? params.anchorOuterRadius() : 0;
             const double minPlacementRadiusSquared = minPlacementRadius * minPlacementRadius;

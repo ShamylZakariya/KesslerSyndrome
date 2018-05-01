@@ -122,13 +122,13 @@ namespace elements {
             
             MouseCutterComponent(terrain::TerrainObjectRef terrain, float radius, int dispatchReceiptIndex = 0);
             
-            bool mouseDown(const ci::app::MouseEvent &event) override;
+            bool mouseDown(const app::MouseEvent &event) override;
             
-            bool mouseUp(const ci::app::MouseEvent &event) override;
+            bool mouseUp(const app::MouseEvent &event) override;
             
-            bool mouseMove(const ci::app::MouseEvent &event, const ivec2 &delta) override;
+            bool mouseMove(const app::MouseEvent &event, const ivec2 &delta) override;
             
-            bool mouseDrag(const ci::app::MouseEvent &event, const ivec2 &delta) override;
+            bool mouseDrag(const app::MouseEvent &event, const ivec2 &delta) override;
             
             bool isCutting() const {
                 return _cutting;

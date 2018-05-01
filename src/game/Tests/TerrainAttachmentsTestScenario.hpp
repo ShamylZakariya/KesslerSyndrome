@@ -26,7 +26,7 @@ public:
     
     virtual void drawScreen(const core::render_state &state) override;
     
-    virtual bool keyDown(const ci::app::KeyEvent &event) override;
+    virtual bool keyDown(const app::KeyEvent &event) override;
     
     void reset();
     

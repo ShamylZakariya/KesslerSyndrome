@@ -19,8 +19,8 @@ namespace {
     
     const double COLLISION_SHAPE_RADIUS = 0;
     const double MIN_SURFACE_AREA = 2;
-    const ci::Color TERRAIN_COLOR(0.2, 0.2, 0.2);
-    const ci::Color ANCHOR_COLOR(1, 0, 1);
+    const Color TERRAIN_COLOR(0.2, 0.2, 0.2);
+    const Color ANCHOR_COLOR(1, 0, 1);
     
     namespace CollisionType {
         
@@ -142,14 +142,14 @@ void TerrainAttachmentsTestScenario::drawScreen(const render_state &state) {
     gl::drawString(info, vec2(10, 10), Color(1, 1, 1));
 }
 
-bool TerrainAttachmentsTestScenario::keyDown(const ci::app::KeyEvent &event) {
+bool TerrainAttachmentsTestScenario::keyDown(const app::KeyEvent &event) {
     if (event.getChar() == 'r') {
         reset();
         return true;
-    } else if (event.getCode() == ci::app::KeyEvent::KEY_SPACE) {
+    } else if (event.getCode() == app::KeyEvent::KEY_SPACE) {
         //testExplicitCut();
         return true;
-    } else if (event.getCode() == ci::app::KeyEvent::KEY_BACKQUOTE) {
+    } else if (event.getCode() == app::KeyEvent::KEY_BACKQUOTE) {
         setRenderMode(RenderMode::mode((int(getRenderMode()) + 1) % RenderMode::COUNT));
     }
     return false;

@@ -354,9 +354,9 @@ namespace core {
          */
         bool isMonitoredKeyDown(int keyCode) const;
 
-        bool keyDown(const ci::app::KeyEvent &event) override;
+        bool keyDown(const app::KeyEvent &event) override;
 
-        bool keyUp(const ci::app::KeyEvent &event) override;
+        bool keyUp(const app::KeyEvent &event) override;
 
     private:
 

@@ -62,7 +62,7 @@ namespace core {
             
             namespace {
                 
-                void dilate_area(const ci::Channel8u &src, ci::Channel8u &dst, Area area, int radius) {
+                void dilate_area(const Channel8u &src, Channel8u &dst, Area area, int radius) {
                     Channel8u::ConstIter srcIt = src.getIter(area);
                     Channel8u::Iter dstIt = dst.getIter(area);
                     const int endX = src.getWidth() - 1;
@@ -90,7 +90,7 @@ namespace core {
 
             }
 
-            void dilate(const ci::Channel8u &src, ci::Channel8u &dst, int radius) {
+            void dilate(const Channel8u &src, Channel8u &dst, int radius) {
 
                 if (dst.getSize() != src.getSize()) {
                     dst = Channel8u(src.getWidth(), src.getHeight());
@@ -164,7 +164,7 @@ namespace core {
                 }
             }
 
-            void floodfill(const ci::Channel8u &src, ci::Channel8u &dst, ivec2 start, uint8_t targetValue, uint8_t newValue, bool copy) {
+            void floodfill(const Channel8u &src, Channel8u &dst, ivec2 start, uint8_t targetValue, uint8_t newValue, bool copy) {
                 // https://en.wikipedia.org/wiki/Flood_fill
 
                 if (dst.getSize() != src.getSize()) {
@@ -263,7 +263,7 @@ namespace core {
             
             namespace {
                 
-                void blur_horizontal(const ci::Channel8u &src, ci::Channel8u &horizontalPass, Area area, const kernel &krnl) {
+                void blur_horizontal(const Channel8u &src, Channel8u &horizontalPass, Area area, const kernel &krnl) {
                     Channel8u::ConstIter srcIt = src.getIter(area);
                     Channel8u::Iter dstIt = horizontalPass.getIter(area);
                     const kernel::const_iterator kend = krnl.end();
@@ -282,7 +282,7 @@ namespace core {
                     }
                 }
                 
-                void blur_vertical(const ci::Channel8u &horizontalPass, ci::Channel8u &dst, Area area, const kernel &krnl) {
+                void blur_vertical(const Channel8u &horizontalPass, Channel8u &dst, Area area, const kernel &krnl) {
                     Channel8u::ConstIter srcIt = horizontalPass.getIter(area);
                     Channel8u::Iter dstIt = dst.getIter(area);
                     const kernel::const_iterator kend = krnl.end();
@@ -308,7 +308,7 @@ namespace core {
                 
             }
             
-            void blur(const ci::Channel8u &src, ci::Channel8u &dst, int radius) {
+            void blur(const Channel8u &src, Channel8u &dst, int radius) {
                 //
                 //    Create the kernel and the buffers
                 //
@@ -316,7 +316,7 @@ namespace core {
                 kernel krnl;
                 create_kernel(radius, krnl);
                 
-                ci::Channel8u horizontalPass(src.getWidth(), src.getHeight());
+                Channel8u horizontalPass(src.getWidth(), src.getHeight());
                 if (dst.getSize() != src.getSize()) {
                     dst = Channel8u(src.getWidth(), src.getHeight());
                 }
@@ -348,7 +348,7 @@ namespace core {
             
             namespace {
 
-                void threshold_area(const ci::Channel8u &src, ci::Channel8u &dst, Area area, uint8_t threshV, uint8_t maxV, uint8_t minV) {
+                void threshold_area(const Channel8u &src, Channel8u &dst, Area area, uint8_t threshV, uint8_t maxV, uint8_t minV) {
                     Channel8u::ConstIter srcIt = src.getIter(area);
                     Channel8u::Iter dstIt = dst.getIter(area);
                     
@@ -362,7 +362,7 @@ namespace core {
 
             }
 
-            void threshold(const ci::Channel8u &src, ci::Channel8u &dst, uint8_t threshV, uint8_t maxV, uint8_t minV) {
+            void threshold(const Channel8u &src, Channel8u &dst, uint8_t threshV, uint8_t maxV, uint8_t minV) {
 
                 if (dst.getSize() != src.getSize()) {
                     dst = Channel8u(src.getWidth(), src.getHeight());
@@ -385,7 +385,7 @@ namespace core {
             }
             
             namespace {
-                void vignette_area(const ci::Channel8u &src, ci::Channel8u &dst, Area area, double innerRadius, double outerRadius, uint8_t vignetteColor) {
+                void vignette_area(const Channel8u &src, Channel8u &dst, Area area, double innerRadius, double outerRadius, uint8_t vignetteColor) {
                     const int size = min(src.getWidth(), src.getHeight());
                     const vec2 center(size/2, size/2);
                     const float outerVignetteRadius = size * 0.5f * outerRadius;
@@ -409,7 +409,7 @@ namespace core {
                 }
             }
             
-            void vignette(const ci::Channel8u &src, ci::Channel8u &dst, double innerRadius, double outerRadius, uint8_t vignetteColor) {
+            void vignette(const Channel8u &src, Channel8u &dst, double innerRadius, double outerRadius, uint8_t vignetteColor) {
                 if (dst.getSize() != src.getSize()) {
                     dst = Channel8u(src.getWidth(), src.getHeight());
                 }
@@ -432,7 +432,7 @@ namespace core {
             
             namespace in_place {
                 
-                void fill(ci::Channel8u &channel, uint8_t value) {
+                void fill(Channel8u &channel, uint8_t value) {
                     Channel8u::Iter it = channel.getIter();
                     
                     while(it.line()) {
@@ -442,7 +442,7 @@ namespace core {
                     }
                 }
                 
-                void fill(ci::Channel8u &channel, ci::Area rect, uint8_t value) {
+                void fill(Channel8u &channel, Area rect, uint8_t value) {
                     Channel8u::Iter it = channel.getIter(rect);
                     
                     while(it.line()) {
@@ -453,7 +453,7 @@ namespace core {
                 }
                 
                 namespace {
-                    void perlin_area(ci::Channel8u &channel, Area area, ci::Perlin &noise, double frequency) {
+                    void perlin_area(Channel8u &channel, Area area, Perlin &noise, double frequency) {
                         Channel8u::Iter iter = channel.getIter(area);
                         
                         while (iter.line()) {
@@ -465,7 +465,7 @@ namespace core {
                     }
                 }
                 
-                void perlin(ci::Channel8u &channel, ci::Perlin &noise, double frequency) {
+                void perlin(Channel8u &channel, Perlin &noise, double frequency) {
                     const size_t threadCount = get_num_threads();
                     if (threadCount > 1) {
                         vector<std::thread> threads;
@@ -482,7 +482,7 @@ namespace core {
                 }
                 
                 namespace {
-                    void perlin_add_area(ci::Channel8u &channel, Area area, ci::Perlin &noise, double frequency, double scale) {
+                    void perlin_add_area(Channel8u &channel, Area area, Perlin &noise, double frequency, double scale) {
                         Channel8u::Iter iter = channel.getIter(area);
                         
                         const float r255 = 1.0f / 255.0f;
@@ -498,7 +498,7 @@ namespace core {
                     }
                 }
                 
-                void perlin_add(ci::Channel8u &channel, ci::Perlin &noise, double frequency, double scale) {
+                void perlin_add(Channel8u &channel, Perlin &noise, double frequency, double scale) {
                     const size_t threadCount = get_num_threads();
                     if (threadCount > 1) {
                         vector<std::thread> threads;
@@ -516,7 +516,7 @@ namespace core {
 
                 
                 namespace {
-                    void perlin_abs_thresh_area(ci::Channel8u &channel, Area area, ci::Perlin &noise, double frequency, uint8_t threshold) {
+                    void perlin_abs_thresh_area(Channel8u &channel, Area area, Perlin &noise, double frequency, uint8_t threshold) {
                         Channel8u::Iter iter = channel.getIter(area);
                         
                         while (iter.line()) {
@@ -530,7 +530,7 @@ namespace core {
                     }
                 }
                 
-                void perlin_abs_thresh(ci::Channel8u &channel, ci::Perlin &noise, double frequency, uint8_t threshold) {
+                void perlin_abs_thresh(Channel8u &channel, Perlin &noise, double frequency, uint8_t threshold) {
                     const size_t threadCount = get_num_threads();
                     if (threadCount > 1) {
                         vector<std::thread> threads;

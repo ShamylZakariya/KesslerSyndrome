@@ -132,7 +132,7 @@ namespace elements {
             cpShapeFilter filter;
             cpCollisionType collisionType;
             double minSurfaceArea;
-            ci::Color color;
+            Color color;
             
             material() :
             density(1),
@@ -144,7 +144,7 @@ namespace elements {
             color(0.2, 0.2, 0.2) {
             }
             
-            material(cpFloat d, cpFloat f, cpFloat csr, cpShapeFilter flt, cpCollisionType ct, double msa, ci::Color c) :
+            material(cpFloat d, cpFloat f, cpFloat csr, cpShapeFilter flt, cpCollisionType ct, double msa, Color c) :
             density(d),
             friction(f),
             collisionShapeRadius(csr),
@@ -194,7 +194,7 @@ namespace elements {
             
             void cull(const core::render_state &);
             
-            void draw(const core::render_state &, const ci::gl::GlslProgRef &shader);
+            void draw(const core::render_state &, const gl::GlslProgRef &shader);
             
             void setDrawPasses(size_t passes) {
                 _drawPasses = passes;
@@ -222,7 +222,7 @@ namespace elements {
              render a run of shapes belonging to a common group
              returns iterator to last shape drawn
              */
-            vector<DrawableRef>::iterator _drawGroupRun(vector<DrawableRef>::iterator first, vector<DrawableRef>::iterator storageEnd, const core::render_state &state, const ci::gl::GlslProgRef &shader);
+            vector<DrawableRef>::iterator _drawGroupRun(vector<DrawableRef>::iterator first, vector<DrawableRef>::iterator storageEnd, const core::render_state &state, const gl::GlslProgRef &shader);
             
         private:
             
@@ -244,13 +244,13 @@ namespace elements {
         class World : public enable_shared_from_this<World> {
         public:
             
-            static void loadSvg(ci::DataSourceRef svgData, dmat4 transform,
+            static void loadSvg(DataSourceRef svgData, dmat4 transform,
                                 vector <ShapeRef> &shapes, vector <AnchorRef> &anchors, vector <ElementRef> &elements,
                                 bool flip = true);
             
-            static void march(const ci::Channel8u isoSurface, double isoLevel, dmat4 transform, vector <ShapeRef> &shapes);
+            static void march(const Channel8u isoSurface, double isoLevel, dmat4 transform, vector <ShapeRef> &shapes);
             
-            static void march(const ci::Channel8u isoSurface, const ci::Channel8u anchorIsoSurface, double isoLevel, dmat4 transform, vector <ShapeRef> &shapes, vector <AnchorRef> &anchors);
+            static void march(const Channel8u isoSurface, const Channel8u anchorIsoSurface, double isoLevel, dmat4 transform, vector <ShapeRef> &shapes, vector <AnchorRef> &anchors);
             
             /**
              Partitions shapes in `shapes to a grid, with chunks of size paritionSize.
@@ -426,7 +426,7 @@ namespace elements {
             map <string, ElementRef> _elementsById;
             
             DrawDispatcher _drawDispatcher;
-            ci::gl::GlslProgRef _shader;
+            gl::GlslProgRef _shader;
             
             core::ObjectWeakRef _object;
             
@@ -914,7 +914,7 @@ namespace elements {
             cpBB _bb;
             string _id;
             TriMeshRef _trimesh;
-            ci::gl::VboMeshRef _vboMesh;
+            gl::VboMeshRef _vboMesh;
             
         };
         
@@ -1014,7 +1014,7 @@ namespace elements {
             PolyLine2d _contour;
             
             TriMeshRef _trimesh;
-            ci::gl::VboMeshRef _vboMesh;
+            gl::VboMeshRef _vboMesh;
             
         };
         
@@ -1173,7 +1173,7 @@ namespace elements {
             cpBB _worldSpaceContourEdgesBB;
             
             TriMeshRef _trimesh;
-            ci::gl::VboMeshRef _vboMesh;
+            gl::VboMeshRef _vboMesh;
             
             // the attachments which are anchored by being in this shape's geometry
             set <AttachmentRef> _attachments;

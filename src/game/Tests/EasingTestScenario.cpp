@@ -164,7 +164,7 @@ void EasingTestScenario::drawScreen(const render_state &state) {
     Scenario::drawScreen(state);
 }
 
-bool EasingTestScenario::keyDown(const ci::app::KeyEvent &event) {
+bool EasingTestScenario::keyDown(const app::KeyEvent &event) {
     
     switch(event.getChar()) {
         case 'r':

@@ -71,7 +71,7 @@ namespace game {
     GameStage::~GameStage() {
     }
 
-    void GameStage::load(ci::DataSourceRef stageXmlData) {
+    void GameStage::load(DataSourceRef stageXmlData) {
         auto root = XmlTree(stageXmlData);
         auto prefabsNode = root.getChild("prefabs");
         auto stageNode = root.getChild("stage");
@@ -179,7 +179,7 @@ namespace game {
             // When user hits command-mouse-down explode a bomb
             //
             
-            addObject(Object::with("Mouse", MouseDelegateComponent::create(0)->onPress([this](dvec2 screen, dvec2 world, const ci::app::MouseEvent &event) {
+            addObject(Object::with("Mouse", MouseDelegateComponent::create(0)->onPress([this](dvec2 screen, dvec2 world, const app::MouseEvent &event) {
                 if (event.isMetaDown()) {
                     performExplosion(world);
                     return true;
@@ -259,8 +259,8 @@ namespace game {
         density = max(density, minDensity);
 
         const double minSurfaceArea = 2;
-        const ci::Color terrainColor = util::xml::readColorAttribute(planetNode, "color", Color(1, 0, 1));
-        const ci::Color coreColor = util::xml::readColorAttribute(planetNode, "coreColor", Color(0, 1, 1));
+        const Color terrainColor = util::xml::readColorAttribute(planetNode, "color", Color(1, 0, 1));
+        const Color coreColor = util::xml::readColorAttribute(planetNode, "coreColor", Color(0, 1, 1));
 
 
         const terrain::material terrainMaterial(density, friction, collisionShapeRadius, ShapeFilters::TERRAIN, CollisionType::TERRAIN, minSurfaceArea, terrainColor);
@@ -329,7 +329,7 @@ namespace game {
         fire.mass = {0};
         fire.initialVelocity = 60;
         fire.gravitationLayerMask = GravitationLayers::GLOBAL;
-        fire.color = ci::ColorA(1, 0.8, 0.1, 1);
+        fire.color = ColorA(1, 0.8, 0.1, 1);
 
         particle_prototype smoke;
         smoke.atlasIdx = 0;
@@ -340,7 +340,7 @@ namespace game {
         smoke.mass = {0};
         smoke.initialVelocity = 60;
         smoke.gravitationLayerMask = GravitationLayers::GLOBAL;
-        smoke.color = ci::ColorA(0.9, 0.9, 0.9, 1);
+        smoke.color = ColorA(0.9, 0.9, 0.9, 1);
 
         particle_prototype spark;
         spark.atlasIdx = 1;
@@ -352,7 +352,7 @@ namespace game {
         spark.orientToVelocity = true;
         spark.initialVelocity = 200;
         spark.minVelocity = 60;
-        spark.color = {ci::ColorA(1, 0.5, 0.5, 1), ci::ColorA(0.5, 0.5, 0.5, 0)};
+        spark.color = {ColorA(1, 0.5, 0.5, 1), ColorA(0.5, 0.5, 0.5, 0)};
         fire.gravitationLayerMask = GravitationLayers::GLOBAL;
         spark.kinematics = particle_prototype::kinematics_prototype(1, 1, 0.2, ShapeFilters::TERRAIN);
 
@@ -392,7 +392,7 @@ namespace game {
         dust.mass = {0};
         dust.initialVelocity = 0;
         dust.gravitationLayerMask = GravitationLayers::GLOBAL;
-        dust.color = { ci::ColorA(0.9, 0.9, 0.9, 1) };
+        dust.color = { ColorA(0.9, 0.9, 0.9, 1) };
         
         auto source = ParticleEmitter::Source(10, 1, 0.5);
         

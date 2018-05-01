@@ -12,8 +12,8 @@
 namespace core {
     namespace util {
         
-        ci::gl::GlslProgRef loadGlsl(const ci::DataSourceRef &glslDataSource) {
-            ci::BufferRef buffer = glslDataSource->getBuffer();
+        gl::GlslProgRef loadGlsl(const DataSourceRef &glslDataSource) {
+            BufferRef buffer = glslDataSource->getBuffer();
             std::string bufferStr(static_cast<char*>(buffer->getData()),buffer->getSize());
             vector<std::string> bufferLines = strings::split(bufferStr, "\n");
             
@@ -43,8 +43,8 @@ namespace core {
         }
 
         
-        ci::gl::GlslProgRef loadGlslAsset(const std::string &assetName) {
-            ci::DataSourceRef asset = app::loadAsset(assetName);
+        gl::GlslProgRef loadGlslAsset(const std::string &assetName) {
+            DataSourceRef asset = app::loadAsset(assetName);
             return loadGlsl(asset);
         }
         

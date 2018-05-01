@@ -50,7 +50,7 @@ namespace {
         
     private:
         
-        ci::gl::Texture2dRef _image;
+        gl::Texture2dRef _image;
         dvec2 _topLeft;
         
     };
@@ -233,7 +233,7 @@ void MultiViewportTestScenario::setup()
         KeyboardDelegateComponent::create(0,{ cinder::app::KeyEvent::KEY_r })->onPress([&](int keyCode){
             this->reset();
         }),
-        MouseDelegateComponent::create(0)->onWheel([&](dvec2 screen, dvec2 world, double deltaWheel, const ci::app::MouseEvent &event)->bool{
+        MouseDelegateComponent::create(0)->onWheel([&](dvec2 screen, dvec2 world, double deltaWheel, const app::MouseEvent &event)->bool{
             this->_scale += deltaWheel * 0.1;
             return true;
         })

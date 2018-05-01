@@ -260,15 +260,15 @@ namespace core {
 
 
         /**
-         create a ci::Channel with the contents of a PerlinNoise instance
+         create a Channel with the contents of a PerlinNoise instance
          @a pn The PerlinNoise instance
          @a size The size of the Channel to create and fill
          @a offset An offset to add to each lookup
          @a normalized If true values will be in [-1,+1] range, otherwise they'll be in [0,1] range
          */
-        ci::Channel32f fill(PerlinNoise &pn, const ivec2 &size, const ivec2 &offset = ivec2(0, 0), bool normalized = false);
+        Channel32f fill(PerlinNoise &pn, const ivec2 &size, const ivec2 &offset = ivec2(0, 0), bool normalized = false);
 
-        void fill(ci::Channel32f &channel, PerlinNoise &pn, const ivec2 &offset = ivec2(0, 0), bool normalized = false);
+        void fill(Channel32f &channel, PerlinNoise &pn, const ivec2 &offset = ivec2(0, 0), bool normalized = false);
 
         void fill(std::vector<double> &data, PerlinNoise &pn, const int offset = 0, bool normalized = false);
 

@@ -134,14 +134,14 @@ namespace core {
 
 #pragma mark -
 
-        ci::Channel32f fill(PerlinNoise &pn, const ivec2 &size, const ivec2 &offset, bool normalized) {
-            ci::Channel32f channel(size.x, size.y);
+        Channel32f fill(PerlinNoise &pn, const ivec2 &size, const ivec2 &offset, bool normalized) {
+            Channel32f channel(size.x, size.y);
             fill(channel, pn, offset, normalized);
             return channel;
         }
 
-        void fill(ci::Channel32f &channel, PerlinNoise &pn, const ivec2 &offset, bool normalized) {
-            ci::Channel32f::Iter iterator = channel.getIter();
+        void fill(Channel32f &channel, PerlinNoise &pn, const ivec2 &offset, bool normalized) {
+            Channel32f::Iter iterator = channel.getIter();
 
             const double
                     width = channel.getWidth(),

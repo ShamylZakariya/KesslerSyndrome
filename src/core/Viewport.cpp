@@ -52,7 +52,7 @@ namespace core {
             // create new fbo
             //
 
-            _fbo = ci::gl::Fbo::create(_width, _height, getFboFormat());
+            _fbo = gl::Fbo::create(_width, _height, getFboFormat());
             
             //
             // update & notify
@@ -147,7 +147,7 @@ namespace core {
             // create new fbo
             //
             
-            _fbo = ci::gl::Fbo::create(_width, _height, getFboFormat());
+            _fbo = gl::Fbo::create(_width, _height, getFboFormat());
         }
     }
 }

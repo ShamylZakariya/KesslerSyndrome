@@ -23,13 +23,13 @@ namespace core {
 
     SMART_PTR(PhysicsLoop);
 
-    class App : public ci::app::App {
+    class App : public cinder::app::App {
     public:
 
         static void prepareSettings(Settings *settings);
 
         static App *get() {
-            return static_cast<App *>(ci::app::App::get());
+            return static_cast<App *>(cinder::app::App::get());
         }
 
     public:

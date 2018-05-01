@@ -54,10 +54,10 @@ public:
     // command+shift+[left or right bracket] to switch through test scenarios
     //
 
-    void keyDown( ci::app::KeyEvent event ) override {
+    void keyDown( app::KeyEvent event ) override {
         if (event.isShiftDown() && event.isMetaDown()) {
             switch(event.getCode()) {
-                case ci::app::KeyEvent::KEY_LEFTBRACKET:
+                case app::KeyEvent::KEY_LEFTBRACKET:
                     if (_index > 0) {
                         _index--;
                     } else {
@@ -66,7 +66,7 @@ public:
                     loadScenario();
                     break;
                     
-                case ci::app::KeyEvent::KEY_RIGHTBRACKET:
+                case app::KeyEvent::KEY_RIGHTBRACKET:
                     _index = (_index+1) % _scenarioFactories.size();
                     loadScenario();
                     break;
@@ -87,4 +87,4 @@ private:
 
 };
 
-CINDER_APP(TestsApp, ci::app::RendererGl, TestsApp::prepareSettings)
+CINDER_APP(TestsApp, app::RendererGl, TestsApp::prepareSettings)

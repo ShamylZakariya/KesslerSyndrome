@@ -138,7 +138,7 @@ namespace elements {
             std::sort(_collector.sorted.begin(), _collector.sorted.end(), visibleDrawableDisplaySorter);
         }
         
-        void DrawDispatcher::draw(const render_state &state, const ci::gl::GlslProgRef &shader) {
+        void DrawDispatcher::draw(const render_state &state, const gl::GlslProgRef &shader) {
             render_state renderState = state;
             const size_t drawPasses = _drawPasses;
             gl::ScopedGlslProg sglp(shader);
@@ -154,7 +154,7 @@ namespace elements {
         }
         
         vector<DrawableRef>::iterator
-        DrawDispatcher::_drawGroupRun(vector<DrawableRef>::iterator firstInRun, vector<DrawableRef>::iterator storageEnd, const render_state &state, const ci::gl::GlslProgRef &shader) {
+        DrawDispatcher::_drawGroupRun(vector<DrawableRef>::iterator firstInRun, vector<DrawableRef>::iterator storageEnd, const render_state &state, const gl::GlslProgRef &shader) {
             
             vector<DrawableRef>::iterator it = firstInRun;
             DrawableRef drawable = *it;
@@ -188,7 +188,7 @@ namespace elements {
         
         size_t World::_idCounter = 0;
         
-        void World::loadSvg(ci::DataSourceRef svgData, dmat4 transform, vector <ShapeRef> &shapes, vector <AnchorRef> &anchors, vector <ElementRef> &elements, bool flip) {
+        void World::loadSvg(DataSourceRef svgData, dmat4 transform, vector <ShapeRef> &shapes, vector <AnchorRef> &anchors, vector <ElementRef> &elements, bool flip) {
             shapes.clear();
             anchors.clear();
             elements.clear();
@@ -203,11 +203,11 @@ namespace elements {
             detail::svg_load(svgNode, transform, shapes, anchors, elements);
         }
         
-        void World::march(const ci::Channel8u isoSurface, double isoLevel, dmat4 transform, vector <ShapeRef> &shapes) {
+        void World::march(const Channel8u isoSurface, double isoLevel, dmat4 transform, vector <ShapeRef> &shapes) {
             shapes = Shape::fromContours(detail::march(isoSurface, isoLevel, transform, 0.01));
         }
         
-        void World::march(const ci::Channel8u isoSurface, const ci::Channel8u anchorIsoSurface, double isoLevel, dmat4 transform, vector <ShapeRef> &shapes, vector <AnchorRef> &anchors) {
+        void World::march(const Channel8u isoSurface, const Channel8u anchorIsoSurface, double isoLevel, dmat4 transform, vector <ShapeRef> &shapes, vector <AnchorRef> &anchors) {
             shapes = Shape::fromContours(detail::march(isoSurface, isoLevel, transform, 0.01));
             anchors = Anchor::fromContours(detail::march(anchorIsoSurface, isoLevel, transform, 0.01));
         }
@@ -273,7 +273,7 @@ namespace elements {
          map <string, ElementRef> _elementsById;
          
          DrawDispatcher _drawDispatcher;
-         ci::gl::GlslProgRef _shader;
+         gl::GlslProgRef _shader;
          
          core::ObjectWeakRef _object;
          
@@ -1647,7 +1647,7 @@ namespace elements {
          cpBB _bb;
          string _id;
          TriMeshRef _trimesh;
-         ci::gl::VboMeshRef _vboMesh;
+         gl::VboMeshRef _vboMesh;
          */
         Element::Element(string id, const PolyLine2d &contour) :
         _bb(cpBBInvalid),
@@ -1703,7 +1703,7 @@ namespace elements {
          PolyLine2d _contour;
          
          TriMeshRef _trimesh;
-         ci::gl::VboMeshRef _vboMesh;
+         gl::VboMeshRef _vboMesh;
          */
         
         Anchor::Anchor(const PolyLine2d &contour) :
@@ -1845,7 +1845,7 @@ namespace elements {
          cpBB _worldSpaceContourEdgesBB;
          
          TriMeshRef _trimesh;
-         ci::gl::VboMeshRef _vboMesh;
+         gl::VboMeshRef _vboMesh;
          */
         
         

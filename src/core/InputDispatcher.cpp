@@ -16,7 +16,7 @@ namespace core {
             // cinder dispatches mouse events for a top-left system
             if (origin == ScreenCoordinateSystem::TopLeft) return e;
             
-            using namespace ci::app;
+            using namespace app;
             
             //
             //	MouseEvent is read only, so we have to reconstruct :(
@@ -42,7 +42,7 @@ namespace core {
             return ci::app::MouseEvent(e.getWindow(),
                                        initiator,
                                        e.getX(),
-                                       ci::app::getWindowHeight() - e.getY(),
+                                       app::getWindowHeight() - e.getY(),
                                        modifiers,
                                        e.getWheelIncrement(),
                                        e.getNativeModifiers()
@@ -63,8 +63,8 @@ namespace core {
      
      std::vector< InputListener* > _listeners;
      std::map< int, bool > _keyPressState;
-     ci::ci::app::MouseEvent _lastMouseEvent;
-     ci::ci::app::KeyEvent _lastKeyEvent;
+     ci::app::MouseEvent _lastMouseEvent;
+     ci::app::KeyEvent _lastKeyEvent;
      ivec2 *_lastMousePosition;
      cinder::signals::Connection _mouseDownId, _mouseUpId, _mouseWheelId, _mouseMoveId, _mouseDragId, _keyDownId, _keyUpId;
      bool _mouseHidden, _mouseLeftDown, _mouseMiddleDown, _mouseRightDown;
@@ -73,7 +73,7 @@ namespace core {
     InputDispatcherRef InputDispatcher::_sInstance;
     ScreenCoordinateSystem::origin InputDispatcher::_screenOrigin = ScreenCoordinateSystem::BottomLeft;
     
-    InputDispatcher::InputDispatcher(ci::app::WindowRef window) :
+    InputDispatcher::InputDispatcher(app::WindowRef window) :
     _lastMousePosition(NULL),
     _lastKeyEvent(),
     _mouseHidden(false),
@@ -120,12 +120,12 @@ namespace core {
     }
     
     void InputDispatcher::hideMouse() {
-        ci::app::AppBase::get()->hideCursor();
+        app::AppBase::get()->hideCursor();
         _mouseHidden = true;
     }
     
     void InputDispatcher::unhideMouse() {
-        ci::app::AppBase::get()->showCursor();
+        app::AppBase::get()->showCursor();
         _mouseHidden = false;
     }
     

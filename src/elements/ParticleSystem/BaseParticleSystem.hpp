@@ -81,7 +81,7 @@ namespace elements {
         dvec2 position;            // base position in world coordinates
         dvec2 right;                // x-axis scaled to half horizontal particle size
         dvec2 up;                    // y-axis scaled to half vertical particle size
-        ci::ColorA color;                // color of particle
+        ColorA color;                // color of particle
         double additivity;            // from 0 to 1 where 0 is transparency blending, and 1 is additive blending
         size_t atlasIdx;            // index into the texture atlas
 

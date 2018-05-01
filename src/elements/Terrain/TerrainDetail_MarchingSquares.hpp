@@ -21,7 +21,7 @@ namespace elements {
             class Channel8uVoxelStoreAdapter {
             public:
                 
-                Channel8uVoxelStoreAdapter(const ci::Channel8u &s) :
+                Channel8uVoxelStoreAdapter(const Channel8u &s) :
                 _store(s),
                 _min(0, 0),
                 _max(s.getWidth() - 1, s.getHeight() - 1) {
@@ -48,7 +48,7 @@ namespace elements {
                 
             private:
                 
-                ci::Channel8u _store;
+                Channel8u _store;
                 ivec2 _min, _max;
                 uint8_t *_data;
                 int32_t _rowBytes, _pixelIncrement;
@@ -110,7 +110,7 @@ namespace elements {
                  will be in the opposite winding.
                  */
                 
-                size_t generate(std::vector<ci::PolyLine2d> &perimeters, dmat4 transform) {
+                size_t generate(std::vector<PolyLine2d> &perimeters, dmat4 transform) {
                     perimeters.clear();
                     
                     while (!_edgesByFirstVertex.empty()) {

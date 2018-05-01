@@ -44,29 +44,29 @@ namespace elements {
         }
         
         // set color of background fill
-        void setFillColor(ci::ColorA fillColor) {
+        void setFillColor(ColorA fillColor) {
             _fillColor = fillColor;
         }
         
-        ci::ColorA getFillColor() const {
+        ColorA getFillColor() const {
             return _fillColor;
         }
         
         // set the color of the grid
-        void setGridColor(ci::ColorA color) {
+        void setGridColor(ColorA color) {
             _gridColor = color;
         }
         
-        ci::ColorA getGridColor() const {
+        ColorA getGridColor() const {
             return _gridColor;
         }
         
         // set the color of the grid, where it overlaps with x==0 || y== 0
-        void setAxisColor(ci::ColorA axisColor) {
+        void setAxisColor(ColorA axisColor) {
             _axisColor = axisColor;
         }
         
-        ci::ColorA getAxisColor() const {
+        ColorA getAxisColor() const {
             return _axisColor;
         }
         
@@ -92,7 +92,7 @@ namespace elements {
         double _axisIntensity;
         gl::GlslProgRef _shader;
         gl::BatchRef _batch;
-        ci::ColorA _fillColor, _gridColor, _axisColor;
+        ColorA _fillColor, _gridColor, _axisColor;
         
     };
     
@@ -106,15 +106,15 @@ namespace elements {
         // InputComponent
         void step(const core::time_state &time) override;
         
-        bool mouseDown(const ci::app::MouseEvent &event) override;
+        bool mouseDown(const app::MouseEvent &event) override;
         
-        bool mouseUp(const ci::app::MouseEvent &event) override;
+        bool mouseUp(const app::MouseEvent &event) override;
         
-        bool mouseMove(const ci::app::MouseEvent &event, const ivec2 &delta) override;
+        bool mouseMove(const app::MouseEvent &event, const ivec2 &delta) override;
         
-        bool mouseDrag(const ci::app::MouseEvent &event, const ivec2 &delta) override;
+        bool mouseDrag(const app::MouseEvent &event, const ivec2 &delta) override;
         
-        bool mouseWheel(const ci::app::MouseEvent &event) override;
+        bool mouseWheel(const app::MouseEvent &event) override;
         
     private:
         
@@ -219,7 +219,7 @@ namespace elements {
         // InputComponent
         void step(const core::time_state &time) override;
         
-        bool mouseWheel(const ci::app::MouseEvent &event) override;
+        bool mouseWheel(const app::MouseEvent &event) override;
         
     protected:
         
@@ -249,13 +249,13 @@ namespace elements {
         
         void step(const core::time_state &time) override;
         
-        bool mouseDown(const ci::app::MouseEvent &event) override;
+        bool mouseDown(const app::MouseEvent &event) override;
         
-        bool mouseUp(const ci::app::MouseEvent &event) override;
+        bool mouseUp(const app::MouseEvent &event) override;
         
-        bool mouseMove(const ci::app::MouseEvent &event, const ivec2 &delta) override;
+        bool mouseMove(const app::MouseEvent &event, const ivec2 &delta) override;
         
-        bool mouseDrag(const ci::app::MouseEvent &event, const ivec2 &delta) override;
+        bool mouseDrag(const app::MouseEvent &event, const ivec2 &delta) override;
         
         bool isDragging() const {
             return _mouseJoint != nullptr;
@@ -339,11 +339,11 @@ namespace elements {
     class MouseDelegateComponent : public core::InputComponent {
     public:
         
-        typedef function<bool(dvec2 screen, dvec2 world, const ci::app::MouseEvent &event)> MousePressHandler;
-        typedef function<bool(dvec2 screen, dvec2 world, const ci::app::MouseEvent &event)> MouseReleaseHandler;
-        typedef function<bool(dvec2 screen, dvec2 world, ivec2 deltaScreen, dvec2 deltaWorld, const ci::app::MouseEvent &event)> MouseMoveHandler;
-        typedef function<bool(dvec2 screen, dvec2 world, ivec2 deltaScreen, dvec2 deltaWorld, const ci::app::MouseEvent &event)> MouseDragHandler;
-        typedef function<bool(dvec2 screen, dvec2 world, double deltaWheel, const ci::app::MouseEvent &event)> MouseWheelHandler;
+        typedef function<bool(dvec2 screen, dvec2 world, const app::MouseEvent &event)> MousePressHandler;
+        typedef function<bool(dvec2 screen, dvec2 world, const app::MouseEvent &event)> MouseReleaseHandler;
+        typedef function<bool(dvec2 screen, dvec2 world, ivec2 deltaScreen, dvec2 deltaWorld, const app::MouseEvent &event)> MouseMoveHandler;
+        typedef function<bool(dvec2 screen, dvec2 world, ivec2 deltaScreen, dvec2 deltaWorld, const app::MouseEvent &event)> MouseDragHandler;
+        typedef function<bool(dvec2 screen, dvec2 world, double deltaWheel, const app::MouseEvent &event)> MouseWheelHandler;
         
         static MouseDelegateComponentRef create(int dispatchReceiptIndex);
         
@@ -361,15 +361,15 @@ namespace elements {
         
         MouseDelegateComponentRef onWheel(MouseWheelHandler);
         
-        bool mouseDown(const ci::app::MouseEvent &event) override;
+        bool mouseDown(const app::MouseEvent &event) override;
         
-        bool mouseUp(const ci::app::MouseEvent &event) override;
+        bool mouseUp(const app::MouseEvent &event) override;
         
-        bool mouseMove(const ci::app::MouseEvent &event, const ivec2 &delta) override;
+        bool mouseMove(const app::MouseEvent &event, const ivec2 &delta) override;
         
-        bool mouseDrag(const ci::app::MouseEvent &event, const ivec2 &delta) override;
+        bool mouseDrag(const app::MouseEvent &event, const ivec2 &delta) override;
         
-        bool mouseWheel(const ci::app::MouseEvent &event) override;
+        bool mouseWheel(const app::MouseEvent &event) override;
         
         
     private:

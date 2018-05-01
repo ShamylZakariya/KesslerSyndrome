@@ -198,21 +198,21 @@ namespace game { namespace planet_generation {
          and populate terrain::Shape vector with the marched/triangulated geometry.
          return terrain map
          */
-        ci::Channel8u generate_shapes(const params &p, vector <elements::terrain::ShapeRef> &shapes);
+        Channel8u generate_shapes(const params &p, vector <elements::terrain::ShapeRef> &shapes);
 
         /**
          Generate just anchors and anchor map from given generation parameters,
          and populate terrain::Shape vector with the marched/triangulated geometry.
          return terrain map
          */
-        ci::Channel8u generate_anchors(const params &p, vector <elements::terrain::AnchorRef> &anchors);
+        Channel8u generate_anchors(const params &p, vector <elements::terrain::AnchorRef> &anchors);
 
     }
     
     struct result {
         elements::terrain::WorldRef world;
-        ci::Channel8u terrainMap;
-        ci::Channel8u anchorMap;
+        Channel8u terrainMap;
+        Channel8u anchorMap;
         map<size_t,vector<elements::terrain::AttachmentRef>> attachmentsByBatchId;
     };
 

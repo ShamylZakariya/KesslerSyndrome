@@ -17,7 +17,7 @@ namespace elements {
      
      trauma_config _traumaConfig;
      double _traumaLevel, _traumaBaselineLevel;
-     vector<ci::Perlin> _traumaPerlinNoiseGenerators;
+     vector<Perlin> _traumaPerlinNoiseGenerators;
      */
     
     ViewportController::ViewportController(ViewportRef viewport) :
@@ -108,7 +108,7 @@ namespace elements {
     void ViewportController::_setup() {
         // uniquely-seeded perlin noise for shake x, shake y, and shake rotation
         for (int i = 0; i < 3; i++) {
-            _traumaPerlinNoiseGenerators.emplace_back(ci::Perlin(4,i));
+            _traumaPerlinNoiseGenerators.emplace_back(Perlin(4,i));
         }
     }
     

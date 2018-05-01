@@ -59,7 +59,7 @@ typedef vec3_comparator_<int, glm::highp> vec3iComparator;
 typedef vec3_comparator_<float, glm::highp> vec3Comparator;
 typedef vec3_comparator_<double, glm::highp> dvec3Comparator;
 
-typedef std::set<vec3i, vec3iComparator> vec3iSet;
+typedef std::set<ci::ivec3, vec3iComparator> vec3iSet;
 typedef std::set<ci::vec3, vec3Comparator> vec3Set;
 typedef std::set<ci::dvec3, dvec3Comparator> dvec3Set;
 

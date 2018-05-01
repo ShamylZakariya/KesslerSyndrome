@@ -23,7 +23,7 @@ namespace core {
                 }
 
                 template<typename TRANSFORMER>
-                cpBB transform(const ci::TriMeshRef &sourceMesh, ci::TriMeshRef &destMesh,
+                cpBB transform(const TriMeshRef &sourceMesh, TriMeshRef &destMesh,
                         const vector <Shape::stroke> &sourceStrokes, vector <Shape::stroke> &destStrokes,
                         const TRANSFORMER &transformer) {
                     //
@@ -128,7 +128,7 @@ namespace core {
             Appearance::~Appearance() {
             }
 
-            void Appearance::parse(const ci::XmlTree &node) {
+            void Appearance::parse(const XmlTree &node) {
 
                 //
                 //	Cache all attributes, in case we want to query them later
@@ -141,15 +141,15 @@ namespace core {
                 _style = util::svg::parseStyle(node);
             }
 
-            void Appearance::setFillColor(const ci::ColorA &color) {
+            void Appearance::setFillColor(const ColorA &color) {
                 _style.fillColor = color;
                 _style.fillOpacity = color.a;
                 _style.hasFillColor = true;
                 _style.hasFillOpacity = true;
             }
 
-            ci::ColorA Appearance::getFillColor() const {
-                return ci::ColorA(_getFillColor(), _getFillOpacity());
+            ColorA Appearance::getFillColor() const {
+                return ColorA(_getFillColor(), _getFillOpacity());
             }
 
             void Appearance::setFillAlpha(double a) {
@@ -161,15 +161,15 @@ namespace core {
                 return _getFillOpacity();
             }
 
-            void Appearance::setStrokeColor(const ci::ColorA &color) {
+            void Appearance::setStrokeColor(const ColorA &color) {
                 _style.strokeColor = color;
                 _style.strokeOpacity = color.a;
                 _style.hasStrokeColor = true;
                 _style.hasStrokeOpacity = true;
             }
 
-            ci::ColorA Appearance::getStrokeColor() const {
-                return ci::ColorA(_getStrokeColor(), _getStrokeOpacity());
+            ColorA Appearance::getStrokeColor() const {
+                return ColorA(_getStrokeColor(), _getStrokeOpacity());
             }
 
             void Appearance::setStrokeWidth(double w) {
@@ -197,12 +197,12 @@ namespace core {
                 return _blendMode;
             }
 
-            void Appearance::setFillRule(ci::Triangulator::Winding fr) {
+            void Appearance::setFillRule(Triangulator::Winding fr) {
                 _style.fillRule = fr;
                 _style.hasFillRule = true;
             }
 
-            ci::Triangulator::Winding Appearance::getFillRule() const {
+            Triangulator::Winding Appearance::getFillRule() const {
                 return _getFillRule();
             }
 
@@ -219,7 +219,7 @@ namespace core {
                 return "";
             }
 
-            ci::Color Appearance::_getFillColor() const {
+            Color Appearance::_getFillColor() const {
                 if (_style.hasFillColor) {
                     return _style.fillColor;
                 } else if (AppearanceRef p = _parentAppearance.lock()) {
@@ -237,7 +237,7 @@ namespace core {
                 return _style.fillOpacity; // default
             }
 
-            ci::Color Appearance::_getStrokeColor() const {
+            Color Appearance::_getStrokeColor() const {
                 if (_style.hasStrokeColor) {
                     return _style.strokeColor;
                 } else if (AppearanceRef p = _parentAppearance.lock()) {
@@ -264,7 +264,7 @@ namespace core {
                 return _style.strokeWidth; // default
             }
 
-            ci::Triangulator::Winding Appearance::_getFillRule() const {
+            Triangulator::Winding Appearance::_getFillRule() const {
                 if (_style.hasFillRule) {
                     return _style.fillRule;
                 } else if (AppearanceRef p = _parentAppearance.lock()) {
@@ -284,11 +284,11 @@ namespace core {
                 string _type, _id;
                 cpBB _localBB;
 
-                ci::TriMeshRef _svgMesh, _worldMesh, _localMesh;
-                ci::gl::VboMeshRef _localVboMesh;
+                TriMeshRef _svgMesh, _worldMesh, _localMesh;
+                gl::VboMeshRef _localVboMesh;
 
                 vector<stroke> _svgStrokes, _worldStrokes, _localStrokes;
-                ci::Rectd _worldBounds, _localBounds;	 */
+                Rectd _worldBounds, _localBounds;	 */
 
             Shape::Shape() :
                     _appearance(make_shared<Appearance>()),
@@ -299,7 +299,7 @@ namespace core {
             Shape::~Shape() {
             }
 
-            void Shape::parse(const ci::XmlTree &shapeNode) {
+            void Shape::parse(const XmlTree &shapeNode) {
                 _type = shapeNode.getTag();
 
                 if (shapeNode.hasAttribute("id")) {
@@ -358,7 +358,7 @@ namespace core {
                 }
 
                 //
-                //	parse svg shape into a ci::Shape2d, and then convert that to _svgMesh in document space.
+                //	parse svg shape into a Shape2d, and then convert that to _svgMesh in document space.
                 //	later, in Group::_normalize we'll project to world space, and then to local space.
                 //
 
@@ -367,7 +367,7 @@ namespace core {
                 _build(shape2d);
             }
 
-            void Shape::draw(const render_state &state, const GroupRef &owner, double opacity, const ci::gl::GlslProgRef &shader) {
+            void Shape::draw(const render_state &state, const GroupRef &owner, double opacity, const gl::GlslProgRef &shader) {
                 switch (state.mode) {
                     case RenderMode::GAME:
                         if (!isOrigin()) {
@@ -384,7 +384,7 @@ namespace core {
                 }
             }
 
-            void Shape::_build(const ci::Shape2d &shape) {
+            void Shape::_build(const Shape2d &shape) {
                 _svgMesh.reset();
                 _worldMesh.reset();
                 _localMesh.reset();
@@ -442,7 +442,7 @@ namespace core {
                 _svgStrokes.clear();
             }
 
-            void Shape::_drawDebug(const render_state &state, const GroupRef &owner, double opacity, const ci::TriMeshRef &mesh, vector <stroke> &strokes, const ci::gl::GlslProgRef &shader) {
+            void Shape::_drawDebug(const render_state &state, const GroupRef &owner, double opacity, const TriMeshRef &mesh, vector <stroke> &strokes, const gl::GlslProgRef &shader) {
                 if (isOrigin()) {
                     dmat4 worldTransform = owner->_worldTransform(dmat4(1));
 
@@ -471,13 +471,13 @@ namespace core {
                     const AppearanceRef appearance = getAppearance();
 
                     if (appearance->isFilled()) {
-                        ci::ColorA fc = appearance->getFillColor();
+                        ColorA fc = appearance->getFillColor();
                         shader->uniform("Color", ColorA(fc.r, fc.g, fc.b, fc.a * opacity));
                         gl::draw(*mesh);
                     }
 
                     if (appearance->isStroked()) {
-                        ci::ColorA sc = appearance->getStrokeColor();
+                        ColorA sc = appearance->getStrokeColor();
                         shader->uniform("Color", ColorA(sc.r, sc.g, sc.b, sc.a * opacity));
                         gl::lineWidth(1);
 
@@ -497,17 +497,17 @@ namespace core {
                 }
             }
 
-            void Shape::_drawGame(const render_state &state, const GroupRef &owner, double opacity, const ci::TriMeshRef &mesh, vector <stroke> &strokes, const ci::gl::GlslProgRef &shader) {
+            void Shape::_drawGame(const render_state &state, const GroupRef &owner, double opacity, const TriMeshRef &mesh, vector <stroke> &strokes, const gl::GlslProgRef &shader) {
                 gl::Context::getCurrent()->setDefaultShaderVars();
                 _drawFills(state, owner, opacity, mesh, shader);
                 _drawStrokes(state, owner, opacity, strokes, shader);
             }
 
-            void Shape::_drawStrokes(const render_state &state, const GroupRef &owner, double opacity, vector <stroke> &strokes, const ci::gl::GlslProgRef &shader) {
+            void Shape::_drawStrokes(const render_state &state, const GroupRef &owner, double opacity, vector <stroke> &strokes, const gl::GlslProgRef &shader) {
                 const AppearanceRef appearance = getAppearance();
                 if (appearance->isStroked()) {
 
-                    ci::ColorA sc = appearance->getStrokeColor();
+                    ColorA sc = appearance->getStrokeColor();
                     shader->uniform("Color", ColorA(sc.r, sc.g, sc.b, sc.a * opacity));
                     gl::lineWidth(1);
 
@@ -527,10 +527,10 @@ namespace core {
                 }
             }
 
-            void Shape::_drawFills(const render_state &state, const GroupRef &owner, double opacity, const ci::TriMeshRef &mesh, const ci::gl::GlslProgRef &shader) {
+            void Shape::_drawFills(const render_state &state, const GroupRef &owner, double opacity, const TriMeshRef &mesh, const gl::GlslProgRef &shader) {
                 const AppearanceRef appearance = getAppearance();
                 if (appearance->isFilled()) {
-                    ci::ColorA fc = appearance->getFillColor();
+                    ColorA fc = appearance->getFillColor();
                     shader->uniform("Color", ColorA(fc.r, fc.g, fc.b, fc.a * opacity));
 
                     if (!_localVboMesh) {
@@ -566,7 +566,7 @@ namespace core {
                 map< string, string > _attributes;
                 vector< drawable > _drawables;
 
-                ci::gl::GlslProgRef _shader;
+                gl::GlslProgRef _shader;
              */
 
             Group::Group() :
@@ -583,7 +583,7 @@ namespace core {
                 clear();
             }
 
-            void Group::load(ci::DataSourceRef svgData, double documentScale) {
+            void Group::load(DataSourceRef svgData, double documentScale) {
                 clear();
 
                 //
@@ -621,7 +621,7 @@ namespace core {
                 _drawables.clear();
             }
 
-            void Group::parse(const ci::XmlTree &svgGroupNode) {
+            void Group::parse(const XmlTree &svgGroupNode) {
                 clear();
                 _parseGroupAttributes(svgGroupNode);
                 _loadAppearances(svgGroupNode);
@@ -795,7 +795,7 @@ namespace core {
                 return inverseWorldTransform * p;
             }
 
-            void Group::_draw(const render_state &state, double parentOpacity, const ci::gl::GlslProgRef &shader) {
+            void Group::_draw(const render_state &state, double parentOpacity, const gl::GlslProgRef &shader) {
                 auto self = shared_from_this();
                 double opacity = _opacity * parentOpacity;
                 BlendMode lastBlendMode = getBlendMode();
@@ -830,7 +830,7 @@ namespace core {
                 }
             }
 
-            void Group::_parseGroupAttributes(const ci::XmlTree &groupNode) {
+            void Group::_parseGroupAttributes(const XmlTree &groupNode) {
                 if (groupNode.hasAttribute("id")) {
                     _id = groupNode.getAttribute("id").getValue();
                 }
@@ -853,7 +853,7 @@ namespace core {
                 }
             }
 
-            void Group::_loadGroupsAndShapes(const ci::XmlTree &fromNode) {
+            void Group::_loadGroupsAndShapes(const XmlTree &fromNode) {
                 auto self = shared_from_this();
                 for (auto childNode = fromNode.begin(); childNode != fromNode.end(); ++childNode) {
                     const std::string tag = childNode->getTag();
@@ -886,7 +886,7 @@ namespace core {
                 }
             }
 
-            void Group::_loadAppearances(const ci::XmlTree &fromNode) {
+            void Group::_loadAppearances(const XmlTree &fromNode) {
                 _appearance->parse(fromNode); // load style attrs from this node
 
                 // if we have a <use /> child node, load attrs from it

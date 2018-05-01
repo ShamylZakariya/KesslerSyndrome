@@ -26,9 +26,9 @@ namespace core {
 
             struct svg_style {
                 bool hasFillColor, hasStrokeColor, hasOpacity, hasFillOpacity, hasStrokeOpacity, hasStrokeWidth, hasFillRule;
-                ci::Color fillColor, strokeColor;
+                Color fillColor, strokeColor;
                 double opacity, fillOpacity, strokeOpacity, strokeWidth;
-                ci::Triangulator::Winding fillRule;
+                Triangulator::Winding fillRule;
 
                 svg_style() :
                         hasFillColor(false),
@@ -44,7 +44,7 @@ namespace core {
                         fillOpacity(1),
                         strokeOpacity(1),
                         strokeWidth(0),
-                        fillRule(ci::Triangulator::WINDING_NONZERO) {
+                        fillRule(Triangulator::WINDING_NONZERO) {
                 }
 
                 bool isFilled() const {
@@ -66,14 +66,14 @@ namespace core {
 
             double parseNumericAttribute(const std::string &numericAttributeValue);
 
-            ci::Rectd parseViewBoxAttribute(const string &viewportValue);
+            Rectd parseViewBoxAttribute(const string &viewportValue);
 
             /**
              Read the document size and offset of an <svg> node from the viewBox, width and height attributes.
              */
-            ci::Rectd parseDocumentFrame(const ci::XmlTree &svgNode);
+            Rectd parseDocumentFrame(const XmlTree &svgNode);
 
-            svg_style parseStyle(const ci::XmlTree &node);
+            svg_style parseStyle(const XmlTree &node);
 
             /**
              parse an svg transform declaration
@@ -83,18 +83,18 @@ namespace core {
             /**
              parse a #FFFF00FF (argb) or #FF00FF (rgb) style color declaration ignoring alpha
              */
-            bool parseColor(const std::string &colorValue, ci::Color &color);
+            bool parseColor(const std::string &colorValue, Color &color);
 
             /**
              parse a #FFFF00FF (argb) or #FF00FF (rgb) style color declaration
              */
-            bool parseColor(const std::string &colorValue, ci::ColorA &color);
+            bool parseColor(const std::string &colorValue, ColorA &color);
 
             /**
-             attempt to parse an svg path data declaration into a ci::Shape2d
+             attempt to parse an svg path data declaration into a Shape2d
              If the path is lamformed, throws svg::PathParserException
              */
-            void parsePath(const std::string &pathString, ci::Shape2d &shape);
+            void parsePath(const std::string &pathString, Shape2d &shape);
 
             /**
              return true if a shape named @a shapeName can be parsed and converted to shape2d
@@ -109,7 +109,7 @@ namespace core {
              If the shape's parameters are invalid, ParserException will be thrown
              If the shape's markup is valid, but would result in nothing being drawn ( per SVG specs ) then nothing will be added to shape.
              */
-            void parseShape(const ci::XmlTree &shapeNode, ci::Shape2d &shape);
+            void parseShape(const XmlTree &shapeNode, Shape2d &shape);
 
             class ParserException : public core::Exception {
             public:

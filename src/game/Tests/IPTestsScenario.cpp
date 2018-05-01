@@ -57,9 +57,9 @@ void IPTestsScenario::setup() {
             };
         }
         
-        const auto fmt = ci::gl::Texture2d::Format().mipmap(false).minFilter(GL_NEAREST).magFilter(GL_NEAREST);
+        const auto fmt = gl::Texture2d::Format().mipmap(false).minFilter(GL_NEAREST).magFilter(GL_NEAREST);
         for(Channel8u channel : _channels) {
-            _channelTextures.push_back(ci::gl::Texture2d::create(channel, fmt));
+            _channelTextures.push_back(gl::Texture2d::create(channel, fmt));
         }
     }
 }
@@ -105,7 +105,7 @@ void IPTestsScenario::drawScreen(const render_state &state) {
 
 }
 
-bool IPTestsScenario::keyDown(const ci::app::KeyEvent &event) {
+bool IPTestsScenario::keyDown(const app::KeyEvent &event) {
     
     switch(event.getChar()) {
         case 'r':
@@ -126,7 +126,7 @@ void IPTestsScenario::reset() {
     setup();
 }
 
-ci::Channel8u IPTestsScenario::testRemap(int width, int height) {
+Channel8u IPTestsScenario::testRemap(int width, int height) {
     using namespace core::util;
     Channel8u channel = Channel8u(width, height);
     
@@ -139,7 +139,7 @@ ci::Channel8u IPTestsScenario::testRemap(int width, int height) {
     return channel;
 }
 
-ci::Channel8u IPTestsScenario::testDilate(int width, int height) {
+Channel8u IPTestsScenario::testDilate(int width, int height) {
     using namespace core::util;
     Channel8u channel = Channel8u(width, height);
     
@@ -151,7 +151,7 @@ ci::Channel8u IPTestsScenario::testDilate(int width, int height) {
     return channel;
 }
 
-ci::Channel8u IPTestsScenario::testErode(int width, int height) {
+Channel8u IPTestsScenario::testErode(int width, int height) {
     using namespace core::util;
     Channel8u channel = Channel8u(width, height);
     
@@ -163,7 +163,7 @@ ci::Channel8u IPTestsScenario::testErode(int width, int height) {
     return channel;
 }
 
-ci::Channel8u IPTestsScenario::testThreshold(int width, int height) {
+Channel8u IPTestsScenario::testThreshold(int width, int height) {
     using namespace core::util;
     Channel8u channel = Channel8u(width, height);
     
@@ -177,11 +177,11 @@ ci::Channel8u IPTestsScenario::testThreshold(int width, int height) {
     return channel;
 }
 
-ci::Channel8u IPTestsScenario::testPerlinNoise(int width, int height) {
+Channel8u IPTestsScenario::testPerlinNoise(int width, int height) {
     using namespace core::util;
     Channel8u channel = Channel8u(width, height);
     
-    ci::Perlin pn(8,123);
+    Perlin pn(8,123);
     double frequency = 8.0 / width;
     StopWatch sw("perlin");
     ip::in_place::perlin(channel, pn, frequency);
@@ -189,11 +189,11 @@ ci::Channel8u IPTestsScenario::testPerlinNoise(int width, int height) {
     return channel;
 }
 
-ci::Channel8u IPTestsScenario::testPerlinNoise2(int width, int height) {
+Channel8u IPTestsScenario::testPerlinNoise2(int width, int height) {
     using namespace core::util;
     Channel8u channel = Channel8u(width, height);
     
-    ci::Perlin pn(8,123);
+    Perlin pn(8,123);
     double frequency = 8.0 / width;
     StopWatch sw("perlin_abs_thresh");
     ip::in_place::perlin_abs_thresh(channel, pn, frequency, 12);
@@ -201,11 +201,11 @@ ci::Channel8u IPTestsScenario::testPerlinNoise2(int width, int height) {
     return channel;
 }
 
-ci::Channel8u IPTestsScenario::testBlur(int width, int height) {
+Channel8u IPTestsScenario::testBlur(int width, int height) {
     using namespace core::util;
     Channel8u channel = Channel8u(width, height);
     
-    ci::Perlin pn(8,123);
+    Perlin pn(8,123);
     double frequency = 8.0 / width;
     ip::in_place::perlin(channel, pn, frequency);
     ip::in_place::threshold(channel);

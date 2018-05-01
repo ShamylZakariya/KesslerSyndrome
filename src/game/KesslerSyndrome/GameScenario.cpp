@@ -56,11 +56,11 @@ namespace game {
         gl::drawString(ss.str(), vec2(10, 40), Color(1, 1, 1));
     }
 
-    bool GameScenario::keyDown(const ci::app::KeyEvent &event) {
+    bool GameScenario::keyDown(const app::KeyEvent &event) {
         if (event.getChar() == 'r') {
             reset();
             return true;
-        } else if (event.getCode() == ci::app::KeyEvent::KEY_BACKQUOTE) {
+        } else if (event.getCode() == app::KeyEvent::KEY_BACKQUOTE) {
             setRenderMode(RenderMode::mode((int(getRenderMode()) + 1) % RenderMode::COUNT));
         }
         return false;

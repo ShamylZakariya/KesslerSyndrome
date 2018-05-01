@@ -18,8 +18,8 @@ namespace {
 
     const double CollisionShapeRadius = 0;
     const double MinSurfaceArea = 2;
-    const ci::Color TerrainColor(0.3, 0.3, 0.3);
-    const ci::Color AnchorColor(0, 0, 0);
+    const Color TerrainColor(0.3, 0.3, 0.3);
+    const Color AnchorColor(0, 0, 0);
 
     namespace CollisionType {
 
@@ -160,7 +160,7 @@ void ParticleSystemTestScenario::setup() {
 
 
     auto mdc = MouseDelegateComponent::create(10)
-            ->onPress([this](dvec2 screen, dvec2 world, const ci::app::MouseEvent &event) {
+            ->onPress([this](dvec2 screen, dvec2 world, const app::MouseEvent &event) {
                 if (event.isMetaDown()) {
                     _explosionEmitter->emit(world, dvec2(0, 1), 1, 120, ParticleEmitter::Sawtooth);
                     _viewportController->addTrauma(0.75);
@@ -169,15 +169,15 @@ void ParticleSystemTestScenario::setup() {
                 }
                 return true;
             })
-            ->onRelease([this](dvec2 screen, dvec2 world, const ci::app::MouseEvent &event) {
+            ->onRelease([this](dvec2 screen, dvec2 world, const app::MouseEvent &event) {
                 _explosionEmitter->cancel(_explosionEmissionId);
                 _explosionEmissionId = 0;
                 return true;
             })
-            ->onMove([this](dvec2 screen, dvec2 world, dvec2 deltaScreen, dvec2 deltaWorld, const ci::app::MouseEvent &event) {
+            ->onMove([this](dvec2 screen, dvec2 world, dvec2 deltaScreen, dvec2 deltaWorld, const app::MouseEvent &event) {
                 return true;
             })
-            ->onDrag([this](dvec2 screen, dvec2 world, dvec2 deltaScreen, dvec2 deltaWorld, const ci::app::MouseEvent &event) {
+            ->onDrag([this](dvec2 screen, dvec2 world, dvec2 deltaScreen, dvec2 deltaWorld, const app::MouseEvent &event) {
                 dvec2 dir = normalize(deltaWorld);
                 _explosionEmitter->setEmissionPosition(_explosionEmissionId, world, dir);
                 return true;
@@ -224,11 +224,11 @@ void ParticleSystemTestScenario::drawScreen(const render_state &state) {
 
 }
 
-bool ParticleSystemTestScenario::keyDown(const ci::app::KeyEvent &event) {
+bool ParticleSystemTestScenario::keyDown(const app::KeyEvent &event) {
     if (event.getChar() == 'r') {
         reset();
         return true;
-    } else if (event.getCode() == ci::app::KeyEvent::KEY_BACKQUOTE) {
+    } else if (event.getCode() == app::KeyEvent::KEY_BACKQUOTE) {
         setRenderMode(RenderMode::mode((int(getRenderMode()) + 1) % RenderMode::COUNT));
     }
     return false;
@@ -271,7 +271,7 @@ void ParticleSystemTestScenario::buildExplosionPs() {
     fire.mass = {0};
     fire.initialVelocity = 15;
     fire.gravitationLayerMask = GravitationLayers::GLOBAL;
-    fire.color = ci::ColorA(1, 0.8, 0.1, 1);
+    fire.color = ColorA(1, 0.8, 0.1, 1);
 
     particle_prototype smoke;
     smoke.atlasIdx = 0;
@@ -282,7 +282,7 @@ void ParticleSystemTestScenario::buildExplosionPs() {
     smoke.mass = {0};
     smoke.initialVelocity = 15;
     smoke.gravitationLayerMask = GravitationLayers::GLOBAL;
-    smoke.color = ci::ColorA(0.9, 0.9, 0.9, 1);
+    smoke.color = ColorA(0.9, 0.9, 0.9, 1);
 
     particle_prototype spark;
     spark.atlasIdx = 1;
@@ -294,7 +294,7 @@ void ParticleSystemTestScenario::buildExplosionPs() {
     spark.orientToVelocity = true;
     spark.initialVelocity = 100;
     spark.minVelocity = 15;
-    spark.color = ci::ColorA(1, 0.75, 0.5, 1);
+    spark.color = ColorA(1, 0.75, 0.5, 1);
     spark.kinematics = particle_prototype::kinematics_prototype(1, 1, 0.2, ShapeFilters::TERRAIN);
 
     // build a "rubble" particle template

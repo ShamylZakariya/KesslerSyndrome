@@ -29,7 +29,7 @@ namespace game {
             double minRadius;
             double maxRadius;
             double minRadiusNoiseValue;
-            ci::ColorA color;
+            ColorA color;
 
             particle_prototype() :
                     minRadius(0),

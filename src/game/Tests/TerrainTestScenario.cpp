@@ -21,8 +21,8 @@ namespace {
 
     const double COLLISION_SHAPE_RADIUS = 0;
     const double MIN_SURFACE_AREA = 2;
-    const ci::Color TERRAIN_COLOR(0.2, 0.2, 0.2);
-    const ci::Color ANCHOR_COLOR(1, 0, 1);
+    const Color TERRAIN_COLOR(0.2, 0.2, 0.2);
+    const Color ANCHOR_COLOR(1, 0, 1);
 
     namespace CollisionType {
 
@@ -211,14 +211,14 @@ void TerrainTestScenario::drawScreen(const render_state &state) {
     gl::drawString(info, vec2(10, 10), Color(1, 1, 1));
 }
 
-bool TerrainTestScenario::keyDown(const ci::app::KeyEvent &event) {
+bool TerrainTestScenario::keyDown(const app::KeyEvent &event) {
     if (event.getChar() == 'r') {
         reset();
         return true;
-    } else if (event.getCode() == ci::app::KeyEvent::KEY_SPACE) {
+    } else if (event.getCode() == app::KeyEvent::KEY_SPACE) {
         //testExplicitCut();
         return true;
-    } else if (event.getCode() == ci::app::KeyEvent::KEY_BACKQUOTE) {
+    } else if (event.getCode() == app::KeyEvent::KEY_BACKQUOTE) {
         setRenderMode(RenderMode::mode((int(getRenderMode()) + 1) % RenderMode::COUNT));
     }
     return false;
@@ -369,7 +369,7 @@ terrain::WorldRef TerrainTestScenario::testComplexAnchors() {
 
 terrain::WorldRef TerrainTestScenario::testSimplePartitionedTerrain() {
 
-    ci::Rand rng;
+    Rand rng;
 
     auto ring = [&rng](vec2 center, float radius, int subdivisions, float wobbleRange) -> PolyLine2d {
         PolyLine2d polyLine;
@@ -406,7 +406,7 @@ terrain::WorldRef TerrainTestScenario::testSimplePartitionedTerrain() {
 
 terrain::WorldRef TerrainTestScenario::testComplexPartitionedTerrainWithAnchors() {
 
-    ci::Rand rng;
+    Rand rng;
 
     auto ring = [&rng](vec2 center, float radius, int subdivisions, float wobbleRange) -> PolyLine2d {
         PolyLine2d polyLine;
@@ -485,7 +485,7 @@ terrain::WorldRef TerrainTestScenario::testComplexSvgLoad() {
 }
 
 terrain::WorldRef TerrainTestScenario::testFail() {
-    ci::Rand rng;
+    Rand rng;
 
     auto ring = [&rng](dvec2 center, float radius, int subdivisions, float wobbleRange) -> PolyLine2d {
         PolyLine2d polyLine;
@@ -562,7 +562,7 @@ terrain::WorldRef TerrainTestScenario::testFail() {
 
 void TerrainTestScenario::timeSpatialIndex() {
 
-    ci::Rand rng;
+    Rand rng;
 
     auto generator = [&rng](cpBB bounds, int count) -> vector<cpBB> {
         vector<cpBB> out;

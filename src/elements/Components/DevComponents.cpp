@@ -219,21 +219,21 @@ namespace elements {
     }
     
     void MouseViewportControlComponent::step(const time_state &time) {
-        const bool fast = (isKeyDown(ci::app::KeyEvent::KEY_LSHIFT)||isKeyDown(ci::app::KeyEvent::KEY_RSHIFT));
+        const bool fast = (isKeyDown(app::KeyEvent::KEY_LSHIFT)||isKeyDown(app::KeyEvent::KEY_RSHIFT));
         const double radsPerSec = (fast ? 100 : 10) * M_PI / 180;
-        if (isKeyDown(ci::app::KeyEvent::KEY_q)) {
+        if (isKeyDown(app::KeyEvent::KEY_q)) {
             Viewport::look target = _viewportController->getTarget();
             target.up = rotate(target.up, -radsPerSec * time.deltaT);
             _viewportController->setTarget(target);
             //_viewport->setRotation(_viewport->getRotation() - radsPerSec * time.deltaT);
-        } else if (isKeyDown(ci::app::KeyEvent::KEY_e)) {
+        } else if (isKeyDown(app::KeyEvent::KEY_e)) {
             Viewport::look target = _viewportController->getTarget();
             target.up = rotate(target.up, +radsPerSec * time.deltaT);
             _viewportController->setTarget(target);
         }
     }
     
-    bool MouseViewportControlComponent::mouseDown(const ci::app::MouseEvent &event) {
+    bool MouseViewportControlComponent::mouseDown(const app::MouseEvent &event) {
         _mouseScreen = event.getPos();
         _mouseWorld = getStage()->getMainViewport()->screenToWorld(_mouseScreen);
         
@@ -253,17 +253,17 @@ namespace elements {
         return false;
     }
     
-    bool MouseViewportControlComponent::mouseUp(const ci::app::MouseEvent &event) {
+    bool MouseViewportControlComponent::mouseUp(const app::MouseEvent &event) {
         return false;
     }
     
-    bool MouseViewportControlComponent::mouseMove(const ci::app::MouseEvent &event, const ivec2 &delta) {
+    bool MouseViewportControlComponent::mouseMove(const app::MouseEvent &event, const ivec2 &delta) {
         _mouseScreen = event.getPos();
         _mouseWorld = getStage()->getMainViewport()->screenToWorld(_mouseScreen);
         return false;
     }
     
-    bool MouseViewportControlComponent::mouseDrag(const ci::app::MouseEvent &event, const ivec2 &delta) {
+    bool MouseViewportControlComponent::mouseDrag(const app::MouseEvent &event, const ivec2 &delta) {
         _mouseScreen = event.getPos();
         _mouseWorld = getStage()->getMainViewport()->screenToWorld(_mouseScreen);
         
@@ -278,7 +278,7 @@ namespace elements {
         return false;
     }
     
-    bool MouseViewportControlComponent::mouseWheel(const ci::app::MouseEvent &event) {
+    bool MouseViewportControlComponent::mouseWheel(const app::MouseEvent &event) {
         const float zoom = _viewportController->getTarget().scale,
         wheelScale = 0.1 * zoom,
         dz = (event.getWheelIncrement() * wheelScale);
@@ -304,7 +304,7 @@ namespace elements {
     _rotateRate(10 * M_PI / 180),
     _scaleRate(1)
     {
-        using namespace ci::app;
+        using namespace app;
         monitorKeys({
             KeyEvent::KEY_q,
             KeyEvent::KEY_e,
@@ -320,9 +320,9 @@ namespace elements {
     
     // InputComponent
     void KeyboardViewportControlComponent::step(const core::time_state &time) {
-        using namespace ci::app;
+        using namespace app;
         
-        const bool fast = (isKeyDown(ci::app::KeyEvent::KEY_LSHIFT)||isKeyDown(ci::app::KeyEvent::KEY_RSHIFT));
+        const bool fast = (isKeyDown(app::KeyEvent::KEY_LSHIFT)||isKeyDown(app::KeyEvent::KEY_RSHIFT));
         const double scale = (fast ? _fastScalar : 1) * time.deltaT;
         
         Viewport::look target = _viewportController->getTarget();
@@ -416,7 +416,7 @@ namespace elements {
         }
     }
     
-    bool TargetTrackingViewportControlComponent::mouseWheel(const ci::app::MouseEvent &event) {
+    bool TargetTrackingViewportControlComponent::mouseWheel(const app::MouseEvent &event) {
         if (auto target = _trackingTarget.lock()) {
             const double wheelScale = 0.1 * _scale;
             _scale += (event.getWheelIncrement() * wheelScale);
@@ -491,7 +491,7 @@ namespace elements {
         cpBodySetPosition(_mouseBody, newMouseBodyPos);
     }
     
-    bool MousePickComponent::mouseDown(const ci::app::MouseEvent &event) {
+    bool MousePickComponent::mouseDown(const app::MouseEvent &event) {
         releaseDragConstraint();
         
         _mouseScreen = event.getPos();
@@ -522,18 +522,18 @@ namespace elements {
         return false;
     }
     
-    bool MousePickComponent::mouseUp(const ci::app::MouseEvent &event) {
+    bool MousePickComponent::mouseUp(const app::MouseEvent &event) {
         releaseDragConstraint();
         return false;
     }
     
-    bool MousePickComponent::mouseMove(const ci::app::MouseEvent &event, const ivec2 &delta) {
+    bool MousePickComponent::mouseMove(const app::MouseEvent &event, const ivec2 &delta) {
         _mouseScreen = event.getPos();
         _mouseWorld = getStage()->getMainViewport()->screenToWorld(_mouseScreen);
         return false;
     }
     
-    bool MousePickComponent::mouseDrag(const ci::app::MouseEvent &event, const ivec2 &delta) {
+    bool MousePickComponent::mouseDrag(const app::MouseEvent &event, const ivec2 &delta) {
         _mouseScreen = event.getPos();
         _mouseWorld = getStage()->getMainViewport()->screenToWorld(_mouseScreen);
         return false;
@@ -643,7 +643,7 @@ namespace elements {
         return shared_from_this_as<MouseDelegateComponent>();
     }
     
-    bool MouseDelegateComponent::mouseDown(const ci::app::MouseEvent &event) {
+    bool MouseDelegateComponent::mouseDown(const app::MouseEvent &event) {
         if (_pressHandler) {
             const dvec2 screen = event.getPos();
             const dvec2 world = getStage()->getMainViewport()->screenToWorld(screen);
@@ -653,7 +653,7 @@ namespace elements {
         return false;
     }
     
-    bool MouseDelegateComponent::mouseUp(const ci::app::MouseEvent &event) {
+    bool MouseDelegateComponent::mouseUp(const app::MouseEvent &event) {
         if (_releaseHandler) {
             const dvec2 screen = event.getPos();
             const dvec2 world = getStage()->getMainViewport()->screenToWorld(screen);
@@ -663,7 +663,7 @@ namespace elements {
         return false;
     }
     
-    bool MouseDelegateComponent::mouseMove(const ci::app::MouseEvent &event, const ivec2 &delta) {
+    bool MouseDelegateComponent::mouseMove(const app::MouseEvent &event, const ivec2 &delta) {
         if (_moveHandler) {
             const dvec2 screen = event.getPos();
             const dvec2 world = getStage()->getMainViewport()->screenToWorld(screen);
@@ -675,7 +675,7 @@ namespace elements {
         return false;
     }
     
-    bool MouseDelegateComponent::mouseDrag(const ci::app::MouseEvent &event, const ivec2 &delta) {
+    bool MouseDelegateComponent::mouseDrag(const app::MouseEvent &event, const ivec2 &delta) {
         if (_dragHandler) {
             const dvec2 screen = event.getPos();
             const dvec2 world = getStage()->getMainViewport()->screenToWorld(screen);
@@ -687,7 +687,7 @@ namespace elements {
         return false;
     }
     
-    bool MouseDelegateComponent::mouseWheel(const ci::app::MouseEvent &event) {
+    bool MouseDelegateComponent::mouseWheel(const app::MouseEvent &event) {
         if (_wheelHandler) {
             const dvec2 screen = event.getPos();
             const dvec2 world = getStage()->getMainViewport()->screenToWorld(screen);

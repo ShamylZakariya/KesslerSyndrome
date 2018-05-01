@@ -30,7 +30,7 @@ public:
 
     virtual void draw(const core::render_state &state) override;
 
-    virtual bool keyDown(const ci::app::KeyEvent &event) override;
+    virtual bool keyDown(const app::KeyEvent &event) override;
 
     void reset();
 
@@ -42,7 +42,7 @@ private:
     };
 
     struct polyline {
-        ci::PolyLine2 pl;
+        PolyLine2 pl;
         Color color;
     };
 

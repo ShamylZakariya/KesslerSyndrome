@@ -111,7 +111,7 @@ namespace core {
         return false;
     }
 
-    bool InputComponent::keyDown(const ci::app::KeyEvent &event) {
+    bool InputComponent::keyDown(const app::KeyEvent &event) {
         // if this is a key code we're monitoring, consume the event
         int keyCode = event.getCode();
         auto pos = _monitoredKeyStates.find(keyCode);
@@ -126,7 +126,7 @@ namespace core {
         return false;
     }
 
-    bool InputComponent::keyUp(const ci::app::KeyEvent &event) {
+    bool InputComponent::keyUp(const app::KeyEvent &event) {
         // if this is a key code we're monitoring, consume the event
         int keyCode = event.getCode();
         auto pos = _monitoredKeyStates.find(keyCode);

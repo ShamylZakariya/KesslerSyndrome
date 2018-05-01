@@ -35,7 +35,7 @@ namespace game {
         //	GameStage
         //
 
-        void load(ci::DataSourceRef stageXmlData);
+        void load(DataSourceRef stageXmlData);
 
         BackgroundRef getBackground() const {
             return _background;

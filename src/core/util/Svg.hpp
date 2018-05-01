@@ -139,7 +139,7 @@ namespace core {
 
                 virtual ~Appearance();
 
-                void parse(const ci::XmlTree &shapeNode);
+                void parse(const XmlTree &shapeNode);
 
                 void setParentAppearance(AppearanceRef parentAppearance) {
                     _parentAppearance = parentAppearance;
@@ -149,17 +149,17 @@ namespace core {
                     return _parentAppearance.lock();
                 }
 
-                void setFillColor(const ci::ColorA &color);
+                void setFillColor(const ColorA &color);
 
-                ci::ColorA getFillColor() const;
+                ColorA getFillColor() const;
 
                 void setFillAlpha(double a);
 
                 bool getFillAlpha() const;
 
-                void setStrokeColor(const ci::ColorA &color);
+                void setStrokeColor(const ColorA &color);
 
-                ci::ColorA getStrokeColor() const;
+                ColorA getStrokeColor() const;
 
                 void setStrokeWidth(double w);
 
@@ -173,25 +173,25 @@ namespace core {
 
                 const BlendMode &getBlendMode() const;
 
-                void setFillRule(ci::Triangulator::Winding fr);
+                void setFillRule(Triangulator::Winding fr);
 
-                ci::Triangulator::Winding getFillRule() const;
+                Triangulator::Winding getFillRule() const;
 
                 string getAttribute(string name) const;
 
             private:
 
-                ci::Color _getFillColor() const;
+                Color _getFillColor() const;
 
                 double _getFillOpacity() const;
 
-                ci::Color _getStrokeColor() const;
+                Color _getStrokeColor() const;
 
                 double _getStrokeOpacity() const;
 
                 double _getStrokeWidth() const;
 
-                ci::Triangulator::Winding _getFillRule() const;
+                Triangulator::Winding _getFillRule() const;
 
 
             private:
@@ -213,7 +213,7 @@ namespace core {
                 struct stroke {
                     vector <vec2> vertices;
                     bool closed;
-                    ci::gl::VboMeshRef vboMesh;
+                    gl::VboMeshRef vboMesh;
 
                     stroke() :
                             closed(false) {
@@ -226,9 +226,9 @@ namespace core {
 
                 ~Shape();
 
-                void parse(const ci::XmlTree &shapeNode);
+                void parse(const XmlTree &shapeNode);
 
-                void draw(const render_state &, const GroupRef &owner, double opacity, const ci::gl::GlslProgRef &shader);
+                void draw(const render_state &, const GroupRef &owner, double opacity, const gl::GlslProgRef &shader);
 
                 /**
                  Get appearance info (color, stroke, etc)
@@ -277,19 +277,19 @@ namespace core {
 
                 friend class Group;
 
-                void _build(const ci::Shape2d &shape);
+                void _build(const Shape2d &shape);
 
-                ci::Rectd _projectToWorld(const dvec2 &documentSize, double documentScale, const dmat4 &worldTransform);
+                Rectd _projectToWorld(const dvec2 &documentSize, double documentScale, const dmat4 &worldTransform);
 
                 void _makeLocal(const dvec2 &originWorld);
 
-                void _drawDebug(const render_state &state, const GroupRef &owner, double opacity, const ci::TriMeshRef &mesh, vector <stroke> &strokes, const ci::gl::GlslProgRef &shader);
+                void _drawDebug(const render_state &state, const GroupRef &owner, double opacity, const TriMeshRef &mesh, vector <stroke> &strokes, const gl::GlslProgRef &shader);
 
-                void _drawGame(const render_state &state, const GroupRef &owner, double opacity, const ci::TriMeshRef &mesh, vector <stroke> &strokes, const ci::gl::GlslProgRef &shader);
+                void _drawGame(const render_state &state, const GroupRef &owner, double opacity, const TriMeshRef &mesh, vector <stroke> &strokes, const gl::GlslProgRef &shader);
 
-                void _drawStrokes(const render_state &state, const GroupRef &owner, double opacity, vector <stroke> &strokes, const ci::gl::GlslProgRef &shader);
+                void _drawStrokes(const render_state &state, const GroupRef &owner, double opacity, vector <stroke> &strokes, const gl::GlslProgRef &shader);
 
-                void _drawFills(const render_state &state, const GroupRef &owner, double opacity, const ci::TriMeshRef &mesh, const ci::gl::GlslProgRef &shader);
+                void _drawFills(const render_state &state, const GroupRef &owner, double opacity, const TriMeshRef &mesh, const gl::GlslProgRef &shader);
 
             private:
 
@@ -300,11 +300,11 @@ namespace core {
                 string _type, _id;
                 cpBB _localBB;
 
-                ci::TriMeshRef _svgMesh, _worldMesh, _localMesh;
-                ci::gl::VboMeshRef _localVboMesh;
+                TriMeshRef _svgMesh, _worldMesh, _localMesh;
+                gl::VboMeshRef _localVboMesh;
 
                 vector <stroke> _svgStrokes, _worldStrokes, _localStrokes;
-                ci::Rectd _worldBounds, _localBounds;
+                Rectd _worldBounds, _localBounds;
 
             };
 
@@ -316,7 +316,7 @@ namespace core {
             class Group : public enable_shared_from_this<Group> {
             public:
 
-                static GroupRef loadSvgDocument(ci::DataSourceRef svgData, double documentScale = 1) {
+                static GroupRef loadSvgDocument(DataSourceRef svgData, double documentScale = 1) {
                     GroupRef g = make_shared<Group>();
                     g->load(svgData, documentScale);
                     return g;
@@ -333,11 +333,11 @@ namespace core {
                  @param svgData SVG byte stream
                  @param documentScale A scaling factor to apply to the SVG geometry.
                  */
-                void load(ci::DataSourceRef svgData, double documentScale = 1);
+                void load(DataSourceRef svgData, double documentScale = 1);
 
                 void clear();
 
-                void parse(const ci::XmlTree &svgGroupNode);
+                void parse(const XmlTree &svgGroupNode);
 
                 string getId() const {
                     return _id;
@@ -488,13 +488,13 @@ namespace core {
 
                 friend class Shape;
 
-                void _draw(const render_state &state, double opacity, const ci::gl::GlslProgRef &shader);
+                void _draw(const render_state &state, double opacity, const gl::GlslProgRef &shader);
 
-                void _parseGroupAttributes(const ci::XmlTree &groupNode);
+                void _parseGroupAttributes(const XmlTree &groupNode);
 
-                void _loadGroupsAndShapes(const ci::XmlTree &fromNode);
+                void _loadGroupsAndShapes(const XmlTree &fromNode);
 
-                void _loadAppearances(const ci::XmlTree &fromNode);
+                void _loadAppearances(const XmlTree &fromNode);
 
                 void _updateTransform();
 
@@ -534,7 +534,7 @@ namespace core {
                 map <string, string> _attributes;
                 vector <drawable> _drawables;
 
-                ci::gl::GlslProgRef _shader;
+                gl::GlslProgRef _shader;
             };
 
             class LoadException : public core::Exception {

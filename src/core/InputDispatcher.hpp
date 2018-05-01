@@ -62,7 +62,7 @@ namespace core {
 
     public:
 
-        InputDispatcher(ci::app::WindowRef window);
+        InputDispatcher(app::WindowRef window);
 
         virtual ~InputDispatcher();
 
@@ -145,7 +145,7 @@ namespace core {
 
         void _sortListeners();
 
-        ci::ivec2 _mouseDelta(const ci::app::MouseEvent &event);
+        ivec2 _mouseDelta(const ci::app::MouseEvent &event);
 
         bool _mouseDown(ci::app::MouseEvent event);
 

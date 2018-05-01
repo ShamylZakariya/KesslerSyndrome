@@ -152,7 +152,7 @@ namespace core {
         /**
          Save a screenshot as PNG to @a path
          */
-        void screenshot(const ci::fs::path &folderPath, const std::string &namingPrefix, const std::string format = "png");
+        void screenshot(const fs::path &folderPath, const std::string &namingPrefix, const std::string format = "png");
 
         void setStage(StageRef stage);
 

@@ -120,7 +120,7 @@ namespace elements {
         
         trauma_config _traumaConfig;
         double _traumaLevel, _traumaBaselineLevel;
-        vector<ci::Perlin> _traumaPerlinNoiseGenerators;
+        vector<Perlin> _traumaPerlinNoiseGenerators;
         
     };
     

@@ -33,15 +33,15 @@ namespace core {
 
                 XmlMultiTree();
 
-                XmlMultiTree(ci::XmlTree tree);
+                XmlMultiTree(XmlTree tree);
 
-                XmlMultiTree(ci::XmlTree firstTree, ci::XmlTree secondTree);
+                XmlMultiTree(XmlTree firstTree, XmlTree secondTree);
 
-                XmlMultiTree(const initializer_list <ci::XmlTree> &trees);
+                XmlMultiTree(const initializer_list <XmlTree> &trees);
 
-                XmlMultiTree(const vector <ci::XmlTree> &trees);
+                XmlMultiTree(const vector <XmlTree> &trees);
 
-                const vector <ci::XmlTree> getTrees() const {
+                const vector <XmlTree> getTrees() const {
                     return _trees;
                 }
 
@@ -77,19 +77,19 @@ namespace core {
 
                 void _sanityCheck();
 
-                vector <ci::XmlTree> _trees;
+                vector <XmlTree> _trees;
 
             };
 
 
             // find first element with a given tag
-            boost::optional<ci::XmlTree> findElement(const ci::XmlTree &node, string tag);
+            boost::optional<XmlTree> findElement(const XmlTree &node, string tag);
 
             // find first element with a given id
-            boost::optional<ci::XmlTree> findElementWithId(const ci::XmlTree &node, string id);
+            boost::optional<XmlTree> findElementWithId(const XmlTree &node, string id);
 
             // find first node in tree of a given tag with a given attribute name/value
-            boost::optional<ci::XmlTree> findElement(const ci::XmlTree &node, string tagName, string attributeName, string attributeValue);
+            boost::optional<XmlTree> findElement(const XmlTree &node, string tagName, string attributeName, string attributeValue);
 
             // read a double numeric attribute
             template<typename T>
