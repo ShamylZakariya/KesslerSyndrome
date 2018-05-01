@@ -25,24 +25,41 @@ namespace core {
      gl::FboRef _fbo;
      gl::GlslProgRef _shader;
      gl::BatchRef _batch;
+     GLenum _srcRgb, _dstRgb, _srcAlpha, _dstAlpha;
      */
     
     FboCompositor::FboCompositor():
             _shader(core::util::loadGlslAsset("core/shaders/fbo_compositor.glsl")),
-            _batch(gl::Batch::create(geom::Rect().rect(Rectf(0, 0, 1, 1)), _shader))
+            _batch(gl::Batch::create(geom::Rect().rect(Rectf(0, 0, 1, 1)), _shader)),
+            _srcRgb(GL_SRC_ALPHA),
+            _dstRgb(GL_ONE_MINUS_SRC_ALPHA),
+            _srcAlpha(GL_ONE),
+            _dstAlpha(GL_ZERO)
     {
     }
 
     FboCompositor::FboCompositor(std::string shaderAssetPath):
-    _shader(core::util::loadGlslAsset(shaderAssetPath)),
-    _batch(gl::Batch::create(geom::Rect().rect(Rectf(0, 0, 1, 1)), _shader))
+            _shader(core::util::loadGlslAsset(shaderAssetPath)),
+            _batch(gl::Batch::create(geom::Rect().rect(Rectf(0, 0, 1, 1)), _shader)),
+            _srcRgb(GL_SRC_ALPHA),
+            _dstRgb(GL_ONE_MINUS_SRC_ALPHA),
+            _srcAlpha(GL_ONE),
+            _dstAlpha(GL_ZERO)
     {
     }
 
     FboCompositor::~FboCompositor()
     {}
     
+    void FboCompositor::setBlend(GLenum srcRgb, GLenum dstRgb, GLenum srcAlpha, GLenum dstAlpha) {
+        _srcRgb = srcRgb;
+        _dstRgb = dstRgb;
+        _srcAlpha = srcAlpha;
+        _dstAlpha = dstAlpha;
+    }
+    
     void FboCompositor::composite(int width, int height) {
+        
         gl::ScopedViewport sv(0,0,width,height);
 
         gl::ScopedMatrices sm;
@@ -52,6 +69,8 @@ namespace core {
         
         _fbo->getColorTexture()->bind(0);
         _shader->uniform("ColorTex", 0);
+
+        gl::ScopedBlend sb(_srcRgb, _dstRgb, _srcAlpha, _dstAlpha);
         _batch->draw();
     }
 

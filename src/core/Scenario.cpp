@@ -34,12 +34,20 @@ namespace core {
         ViewportComposerRef create_stage_viewport_composer() {
             auto viewport = make_shared<Viewport>();
             auto compositor = make_shared<ViewportCompositor>(viewport);
+            
+            // set up an appropriate default blend mode for compositing a solid scene render into the context
+            compositor->setBlend(GL_ONE, GL_ZERO, GL_ONE, GL_ZERO);
+
             return make_shared<ViewportComposer>(viewport, compositor);
         }
 
         ViewportComposerRef create_screen_viewport_composer() {
             auto viewport = make_shared<ScreenViewport>();
             auto compositor = make_shared<ViewportCompositor>(viewport);
+            
+            // set up an appropriate blend mode for UI compositing atop the scene
+            compositor->setBlend(GL_ONE, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
+
             return make_shared<ViewportComposer>(viewport, compositor);
         }
 
