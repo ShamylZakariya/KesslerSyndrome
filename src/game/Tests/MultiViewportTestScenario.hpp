@@ -11,10 +11,7 @@
 
 #include "Core.hpp"
 
-using namespace ci;
-using namespace core;
-
-class MultiViewportTestScenario : public Scenario {
+class MultiViewportTestScenario : public core::Scenario {
 public:
     
     MultiViewportTestScenario();
@@ -23,9 +20,9 @@ public:
     
     void setup() override;
     void cleanup() override;
-    void update(const time_state &time) override;
-    void draw(const render_state &state) override;
-    void drawScreen(const render_state &state) override;
+    void update(const core::time_state &time) override;
+    void draw(const core::render_state &state) override;
+    void drawScreen(const core::render_state &state) override;
     
     void reset();
     

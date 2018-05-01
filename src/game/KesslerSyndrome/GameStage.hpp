@@ -17,6 +17,7 @@
 #include "Planet.hpp"
 #include "CloudLayerParticleSystem.hpp"
 #include "ParticleSystem.hpp"
+#include "ViewportController.hpp"
 
 namespace game {
 
@@ -91,9 +92,9 @@ namespace game {
         PlanetRef _planet;
         vector <CloudLayerParticleSystemRef> _cloudLayers;
         core::RadialGravitationCalculatorRef _gravity;
-        particles::ParticleEmitterRef _explosionEmitter;
-        particles::ParticleEmitterRef _dustEmitter;
-        core::ViewportControllerRef _viewportController;
+        elements::ParticleEmitterRef _explosionEmitter;
+        elements::ParticleEmitterRef _dustEmitter;
+        elements::ViewportControllerRef _viewportController;
 
     };
 

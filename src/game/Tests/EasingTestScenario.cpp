@@ -10,9 +10,8 @@
 #include "ImageProcessing.hpp"
 #include "Easing.hpp"
 
-
-using namespace ci;
 using namespace core;
+using namespace elements;
 
 namespace {
     

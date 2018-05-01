@@ -11,7 +11,9 @@
 #include "DevComponents.hpp"
 #include "PlanetGreebling.hpp"
 
+
 using namespace core;
+using namespace elements;
 
 namespace game {
 
@@ -58,8 +60,8 @@ namespace game {
      PlanetRef _planet;
      vector <CloudLayerParticleSystemRef> _cloudLayers;
      core::RadialGravitationCalculatorRef _gravity;
-     particles::ParticleEmitterRef _explosionEmitter;
-     particles::ParticleEmitterRef _dustEmitter;
+     elements::ParticleEmitterRef _explosionEmitter;
+     elements::ParticleEmitterRef _dustEmitter;
      */
 
     GameStage::GameStage() :
@@ -298,7 +300,7 @@ namespace game {
     }
 
     void GameStage::buildExplosionParticleSystem() {
-        using namespace particles;
+        using namespace elements;
 
         auto image = loadImage(app::loadAsset("kessler/textures/Explosion.png"));
         gl::Texture2d::Format fmt = gl::Texture2d::Format().mipmap(false);
@@ -361,7 +363,7 @@ namespace game {
     }
     
     void GameStage::buildDustParticleSystem() {
-        using namespace particles;
+        using namespace elements;
         
         auto image = loadImage(app::loadAsset("kessler/textures/Explosion.png"));
         gl::Texture2d::Format fmt = gl::Texture2d::Format().mipmap(false);
@@ -435,7 +437,7 @@ namespace game {
         }
 
         dvec2 emissionDir = normalize(world - _planet->getOrigin());
-        _explosionEmitter->emit(world, emissionDir, 1.0, 140, particles::ParticleEmitter::Sawtooth);
+        _explosionEmitter->emit(world, emissionDir, 1.0, 140, elements::ParticleEmitter::Sawtooth);
         
         _viewportController->addTrauma(0.5);
     }

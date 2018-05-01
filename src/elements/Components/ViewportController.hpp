@@ -16,11 +16,11 @@
 #include "Viewport.hpp"
 #include "Tracking.hpp"
 
-namespace core {
+namespace elements {
     
     SMART_PTR(ViewportController);
     
-    class ViewportController : public Component, public Tracker {
+    class ViewportController : public core::Component, public core::Tracker {
     public:
         
         struct trauma_config {
@@ -60,8 +60,8 @@ namespace core {
             
         };
         
-        ViewportController(ViewportRef vp);
-        ViewportController(ViewportRef vp, const tracking_config &tracking, const trauma_config &trauma);
+        ViewportController(core::ViewportRef vp);
+        ViewportController(core::ViewportRef vp, const tracking_config &tracking, const trauma_config &trauma);
         
         virtual ~ViewportController() {
         }
@@ -69,12 +69,12 @@ namespace core {
         ///////////////////////////////////////////////////////////////////////////
         // Component
         
-        void update(const time_state &time) override;
+        void update(const core::time_state &time) override;
         
         ///////////////////////////////////////////////////////////////////////////
         // ViewportController
         
-        ViewportRef getMainViewport() const {
+        core::ViewportRef getMainViewport() const {
             return _viewport;
         }
         
@@ -109,13 +109,13 @@ namespace core {
         
         void _setup();
         
-        void _setViewport(ViewportRef vp);
+        void _setViewport(core::ViewportRef vp);
         
-        void _onViewportPropertyChanged(const Viewport &vp);
+        void _onViewportPropertyChanged(const core::Viewport &vp);
         
     private:
         
-        ViewportRef _viewport;
+        core::ViewportRef _viewport;
         bool _disregardViewportMotion;
         
         trauma_config _traumaConfig;
@@ -125,6 +125,6 @@ namespace core {
     };
     
     
-} // end namespace core
+} // end namespace elements
 
 #endif /* ViewportController_hpp */

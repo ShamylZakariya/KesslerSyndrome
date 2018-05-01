@@ -8,7 +8,7 @@
 #include "CloudLayerParticleSystem.hpp"
 
 using namespace core;
-using namespace particles;
+using namespace elements;
 
 namespace game {
 

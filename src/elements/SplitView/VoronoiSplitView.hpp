@@ -14,7 +14,7 @@
 
 #include <cinder/gl/scoped.h>
 
-namespace vsv {
+namespace elements {
     
     SMART_PTR(VoronoiSplitViewCompositor);
     SMART_PTR(VoronoiSplitViewComposer);
@@ -119,6 +119,6 @@ namespace vsv {
         
     };
     
-} // end namespace vsv
+} // end namespace elements
 
 #endif /* VoronoiSplitView_hpp */

@@ -20,19 +20,12 @@
 #include "Signals.hpp"
 #include "TimeState.hpp"
 
-using namespace ci;
-using namespace std;
-
-
 namespace core {
 
     SMART_PTR(BaseViewport);
     SMART_PTR(Viewport);
     SMART_PTR(ScreenViewport);
     
-    // prototype - defined in ViewportController.hpp
-    SMART_PTR(ViewportController);
-
     class BaseViewport {
     public:
         
@@ -325,8 +318,6 @@ namespace core {
 
     private:
         
-        friend class ViewportController;
-
         void _updateMatrices();
 
     private:

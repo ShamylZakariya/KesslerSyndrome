@@ -15,11 +15,7 @@
 #include "Terrain.hpp"
 #include "TerrainCutRecorder.hpp"
 
-
-using namespace ci;
-using namespace core;
-
-class PerlinWorldTestScenario : public Scenario {
+class PerlinWorldTestScenario : public core::Scenario {
 public:
 
     PerlinWorldTestScenario();
@@ -30,9 +26,9 @@ public:
 
     virtual void cleanup() override;
 
-    virtual void clear(const render_state &state) override;
+    virtual void clear(const core::render_state &state) override;
 
-    virtual void draw(const render_state &state) override;
+    virtual void draw(const core::render_state &state) override;
 
     virtual bool keyDown(const ci::app::KeyEvent &event) override;
 
@@ -42,16 +38,16 @@ private:
 
     struct segment {
         dvec2 a, b;
-        ci::Color color;
+        Color color;
     };
 
     struct polyline {
         ci::PolyLine2 pl;
-        ci::Color color;
+        Color color;
     };
 
-    vector <polyline> marchToPerimeters(ci::Channel8u &iso, size_t expectedContourCount) const;
-    vector <segment> testMarch(ci::Channel8u &iso) const;
+    vector <polyline> marchToPerimeters(Channel8u &iso, size_t expectedContourCount) const;
+    vector <segment> testMarch(Channel8u &iso) const;
     void onCutPerformed(dvec2 a, dvec2 b, double radius);
 
 private:
@@ -61,7 +57,7 @@ private:
 
     vector <segment> _marchSegments;
     vector <polyline> _marchedPolylines;
-    terrain::TerrainObjectRef _terrain;
+    elements::terrain::TerrainObjectRef _terrain;
         
     shared_ptr<TerrainCutRecorder> _terrainCutRecorder;
     bool _recordCuts;

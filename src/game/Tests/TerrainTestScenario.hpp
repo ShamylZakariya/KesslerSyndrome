@@ -11,11 +11,9 @@
 
 #include "Terrain.hpp"
 #include "Scenario.hpp"
+#include "ViewportController.hpp"
 
-using namespace ci;
-using namespace core;
-
-class TerrainTestScenario : public Scenario {
+class TerrainTestScenario : public core::Scenario {
 public:
 
     TerrainTestScenario();
@@ -26,9 +24,9 @@ public:
 
     virtual void cleanup() override;
 
-    virtual void clear(const render_state &state) override;
+    virtual void clear(const core::render_state &state) override;
 
-    virtual void drawScreen(const render_state &state) override;
+    virtual void drawScreen(const core::render_state &state) override;
 
     virtual bool keyDown(const ci::app::KeyEvent &event) override;
 
@@ -36,32 +34,32 @@ public:
 
 private:
 
-    terrain::WorldRef testDistantTerrain();
+    elements::terrain::WorldRef testDistantTerrain();
 
-    terrain::WorldRef testBasicTerrain();
+    elements::terrain::WorldRef testBasicTerrain();
 
-    terrain::WorldRef testComplexTerrain();
+    elements::terrain::WorldRef testComplexTerrain();
 
-    terrain::WorldRef testSimpleAnchors();
+    elements::terrain::WorldRef testSimpleAnchors();
 
-    terrain::WorldRef testComplexAnchors();
+    elements::terrain::WorldRef testComplexAnchors();
 
-    terrain::WorldRef testSimplePartitionedTerrain();
+    elements::terrain::WorldRef testSimplePartitionedTerrain();
 
-    terrain::WorldRef testComplexPartitionedTerrainWithAnchors();
+    elements::terrain::WorldRef testComplexPartitionedTerrainWithAnchors();
 
-    terrain::WorldRef testSimpleSvgLoad();
+    elements::terrain::WorldRef testSimpleSvgLoad();
 
-    terrain::WorldRef testComplexSvgLoad();
+    elements::terrain::WorldRef testComplexSvgLoad();
 
-    terrain::WorldRef testFail();
+    elements::terrain::WorldRef testFail();
 
     void timeSpatialIndex();
 
 private:
 
-    terrain::TerrainObjectRef _terrain;
-    core::ViewportControllerRef _viewportController;
+    elements::terrain::TerrainObjectRef _terrain;
+    elements::ViewportControllerRef _viewportController;
 };
 
 #endif /* IslandTestScenario_hpp */

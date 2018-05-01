@@ -11,10 +11,7 @@
 #include "Terrain.hpp"
 #include "Scenario.hpp"
 
-using namespace ci;
-using namespace core;
-
-class TerrainAttachmentsTestScenario : public Scenario {
+class TerrainAttachmentsTestScenario : public core::Scenario {
 public:
     
     TerrainAttachmentsTestScenario();
@@ -25,9 +22,9 @@ public:
     
     virtual void cleanup() override;
     
-    virtual void clear(const render_state &state) override;
+    virtual void clear(const core::render_state &state) override;
     
-    virtual void drawScreen(const render_state &state) override;
+    virtual void drawScreen(const core::render_state &state) override;
     
     virtual bool keyDown(const ci::app::KeyEvent &event) override;
     
@@ -35,12 +32,12 @@ public:
     
 private:
     
-    terrain::WorldRef testBasicTerrain();
-    terrain::WorldRef testBasicAttachmentAdapter();
+    elements::terrain::WorldRef testBasicTerrain();
+    elements::terrain::WorldRef testBasicAttachmentAdapter();
     
 private:
     
-    terrain::TerrainObjectRef _terrain;
+    elements::terrain::TerrainObjectRef _terrain;
 };
 
 #endif /* TerrainAttachmentsTestScenario_hpp */

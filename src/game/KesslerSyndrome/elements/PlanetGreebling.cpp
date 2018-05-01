@@ -10,7 +10,8 @@
 #include "GlslProgLoader.hpp"
 
 using namespace core;
-using namespace particles;
+using namespace elements;
+
 namespace game {
     
     /*
@@ -153,7 +154,7 @@ namespace game {
         gl::Texture2d::Format fmt = gl::Texture2d::Format().mipmap(false);
         c.textureAtlas = gl::Texture2d::create(image, fmt);
         
-        c.atlasType = particles::Atlas::fromString(node.getAttribute("atlasType").value_or("None"));
+        c.atlasType = elements::Atlas::fromString(node.getAttribute("atlasType").value_or("None"));
 
         // now load <greeble> children until exhausted
         for(size_t i = 0;; i++) {

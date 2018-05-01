@@ -8,7 +8,6 @@
 
 #include "Tracking.hpp"
 
-using namespace ci;
 namespace core {
     
     /*

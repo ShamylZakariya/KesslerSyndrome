@@ -12,7 +12,6 @@
 
 #include "Strings.hpp"
 
-using namespace ci;
 using namespace core::strings;
 
 namespace core {

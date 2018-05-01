@@ -11,7 +11,6 @@
 
 #include "InputDispatcher.hpp"
 #include "Viewport.hpp"
-#include "ViewportController.hpp"
 #include "RenderState.hpp"
 #include "TimeState.hpp"
 #include "Compositor.hpp"

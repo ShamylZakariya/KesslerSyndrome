@@ -18,8 +18,8 @@
 
 #include <cinder/gl/scoped.h>
 
-using namespace ci;
 using namespace core;
+using namespace elements;
 
 namespace {
     
@@ -219,7 +219,7 @@ void MultiViewportTestScenario::setup()
     
     TrackableRef trackableA = playerA->getComponent<CharacterState>();
     TrackableRef trackableB = playerB->getComponent<CharacterState>();
-    auto svc = make_shared<vsv::VoronoiSplitViewComposer>(trackableA, trackableB, viewportA, viewportB);
+    auto svc = make_shared<VoronoiSplitViewComposer>(trackableA, trackableB, viewportA, viewportB);
     svc->getVoronoiSplitViewCompositor()->setShadowColor(ColorA(0.1,0.1,0.15,0.75));
     svc->getVoronoiSplitViewCompositor()->setShadowWidth(0.7);
     setViewportComposer(svc);
@@ -249,7 +249,7 @@ void MultiViewportTestScenario::cleanup()
 void MultiViewportTestScenario::update(const time_state &time) {
     Scenario::update(time);
     
-    auto svc = static_pointer_cast<vsv::VoronoiSplitViewComposer>(getViewportComposer());
+    auto svc = static_pointer_cast<VoronoiSplitViewComposer>(getViewportComposer());
     double scale = svc->getScale();
     scale = lrp<double>(0.25, scale, _scale);
     svc->setScale(scale);

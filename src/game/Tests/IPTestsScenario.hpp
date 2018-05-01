@@ -16,12 +16,7 @@
 #include "Terrain.hpp"
 #include "ParticleSystem.hpp"
 
-
-using namespace ci;
-using namespace core;
-using namespace particles;
-
-class IPTestsScenario : public Scenario {
+class IPTestsScenario : public core::Scenario {
 public:
     
     IPTestsScenario();
@@ -32,11 +27,11 @@ public:
     
     virtual void cleanup() override;
         
-    virtual void clear(const render_state &state) override;
+    virtual void clear(const core::render_state &state) override;
     
-    virtual void draw(const render_state &state) override;
+    virtual void draw(const core::render_state &state) override;
     
-    virtual void drawScreen(const render_state &state) override;
+    virtual void drawScreen(const core::render_state &state) override;
     
     virtual bool keyDown(const ci::app::KeyEvent &event) override;
     

@@ -14,10 +14,10 @@
 #include "MathHelpers.hpp"
 #include "LineSegment.hpp"
 
-using namespace std;
-
 namespace core {
     namespace util {
+        
+        using std::vector;
 
         /**
          Ramer-Douglas-Peucker simplification

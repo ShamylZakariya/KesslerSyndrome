@@ -10,7 +10,6 @@
 #include <queue>
 #include <thread>
 
-using namespace ci;
 namespace core {
     namespace util {
         namespace ip {

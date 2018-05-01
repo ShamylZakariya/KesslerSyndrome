@@ -8,7 +8,8 @@
 
 #include "ViewportController.hpp"
 
-namespace core {
+using namespace core;
+namespace elements {
 
     /*
      ViewportRef _viewport;
@@ -133,4 +134,4 @@ namespace core {
     }
 
 
-} // end namespace core
+} // end namespace elements

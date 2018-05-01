@@ -16,7 +16,7 @@ namespace game {
 
     SMART_PTR(Planet);
 
-    class Planet : public terrain::TerrainObject {
+    class Planet : public elements::terrain::TerrainObject {
     public:
 
         /**
@@ -41,13 +41,13 @@ namespace game {
 
         };
 
-        static PlanetRef create(string name, terrain::WorldRef world, core::util::xml::XmlMultiTree planetNode, int drawLayer);
+        static PlanetRef create(string name, elements::terrain::WorldRef world, core::util::xml::XmlMultiTree planetNode, int drawLayer);
 
-        static PlanetRef create(string name, terrain::WorldRef world, const config &surfaceConfig, const config &coreConfig, const vector<planet_generation::params::perimeter_attachment_params> &attachments, dvec2 origin, double partitionSize, int drawLayer);
+        static PlanetRef create(string name, elements::terrain::WorldRef world, const config &surfaceConfig, const config &coreConfig, const vector<planet_generation::params::perimeter_attachment_params> &attachments, dvec2 origin, double partitionSize, int drawLayer);
 
     public:
 
-        Planet(string name, terrain::WorldRef world, const map<size_t,vector<terrain::AttachmentRef>> &attachmentsByBatchId, int drawLayer);
+        Planet(string name, elements::terrain::WorldRef world, const map<size_t,vector<elements::terrain::AttachmentRef>> &attachmentsByBatchId, int drawLayer);
 
         virtual ~Planet();
 
@@ -59,14 +59,14 @@ namespace game {
             return _origin;
         }
         
-        const map<size_t,vector<terrain::AttachmentRef>> &getAttachments() const { return _attachmentsByBatchId; }
+        const map<size_t,vector<elements::terrain::AttachmentRef>> &getAttachments() const { return _attachmentsByBatchId; }
         
-        vector<terrain::AttachmentRef> getAttachmentsByBatchId(size_t batchId) const;
+        vector<elements::terrain::AttachmentRef> getAttachmentsByBatchId(size_t batchId) const;
 
     private:
 
         dvec2 _origin;
-        map<size_t,vector<terrain::AttachmentRef>> _attachmentsByBatchId;
+        map<size_t,vector<elements::terrain::AttachmentRef>> _attachmentsByBatchId;
 
     };
 
@@ -80,14 +80,14 @@ namespace game {
 
         virtual cpBB getBB() const = 0;
 
-        virtual terrain::dpolygon2 getPolygon() const = 0;
+        virtual elements::terrain::dpolygon2 getPolygon() const = 0;
 
         virtual void debugDrawSkeleton() const {
         }
 
     protected:
 
-        static terrain::dpolygon2 lineSegmentToPolygon(dvec2 a, dvec2 b, double width);
+        static elements::terrain::dpolygon2 lineSegmentToPolygon(dvec2 a, dvec2 b, double width);
 
     };
 
@@ -100,7 +100,7 @@ namespace game {
             return _bb;
         }
 
-        terrain::dpolygon2 getPolygon() const override {
+        elements::terrain::dpolygon2 getPolygon() const override {
             return _polygon;
         }
 
@@ -112,12 +112,12 @@ namespace game {
         dvec2 _origin;
         vector<dvec2> _vertices;
         vector<vector<pair<size_t, size_t>>> _spokes, _rings;
-        terrain::dpolygon2 _polygon;
+        elements::terrain::dpolygon2 _polygon;
         cpBB _bb;
 
-        terrain::dpolygon2 createPolygon() const;
+        elements::terrain::dpolygon2 createPolygon() const;
 
-        terrain::dpolygon2 createPolygon(const pair<std::size_t, std::size_t> &segment) const;
+        elements::terrain::dpolygon2 createPolygon(const pair<std::size_t, std::size_t> &segment) const;
     };
 
     class CrackGeometryDrawComponent : public core::DrawComponent {

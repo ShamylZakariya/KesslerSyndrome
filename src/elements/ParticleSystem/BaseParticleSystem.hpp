@@ -11,7 +11,7 @@
 #include "Core.hpp"
 #include "Xml.hpp"
 
-namespace particles {
+namespace elements {
 
     using core::seconds_t;
 
@@ -258,6 +258,6 @@ namespace particles {
 
     };
 
-}
+} // end namespace elements
 
 #endif /* BaseParticleSystem_hpp */

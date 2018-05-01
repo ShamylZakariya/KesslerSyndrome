@@ -11,7 +11,7 @@
 #include "GlslProgLoader.hpp"
 
 using namespace core;
-namespace particles {
+namespace elements {
 
     namespace {
 
@@ -864,4 +864,4 @@ namespace particles {
         return _config.kinematicParticleGravitationLayerMask;
     }
 
-}
+} // end namespace elements

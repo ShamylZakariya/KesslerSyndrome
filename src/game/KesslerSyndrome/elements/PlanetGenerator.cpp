@@ -18,8 +18,8 @@
 #include "TerrainDetail.hpp"
 #include "TerrainDetail_MarchingSquares.hpp"
 
-using namespace ci;
 using namespace core;
+using namespace elements;
 
 namespace game { namespace planet_generation {
     

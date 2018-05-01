@@ -69,7 +69,7 @@ namespace game { namespace planet_generation {
             bool pruneFloaters;
             
             // material to apply to terrain
-            terrain::material material;
+            elements::terrain::material material;
             
             terrain_params(bool enabled=true):
             enabled(enabled),
@@ -85,7 +85,7 @@ namespace game { namespace planet_generation {
             bool enabled;
             
             // material to apply to anchors
-            terrain::material material;
+            elements::terrain::material material;
             
             anchor_params(bool enabled=true):
             enabled(enabled)
@@ -198,28 +198,28 @@ namespace game { namespace planet_generation {
          and populate terrain::Shape vector with the marched/triangulated geometry.
          return terrain map
          */
-        ci::Channel8u generate_shapes(const params &p, vector <terrain::ShapeRef> &shapes);
+        ci::Channel8u generate_shapes(const params &p, vector <elements::terrain::ShapeRef> &shapes);
 
         /**
          Generate just anchors and anchor map from given generation parameters,
          and populate terrain::Shape vector with the marched/triangulated geometry.
          return terrain map
          */
-        ci::Channel8u generate_anchors(const params &p, vector <terrain::AnchorRef> &anchors);
+        ci::Channel8u generate_anchors(const params &p, vector <elements::terrain::AnchorRef> &anchors);
 
     }
     
     struct result {
-        terrain::WorldRef world;
+        elements::terrain::WorldRef world;
         ci::Channel8u terrainMap;
         ci::Channel8u anchorMap;
-        map<size_t,vector<terrain::AttachmentRef>> attachmentsByBatchId;
+        map<size_t,vector<elements::terrain::AttachmentRef>> attachmentsByBatchId;
     };
 
     /**
      Generate a terrin::World with given generation parameters; generates both terrain and anchor geometry.
      */
-    result generate(const params &params, terrain::WorldRef world);
+    result generate(const params &params, elements::terrain::WorldRef world);
 
     /**
      Generate a terrin::World with given generation parameters; generates both terrain and anchor geometry.

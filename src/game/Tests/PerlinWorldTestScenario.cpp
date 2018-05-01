@@ -23,8 +23,8 @@
 #include "PlanetGenerator.hpp"
 #include "PlanetGreebling.hpp"
 
-using namespace ci;
 using namespace core;
+using namespace elements;
 
 namespace {
 
@@ -203,7 +203,7 @@ void PerlinWorldTestScenario::setup() {
         
         game::GreeblingParticleSystem::config config;
         config.textureAtlas = gl::Texture2d::create(image, fmt);
-        config.atlasType = particles::Atlas::TwoByTwo;
+        config.atlasType = elements::Atlas::TwoByTwo;
         config.drawLayer = DrawLayers::ATTACHMENTS;
         
         config.greebleDescriptors = {

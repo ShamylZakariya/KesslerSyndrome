@@ -18,9 +18,6 @@
 #include <cinder/gl/GlslProg.h>
 #include <cinder/gl/Batch.h>
 
-using namespace ci;
-using namespace std;
-
 namespace core {
 
     SMART_PTR(BaseCompositor);

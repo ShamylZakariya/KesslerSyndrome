@@ -17,7 +17,7 @@ namespace game {
     SMART_PTR(GreeblingParticleSimulation);
     SMART_PTR(GreeblingParticleSystem);
 
-    class GreeblingParticleSimulation : public particles::BaseParticleSimulation {
+    class GreeblingParticleSimulation : public elements::BaseParticleSimulation {
     public:
         
         struct config {
@@ -72,8 +72,8 @@ namespace game {
         }
         
         // GreeblingParticleSimulation
-        void setAttachments(const vector <terrain::AttachmentRef> &attachments);
-        const vector <terrain::AttachmentRef> &getAttachments() const { return _attachments; }
+        void setAttachments(const vector <elements::terrain::AttachmentRef> &attachments);
+        const vector <elements::terrain::AttachmentRef> &getAttachments() const { return _attachments; }
 
     protected:
         
@@ -85,14 +85,14 @@ namespace game {
         config _config;
         cpBB _bb;
         bool _firstSimulate;
-        vector <terrain::AttachmentRef> _attachments;
+        vector <elements::terrain::AttachmentRef> _attachments;
         
     };
     
-    class GreeblingParticleSystemDrawComponent : public particles::ParticleSystemDrawComponent {
+    class GreeblingParticleSystemDrawComponent : public elements::ParticleSystemDrawComponent {
     public:
         
-        struct config : public particles::ParticleSystemDrawComponent::config {
+        struct config : public elements::ParticleSystemDrawComponent::config {
 
             // if non-zero, this represents the distance relative to width of the sway of each greeble particle
             // by its atlas index. The size of the vector must == the number of elements implied by the atlas type.
@@ -122,7 +122,7 @@ namespace game {
     };
     
     
-    class GreeblingParticleSystem : public particles::BaseParticleSystem {
+    class GreeblingParticleSystem : public elements::BaseParticleSystem {
     public:
 
         struct greeble_descriptor {
@@ -156,13 +156,13 @@ namespace game {
             int attachmentBatchId;
             int drawLayer;
             ci::gl::Texture2dRef textureAtlas;
-            particles::Atlas::Type atlasType;
+            elements::Atlas::Type atlasType;
             vector<greeble_descriptor> greebleDescriptors;
             
             config():
             attachmentBatchId(0),
             drawLayer(0),
-            atlasType(particles::Atlas::None)
+            atlasType(elements::Atlas::None)
             {}
             
             static boost::optional<config> parse(const core::util::xml::XmlMultiTree &node);
@@ -172,7 +172,7 @@ namespace game {
             GreeblingParticleSystemDrawComponent::config createDrawConfig() const;
         };
         
-        static GreeblingParticleSystemRef create(std::string name, const config &c, const vector <terrain::AttachmentRef> &attachments);
+        static GreeblingParticleSystemRef create(std::string name, const config &c, const vector <elements::terrain::AttachmentRef> &attachments);
         
     public:
         

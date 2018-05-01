@@ -12,8 +12,6 @@
 #include "Core.hpp"
 #include "Svg.hpp"
 
-
-using namespace ci;
 using namespace core;
 
 class SvgTestScenario : public Scenario {

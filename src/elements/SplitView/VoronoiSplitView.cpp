@@ -11,7 +11,7 @@
 #include "Easing.hpp"
 
 using namespace core;
-namespace vsv {
+namespace elements {
     
     /*
      core::BaseViewportRef _viewportA, _viewportB;
@@ -146,4 +146,4 @@ namespace vsv {
         _vspc->setShadowIntensity(curvedVoronoiMix);
     }
     
-}
+} // end namespace elements

@@ -14,7 +14,6 @@
 #include "Signals.hpp"
 #include "RenderState.hpp"
 #include "TimeState.hpp"
-#include "ViewportController.hpp"
 
 namespace core {
 

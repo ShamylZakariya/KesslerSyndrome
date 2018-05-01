@@ -15,13 +15,10 @@
 
 #include "Terrain.hpp"
 #include "ParticleSystem.hpp"
+#include "ViewportController.hpp"
 
 
-using namespace ci;
-using namespace core;
-using namespace particles;
-
-class ParticleSystemTestScenario : public Scenario {
+class ParticleSystemTestScenario : public core::Scenario {
 public:
 
     ParticleSystemTestScenario();
@@ -32,11 +29,11 @@ public:
 
     virtual void cleanup() override;
 
-    virtual void update(const time_state &time) override;
+    virtual void update(const core::time_state &time) override;
 
-    virtual void clear(const render_state &state) override;
+    virtual void clear(const core::render_state &state) override;
 
-    virtual void drawScreen(const render_state &state) override;
+    virtual void drawScreen(const core::render_state &state) override;
 
     virtual bool keyDown(const ci::app::KeyEvent &event) override;
 
@@ -48,10 +45,10 @@ protected:
 
 private:
 
-    ParticleSystemRef _explosionPs;
-    ParticleEmitterRef _explosionEmitter;
-    ParticleEmitter::emission_id _explosionEmissionId;
-    core::ViewportControllerRef _viewportController;
+    elements::ParticleSystemRef _explosionPs;
+    elements::ParticleEmitterRef _explosionEmitter;
+    elements::ParticleEmitter::emission_id _explosionEmissionId;
+    elements::ViewportControllerRef _viewportController;
 };
 
 #endif /* ParticleSystemTestScenario_hpp */

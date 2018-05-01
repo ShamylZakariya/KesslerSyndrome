@@ -22,7 +22,7 @@ namespace game {
 
     SMART_PTR(CloudLayerParticleSystem);
 
-    class CloudLayerParticleSimulation : public particles::BaseParticleSimulation {
+    class CloudLayerParticleSimulation : public elements::BaseParticleSimulation {
     public:
 
         struct particle_prototype {
@@ -121,11 +121,11 @@ namespace game {
         vector<particle_physics> _physics;
     };
 
-    class CloudLayerParticleSystem : public particles::BaseParticleSystem {
+    class CloudLayerParticleSystem : public elements::BaseParticleSystem {
     public:
 
         struct config {
-            particles::ParticleSystemDrawComponent::config drawConfig;
+            elements::ParticleSystemDrawComponent::config drawConfig;
             CloudLayerParticleSimulation::config simulationConfig;
 
             static config parse(const core::util::xml::XmlMultiTree &node);

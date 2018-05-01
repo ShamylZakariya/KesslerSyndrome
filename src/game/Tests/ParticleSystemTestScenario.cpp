@@ -11,6 +11,8 @@
 
 #include "DevComponents.hpp"
 
+using namespace core;
+using namespace elements;
 
 namespace {
 

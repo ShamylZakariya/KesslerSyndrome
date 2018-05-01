@@ -8,7 +8,7 @@
 #include "BaseParticleSystem.hpp"
 
 using namespace core;
-namespace particles {
+namespace elements {
 
 #pragma mark - Data
 
@@ -66,7 +66,7 @@ namespace particles {
         return None;
     }
 
-    std::string Atlas::toString(particles::Atlas::Type t) {
+    std::string Atlas::toString(elements::Atlas::Type t) {
         switch (t) {
             case None:
                 return "None";
@@ -150,4 +150,4 @@ namespace particles {
         }
     }
 
-}
+} // end namespace elements

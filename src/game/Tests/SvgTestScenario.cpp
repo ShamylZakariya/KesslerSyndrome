@@ -22,12 +22,12 @@ void SvgTestScenario::setup() {
     setStage(make_shared<Stage>("Hello Svg"));
     
 
-    getStage()->addObject(Object::with("Grid", { WorldCartesianGridDrawComponent::create(1) }));
+    getStage()->addObject(Object::with("Grid", { elements::WorldCartesianGridDrawComponent::create(1) }));
 
-    auto viewportController = make_shared<ViewportController>(getMainViewport<Viewport>());
+    auto viewportController = make_shared<elements::ViewportController>(getMainViewport<Viewport>());
     getStage()->addObject(Object::with("ViewportControl", {
         viewportController,
-        make_shared<MouseViewportControlComponent>(viewportController)
+        make_shared<elements::MouseViewportControlComponent>(viewportController)
     }));
 
     testSimpleSvgLoad();

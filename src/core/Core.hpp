@@ -24,7 +24,6 @@
 #include "TimeState.hpp"
 #include "RenderState.hpp"
 #include "Viewport.hpp"
-#include "ViewportController.hpp"
 
 // higher stage stuff
 

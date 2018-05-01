@@ -398,8 +398,6 @@
 				63F93C321F86F96A00F537CA /* util */,
 				632622FF1E7D9A630051ABE2 /* Viewport.cpp */,
 				632623001E7D9A630051ABE2 /* Viewport.hpp */,
-				632623011E7D9A630051ABE2 /* ViewportController.cpp */,
-				632623021E7D9A630051ABE2 /* ViewportController.hpp */,
 				63611A8B2087990C004EE731 /* Compositor.cpp */,
 				63611A8C2087990C004EE731 /* Compositor.hpp */,
 				636364032093743C00806152 /* Tracking.cpp */,
@@ -485,6 +483,8 @@
 		63F93C221F86F70D00F537CA /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				632623011E7D9A630051ABE2 /* ViewportController.cpp */,
+				632623021E7D9A630051ABE2 /* ViewportController.hpp */,
 				63F93C231F86F70D00F537CA /* DevComponents.cpp */,
 				63F93C241F86F70D00F537CA /* DevComponents.hpp */,
 			);

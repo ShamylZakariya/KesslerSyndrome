@@ -12,8 +12,8 @@
 #include "GameConstants.hpp"
 
 using namespace core;
-using namespace terrain;
-
+using namespace elements;
+using elements::terrain::dpolygon2;
 
 namespace game {
 
@@ -113,7 +113,7 @@ namespace game {
         return make_shared<Planet>(name, result.world, result.attachmentsByBatchId, drawLayer);
     }
 
-    Planet::Planet(string name, WorldRef world, const map<size_t,vector<terrain::AttachmentRef>> &attachmentsByBatchId, int drawLayer) :
+    Planet::Planet(string name, terrain::WorldRef world, const map<size_t,vector<terrain::AttachmentRef>> &attachmentsByBatchId, int drawLayer) :
             TerrainObject(name, world, drawLayer),
             _attachmentsByBatchId(attachmentsByBatchId)
     {

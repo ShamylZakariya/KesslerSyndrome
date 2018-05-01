@@ -11,7 +11,6 @@
 #include "Stage.hpp"
 #include "Strings.hpp"
 
-using namespace ci;
 namespace core {
 
     namespace {

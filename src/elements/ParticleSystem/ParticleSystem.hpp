@@ -12,7 +12,7 @@
 
 #include "BaseParticleSystem.hpp"
 
-namespace particles {
+namespace elements {
 
     SMART_PTR(ParticleSystem);
 
@@ -429,21 +429,21 @@ namespace particles {
     };
 
 
-    class ParticleSystemDrawComponent : public particles::BaseParticleSystemDrawComponent {
+    class ParticleSystemDrawComponent : public elements::BaseParticleSystemDrawComponent {
     public:
 
-        struct config : public particles::BaseParticleSystemDrawComponent::config {
+        struct config : public elements::BaseParticleSystemDrawComponent::config {
             ci::gl::Texture2dRef textureAtlas;
-            particles::Atlas::Type atlasType;
+            elements::Atlas::Type atlasType;
             gl::GlslProgRef shader;
 
             config() :
-                    atlasType(particles::Atlas::None) {
+                    atlasType(elements::Atlas::None) {
             }
 
-            config(const particles::BaseParticleSystemDrawComponent::config &c) :
-                    particles::BaseParticleSystemDrawComponent::config(c),
-                    atlasType(particles::Atlas::None) {
+            config(const elements::BaseParticleSystemDrawComponent::config &c) :
+                    elements::BaseParticleSystemDrawComponent::config(c),
+                    atlasType(elements::Atlas::None) {
             }
 
             static config parse(const core::util::xml::XmlMultiTree &node);
@@ -454,7 +454,7 @@ namespace particles {
         ParticleSystemDrawComponent(config c);
 
         // BaseParticleSystemDrawComponent
-        void setSimulation(const particles::BaseParticleSimulationRef simulation) override;
+        void setSimulation(const elements::BaseParticleSimulationRef simulation) override;
 
         void draw(const core::render_state &renderState) override;
 
@@ -515,14 +515,14 @@ namespace particles {
     };
 
 
-    class ParticleSystem : public particles::BaseParticleSystem {
+    class ParticleSystem : public elements::BaseParticleSystem {
     public:
 
         struct config {
             size_t maxParticleCount;
             bool keepSorted;
             size_t kinematicParticleGravitationLayerMask;
-            particles::ParticleSystemDrawComponent::config drawConfig;
+            elements::ParticleSystemDrawComponent::config drawConfig;
 
             config() :
                     maxParticleCount(500),
@@ -553,6 +553,6 @@ namespace particles {
     };
 
 
-}
+} // end namespace elements
 
 #endif /* ParticleSystem_hpp */

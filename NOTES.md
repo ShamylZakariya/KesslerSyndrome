@@ -2,12 +2,15 @@
 
 ## TODO
 
-## Thoughts
-
-- TargetTrackingViewportControlComponent is... way obsolete at this point. But it has good ideas!
+- Namespace cleanup
+    - look for instances of ci:: & using namespace ci. 
 - Do I still need Scenario::clear????
 - ScreenComposite fugliness
     - Look into glBlendFuncSeparate - it allows separate SRC/DST factors for RGB vs ALPHA. ci::gl::ScopedBlend supports it.
+
+## Thoughts
+
+- TargetTrackingViewportControlComponent is... way obsolete at this point. But it has good ideas!
 
 ## BUGS PRIORITY HIGH
 - observe TerrainWorld::417 cpSpaceBBQuery - I might be able to use cpSPace queries to test if attachments are inside the cut volume. might be a lot faster than my approach, since chipmunk is pretty optimized.
