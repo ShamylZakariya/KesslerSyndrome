@@ -238,7 +238,6 @@ void MultiViewportTestScenario::setup()
             return true;
         })
     }));
-    
 }
 
 void MultiViewportTestScenario::cleanup()
@@ -268,8 +267,59 @@ void MultiViewportTestScenario::drawScreen(const render_state &state)
     << " sps: " << core::App::get()->getAverageSps()
     << " visible: (" << getStage()->getDrawDispatcher()->visible().size() << "/" << getStage()->getDrawDispatcher()->all().size() << ")";
     
-    
     gl::drawString(ss.str(), vec2(10, 10), Color(1, 1, 1));
+    
+
+    // we're demonstrating screen blending correctness here
+
+    
+    {
+        gl::ScopedBlendAlpha sb;
+        {
+            gl::ScopedColor sc(ColorA(0,0,0,0.75));
+            gl::drawSolidCircle(vec2(25,45), 20);
+        }
+
+        {
+            gl::ScopedColor sc(ColorA(1,0,1,0.75));
+            gl::drawSolidCircle(vec2(55,45), 20);
+        }
+
+        {
+            gl::ScopedColor sc(ColorA(0,1,1,0.75));
+            gl::drawSolidCircle(vec2(85,45), 20);
+        }
+
+        {
+            gl::ScopedColor sc(ColorA(1,1,0,0.75));
+            gl::drawSolidCircle(vec2(115,45), 20);
+        }
+    }
+
+    {
+        gl::ScopedBlendAdditive sb;
+        {
+            gl::ScopedColor sc(ColorA(0,0,0,0.75));
+            gl::drawSolidCircle(vec2(25,105), 20);
+        }
+        
+        {
+            gl::ScopedColor sc(ColorA(1,0,1,0.75));
+            gl::drawSolidCircle(vec2(55,105), 20);
+        }
+        
+        {
+            gl::ScopedColor sc(ColorA(0,1,1,0.75));
+            gl::drawSolidCircle(vec2(85,105), 20);
+        }
+
+        {
+            gl::ScopedColor sc(ColorA(1,1,0,0.75));
+            gl::drawSolidCircle(vec2(115,105), 20);
+        }
+
+    }
+
 }
 
 void MultiViewportTestScenario::reset()

@@ -59,6 +59,13 @@ namespace core {
         void setFbo(const gl::FboRef &fbo) { _fbo = fbo; }
         const gl::FboRef &getFbo() const { return _fbo; }
         
+        void setBlend(GLenum srcRgb, GLenum dstRgb, GLenum srcAlpha, GLenum dstAlpha);
+
+        GLenum getBlendSrcRgb() const { return _srcRgb; }
+        GLenum getBlendDstRgb() const { return _dstRgb; }
+        GLenum getBlendSrcAlpha() const { return _srcAlpha; }
+        GLenum getBlendDstAlpha() const { return _dstAlpha; }
+        
         void composite(int width, int height) override;
     
     protected:
@@ -66,6 +73,7 @@ namespace core {
         gl::FboRef _fbo;
         gl::GlslProgRef _shader;
         gl::BatchRef _batch;
+        GLenum _srcRgb, _dstRgb, _srcAlpha, _dstAlpha;
 
     };
     
