@@ -2,11 +2,7 @@
 
 ## TODO
 
-- Namespace cleanup
-    - look for instances of  & using namespace ci. 
 - Do I still need Scenario::clear????
-- ScreenComposite fugliness
-    - Look into glBlendFuncSeparate - it allows separate SRC/DST factors for RGB vs ALPHA. gl::ScopedBlend supports it.
 
 ## Thoughts
 
