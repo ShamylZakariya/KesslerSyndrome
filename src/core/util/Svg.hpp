@@ -283,7 +283,7 @@ namespace core {
 
                 void _makeLocal(const dvec2 &originWorld);
 
-                void _drawDebug(const render_state &state, const GroupRef &owner, double opacity, const TriMeshRef &mesh, vector <stroke> &strokes, const gl::GlslProgRef &shader);
+                void _drawGizmos(const render_state &state, const GroupRef &owner, double opacity, const TriMeshRef &mesh, vector <stroke> &strokes, const gl::GlslProgRef &shader);
 
                 void _drawGame(const render_state &state, const GroupRef &owner, double opacity, const TriMeshRef &mesh, vector <stroke> &strokes, const gl::GlslProgRef &shader);
 

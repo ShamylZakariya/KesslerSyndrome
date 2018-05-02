@@ -298,10 +298,6 @@ namespace core {
 
         virtual int getLayer() const = 0;
 
-        virtual int getDrawPasses() const {
-            return 1;
-        }
-
         virtual BatchDrawDelegateRef getBatchDrawDelegate() const {
             return nullptr;
         }

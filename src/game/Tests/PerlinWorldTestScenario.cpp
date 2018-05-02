@@ -365,10 +365,6 @@ bool PerlinWorldTestScenario::keyDown(const app::KeyEvent &event) {
     }
     
     switch(event.getCode()) {
-        case app::KeyEvent::KEY_BACKQUOTE: {
-            setRenderMode(RenderMode::mode((int(getRenderMode()) + 1) % RenderMode::COUNT));
-            return true;
-        }
         case app::KeyEvent::KEY_BACKSPACE: {
             CI_LOG_D("Clearing cut recorder");
             _terrainCutRecorder->clearCuts();

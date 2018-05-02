@@ -14,34 +14,6 @@
 
 namespace core {
 
-#pragma mark - RenderMode
-
-    namespace RenderMode {
-
-        enum mode {
-            GAME,
-            DEVELOPMENT,
-            COUNT
-        };
-
-        inline std::string toString(RenderMode::mode mode) {
-            switch (mode) {
-                case GAME:
-                    return "RenderMode::GAME";
-                    break;
-                case DEVELOPMENT:
-                    return "RenderMode::DEVELOPMENT";
-                    break;
-                case COUNT:
-                    return "RenderMode::COUNT";
-                    break;
-            }
-
-            return "RenderMode::Unknown";
-        }
-
-    }
-
 #pragma mark - render_state
 
     /**
@@ -52,36 +24,38 @@ namespace core {
     struct render_state {
 
         BaseViewportRef viewport;
-        RenderMode::mode mode;
-        size_t frame, pass;
-        seconds_t time, deltaT;
+        size_t frame;
+        seconds_t time;
+        seconds_t deltaT;
+        size_t gizmoMask;
 
         /**
          create a render_state
-         @param vp The current viewport
-         @param m The current RenderMode::mode
-         @param f The current frame
-         @param p The current pass
-         @param t The current time
-
-         Note that pass is optional. It's reserved for special situations where a composite Object
-         draws multiple child game objects, and might need to render them multiple times, with them
-         rendering effects after solid geometry, etc. Pass will generally be zero.
          */
-        render_state(RenderMode::mode m, size_t f, size_t p, seconds_t t, seconds_t dt) :
-                mode(m),
-                frame(f),
-                pass(p),
-                time(t),
-                deltaT(dt) {
+        render_state(size_t frame, seconds_t time, seconds_t deltaTime, size_t gizmoMask) :
+                frame(frame),
+                time(time),
+                deltaT(deltaTime),
+                gizmoMask(gizmoMask){
         }
+        
+        // test to see if all bits in `bits are enabled in gizmoMask
+        inline bool testAllGizmoBits(size_t bits) const { return (gizmoMask & bits) == bits; }
+        
+        // test if any bits in `bits are enabled in gizmoMask
+        inline bool testGizmoBit(size_t bits) const { return gizmoMask & bits; }
+
 
     };
+    
+    namespace Gizmos {
+        static const size_t ANCHORS         = 1 << 0;
+        static const size_t LABELS          = 1 << 1;
+        static const size_t AABBS           = 1 << 2;
+        static const size_t WIREFRAME       = 1 << 3;
+        static const size_t PHYSICS         = 1 << 4;
+    }
 
-}
-
-inline ostream &operator<<(ostream &os, core::RenderMode::mode mode) {
-    return os << core::RenderMode::toString(mode);
 }
 
 #endif /* RenderState_h */

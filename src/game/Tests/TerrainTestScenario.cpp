@@ -151,9 +151,8 @@ TerrainTestScenario::~TerrainTestScenario() {
 }
 
 void TerrainTestScenario::setup() {
-    // go debug for rendering
-    setRenderMode(RenderMode::DEVELOPMENT);
-
+    setRenderStateGizmoMask(Gizmos::LABELS | Gizmos::ANCHORS);
+    
     setStage(make_shared<Stage>("Terrain Test Stage"));
 
     //auto world = testDistantTerrain();
@@ -218,8 +217,6 @@ bool TerrainTestScenario::keyDown(const app::KeyEvent &event) {
     } else if (event.getCode() == app::KeyEvent::KEY_SPACE) {
         //testExplicitCut();
         return true;
-    } else if (event.getCode() == app::KeyEvent::KEY_BACKQUOTE) {
-        setRenderMode(RenderMode::mode((int(getRenderMode()) + 1) % RenderMode::COUNT));
     }
     return false;
 }

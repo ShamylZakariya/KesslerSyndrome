@@ -368,19 +368,12 @@ namespace core {
             }
 
             void Shape::draw(const render_state &state, const GroupRef &owner, double opacity, const gl::GlslProgRef &shader) {
-                switch (state.mode) {
-                    case RenderMode::GAME:
-                        if (!isOrigin()) {
-                            _drawGame(state, owner, opacity, _localMesh, _localStrokes, shader);
-                        }
-                        break;
-
-                    case RenderMode::DEVELOPMENT:
-                        _drawDebug(state, owner, opacity, _localMesh, _localStrokes, shader);
-                        break;
-
-                    case RenderMode::COUNT:
-                        break;
+                if (!isOrigin()) {
+                    _drawGame(state, owner, opacity, _localMesh, _localStrokes, shader);
+                }
+                
+                if (state.gizmoMask) {
+                    _drawGizmos(state, owner, opacity, _localMesh, _localStrokes, shader);
                 }
             }
 
@@ -442,55 +435,61 @@ namespace core {
                 _svgStrokes.clear();
             }
 
-            void Shape::_drawDebug(const render_state &state, const GroupRef &owner, double opacity, const TriMeshRef &mesh, vector <stroke> &strokes, const gl::GlslProgRef &shader) {
+            void Shape::_drawGizmos(const render_state &state, const GroupRef &owner, double opacity, const TriMeshRef &mesh, vector <stroke> &strokes, const gl::GlslProgRef &shader) {
                 if (isOrigin()) {
-                    dmat4 worldTransform = owner->_worldTransform(dmat4(1));
+                    
+                    if (state.testGizmoBit(Gizmos::ANCHORS)) {
+                        dmat4 worldTransform = owner->_worldTransform(dmat4(1));
 
-                    double screenSize = 20;
-                    dvec2 xAxis(worldTransform[0]);
-                    dvec2 yAxis(worldTransform[1]);
+                        double screenSize = 20;
+                        dvec2 xAxis(worldTransform[0]);
+                        dvec2 yAxis(worldTransform[1]);
 
-                    dvec2 scale(screenSize / length(xAxis), screenSize / length(yAxis));
-                    scale *= state.viewport->getReciprocalScale();
+                        dvec2 scale(screenSize / length(xAxis), screenSize / length(yAxis));
+                        scale *= state.viewport->getReciprocalScale();
 
-                    shader->uniform("Color", ColorA(1, 0, 0, 1));
-                    gl::drawLine(vec2(0, 0), vec2(scale.x, 0));
-                    shader->uniform("Color", ColorA(1, 0, 0, 0.5));
-                    gl::drawLine(vec2(0, 0), vec2(-scale.x, 0));
+                        shader->uniform("Color", ColorA(1, 0, 0, 1));
+                        gl::drawLine(vec2(0, 0), vec2(scale.x, 0));
+                        shader->uniform("Color", ColorA(1, 0, 0, 0.5));
+                        gl::drawLine(vec2(0, 0), vec2(-scale.x, 0));
 
-                    shader->uniform("Color", ColorA(0, 1, 0, 1));
-                    gl::drawLine(vec2(0, 0), vec2(0, scale.y));
-                    shader->uniform("Color", ColorA(0, 1, 0, 0.5));
-                    gl::drawLine(vec2(0, 0), vec2(0, -scale.y));
+                        shader->uniform("Color", ColorA(0, 1, 0, 1));
+                        gl::drawLine(vec2(0, 0), vec2(0, scale.y));
+                        shader->uniform("Color", ColorA(0, 1, 0, 0.5));
+                        gl::drawLine(vec2(0, 0), vec2(0, -scale.y));
+                    }
+                    
                 } else {
 
-                    //
-                    //	Crude immediate-mode style drawing of meshes and strokes
-                    //
-
-                    const AppearanceRef appearance = getAppearance();
-
-                    if (appearance->isFilled()) {
-                        ColorA fc = appearance->getFillColor();
-                        shader->uniform("Color", ColorA(fc.r, fc.g, fc.b, fc.a * opacity));
-                        gl::draw(*mesh);
-                    }
-
-                    if (appearance->isStroked()) {
-                        ColorA sc = appearance->getStrokeColor();
-                        shader->uniform("Color", ColorA(sc.r, sc.g, sc.b, sc.a * opacity));
-                        gl::lineWidth(1);
-
-                        for (auto &stroke : strokes) {
-                            vec2 a = stroke.vertices.front();
-                            for (auto it = stroke.vertices.begin() + 1, end = stroke.vertices.end(); it != end; ++it) {
-                                vec2 b = *it;
-                                gl::drawLine(a, b);
-                                a = b;
-                            }
-
-                            if (stroke.closed) {
-                                gl::drawLine(a, stroke.vertices.front());
+                    if (state.testGizmoBit(Gizmos::WIREFRAME)) {
+                        //
+                        //    Crude immediate-mode style drawing of meshes and strokes
+                        //
+                        
+                        const AppearanceRef appearance = getAppearance();
+                        
+                        if (appearance->isFilled()) {
+                            ColorA fc = appearance->getFillColor();
+                            shader->uniform("Color", ColorA(fc.r, fc.g, fc.b, fc.a * opacity));
+                            gl::draw(*mesh);
+                        }
+                        
+                        if (appearance->isStroked()) {
+                            ColorA sc = appearance->getStrokeColor();
+                            shader->uniform("Color", ColorA(sc.r, sc.g, sc.b, sc.a * opacity));
+                            gl::lineWidth(1);
+                            
+                            for (auto &stroke : strokes) {
+                                vec2 a = stroke.vertices.front();
+                                for (auto it = stroke.vertices.begin() + 1, end = stroke.vertices.end(); it != end; ++it) {
+                                    vec2 b = *it;
+                                    gl::drawLine(a, b);
+                                    a = b;
+                                }
+                                
+                                if (stroke.closed) {
+                                    gl::drawLine(a, stroke.vertices.front());
+                                }
                             }
                         }
                     }
@@ -666,7 +665,7 @@ namespace core {
                     _draw(state, 1, _shader);
                 }
 
-                if (state.mode == RenderMode::DEVELOPMENT && isRoot()) {
+                if (state.testGizmoBit(Gizmos::AABBS) && isRoot()) {
                     gl::color(1, 0, 1);
                     cpBB bounds = getBB();
                     gl::drawStrokedRect(Rectf(bounds.l, bounds.b, bounds.r, bounds.t), state.viewport->getReciprocalScale());

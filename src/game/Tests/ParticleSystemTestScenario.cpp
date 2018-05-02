@@ -228,8 +228,6 @@ bool ParticleSystemTestScenario::keyDown(const app::KeyEvent &event) {
     if (event.getChar() == 'r') {
         reset();
         return true;
-    } else if (event.getCode() == app::KeyEvent::KEY_BACKQUOTE) {
-        setRenderMode(RenderMode::mode((int(getRenderMode()) + 1) % RenderMode::COUNT));
     }
     return false;
 }

@@ -87,11 +87,10 @@ namespace elements {
          cpSpatialIndex *_index;
          set<ShapeRef> _all;
          collector _collector;
-         size_t _drawPasses;
          */
         DrawDispatcher::DrawDispatcher() :
-        _index(cpBBTreeNew(objectBBFunc, NULL)),
-        _drawPasses(1) {
+        _index(cpBBTreeNew(objectBBFunc, NULL))
+        {
         }
         
         DrawDispatcher::~DrawDispatcher() {
@@ -140,16 +139,10 @@ namespace elements {
         
         void DrawDispatcher::draw(const render_state &state, const gl::GlslProgRef &shader) {
             render_state renderState = state;
-            const size_t drawPasses = _drawPasses;
             gl::ScopedGlslProg sglp(shader);
             
             for (vector<DrawableRef>::iterator it(_collector.sorted.begin()), end(_collector.sorted.end()); it != end; ++it) {
-                vector<DrawableRef>::iterator groupRunIt = it;
-                for (renderState.pass = 0; renderState.pass < drawPasses; ++renderState.pass) {
-                    groupRunIt = _drawGroupRun(it, end, renderState, shader);
-                }
-                
-                it = groupRunIt;
+                it = _drawGroupRun(it, end, renderState, shader);
             }
         }
         
@@ -518,23 +511,32 @@ namespace elements {
             _drawDispatcher.cull(renderState);
             _drawDispatcher.draw(renderState, _shader);
             
-            //
-            //	In dev mode draw BBs and drawable IDs
-            //
-            
-            if (renderState.mode == RenderMode::DEVELOPMENT) {
+            if (renderState.gizmoMask) {
+
                 const double rScale = renderState.viewport->getReciprocalScale();
                 const dmat4 rScaleMat = glm::scale(dvec3(rScale, -rScale, 1));
-                
-                const bool DrawGroupOrigins = false;
-                const bool DrawAttachments = true;
-                const bool DrawGroupBBs = true;
-                const bool DrawGroupIds = true;
-                
+
                 gl::ScopedLineWidth slw(1);
-                
-                if ((DrawAttachments)) {
-                    // render attachments
+
+                if (renderState.testGizmoBit(Gizmos::ANCHORS)) {
+                    
+                    auto groupOriginRenderer = [&](const GroupBaseRef &group) {
+                        // draw the shape id
+                        const auto R = group->getModelMatrix();
+                        const double axisSize = 10;
+                        
+                        gl::ScopedModelMatrix smm;
+                        gl::multModelMatrix(R);
+                        
+                        gl::color(1, 0, 0);
+                        gl::drawLine(vec3(0, 0, 0), vec3(axisSize, 0, 0));
+                        gl::color(0, 1, 0);
+                        gl::drawLine(vec3(0, 0, 0), vec3(0, axisSize, 0));
+                        
+                        gl::color(1,1,1);
+                        gl::drawStrokedCircle(dvec2(0,0), axisSize, 16);
+                    };
+
                     auto groupAttachmentRenderer = [&](const GroupBaseRef &group, float axisSize) {
                         if (group->isStatic() || cpBBIntersects(renderState.viewport->getFrustum(), group->getBB())) {
                             
@@ -557,14 +559,20 @@ namespace elements {
                         }
                     };
                     
-                    const double size = 16 * rScale;
-                    groupAttachmentRenderer(_staticGroup, size);
+                    groupOriginRenderer(_staticGroup);
                     for (const auto &dynamicGroup : _dynamicGroups) {
-                        groupAttachmentRenderer(dynamicGroup, size);
+                        groupOriginRenderer(dynamicGroup);
                     }
+                    
+                    const double attachmentSize = 16 * rScale;
+                    groupAttachmentRenderer(_staticGroup, attachmentSize);
+                    for (const auto &dynamicGroup : _dynamicGroups) {
+                        groupAttachmentRenderer(dynamicGroup, attachmentSize);
+                    }
+                    
                 }
                 
-                if ((DrawGroupBBs)) {
+                if (renderState.testGizmoBit(Gizmos::AABBS)) {
                     auto groupBBRenderer = [&](const GroupBaseRef &group) {
                         const auto bb = group->getBB();
                         gl::drawStrokedRect(Rectf(bb.l, bb.b, bb.r, bb.t));
@@ -579,7 +587,7 @@ namespace elements {
                     }
                 }
                 
-                if ((DrawGroupIds)) {
+                if (renderState.testGizmoBit(Gizmos::LABELS)) {
                     auto groupIdRenderer = [&](const GroupBaseRef &group) {
                         // draw the shape id
                         const auto R = group->getModelMatrix();
@@ -595,31 +603,9 @@ namespace elements {
                         groupIdRenderer(dynamicGroup);
                     }
                 }
-                
-                if ((DrawGroupOrigins)) {
-                    auto groupOriginRenderer = [&](const GroupBaseRef &group) {
-                        // draw the shape id
-                        const auto R = group->getModelMatrix();
-                        const double axisSize = 10;
-                        
-                        gl::ScopedModelMatrix smm;
-                        gl::multModelMatrix(R);
-                        
-                        gl::color(1, 0, 0);
-                        gl::drawLine(vec3(0, 0, 0), vec3(axisSize, 0, 0));
-                        gl::color(0, 1, 0);
-                        gl::drawLine(vec3(0, 0, 0), vec3(0, axisSize, 0));
-                        
-                        gl::color(1,1,1);
-                        gl::drawStrokedCircle(dvec2(0,0), axisSize, 16);
-                    };
-                    
-                    groupOriginRenderer(_staticGroup);
-                    for (const auto &dynamicGroup : _dynamicGroups) {
-                        groupOriginRenderer(dynamicGroup);
-                    }
-                }
+    
             }
+
         }
         
         void World::step(const time_state &timeState) {
@@ -1337,7 +1323,7 @@ namespace elements {
         }
         
         Color DynamicGroup::getColor(const core::render_state &state) const {
-            if (state.mode == RenderMode::DEVELOPMENT && isSleeping()) {
+            if (state.testGizmoBit(Gizmos::PHYSICS) && isSleeping()) {
                 return Color(0, 0.5, 0.5);
             }
             return GroupBase::getColor(state);
@@ -1679,7 +1665,7 @@ namespace elements {
         }
         
         bool Element::shouldDraw(const render_state &state) const {
-            return state.mode == RenderMode::DEVELOPMENT;
+            return state.testGizmoBit(Gizmos::ANCHORS);
         }
         
         

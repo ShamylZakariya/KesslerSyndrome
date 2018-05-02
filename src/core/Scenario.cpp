@@ -93,8 +93,8 @@ namespace core {
             _screenViewportComposer(create_screen_viewport_composer()),
             _time(app::getElapsedSeconds(), 1.0 / 60.0, 1, 0),
             _stepTime(app::getElapsedSeconds(), 1.0 / 60.0, 1, 0),
-            _renderState(RenderMode::GAME, 0, 0, 0, 0),
-            _screenRenderState(RenderMode::GAME, 0, 0, 0, 0),
+            _renderState(0, 0, 0, 0),
+            _screenRenderState(0, 0, 0, 0),
             _width(app::getWindowWidth()),
             _height(app::getWindowHeight())
     {
@@ -135,12 +135,20 @@ namespace core {
         _screenViewportComposer = composer;
         _screenViewportComposer->onScenarioResized(_width, _height);
     }
-
-    void Scenario::setRenderMode(RenderMode::mode mode) {
-        _screenRenderState.mode = _renderState.mode = mode;
-        app::console() << "Scenario[" << this << "]::setRenderMode: " << RenderMode::toString(getRenderMode()) << endl;
+    
+    void Scenario::setRenderStateGizmoMask(size_t gizmoMask) {
+        _renderState.gizmoMask = _screenRenderState.gizmoMask = gizmoMask;
     }
-        
+    
+    void Scenario::addRenderStateGizmo(size_t gizmoBit) {
+        _renderState.gizmoMask |= gizmoBit;
+        _screenRenderState.gizmoMask |= gizmoBit;
+    }
+    
+    void Scenario::removeRenderStateGizmo(size_t gizmoBit) {
+        size_t mask = _renderState.gizmoMask;
+        _renderState.gizmoMask = _screenRenderState.gizmoMask = mask & ~gizmoBit;
+    }
 
     void Scenario::screenshot(const fs::path &folderPath, const string &namingPrefix, const string format) {
         size_t index = 0;
@@ -220,7 +228,6 @@ namespace core {
         //
 
         _screenRenderState.frame = _renderState.frame = app::getElapsedFrames();
-        _screenRenderState.pass = _renderState.pass = 0;
         _screenRenderState.time = _renderState.time = _time.time;
         _screenRenderState.deltaT = _renderState.deltaT = _time.deltaT;
 

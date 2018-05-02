@@ -142,11 +142,15 @@ namespace core {
         const render_state &getRenderState() const {
             return _renderState;
         }
-
-        void setRenderMode(RenderMode::mode mode);
-
-        RenderMode::mode getRenderMode() const {
-            return _renderState.mode;
+        
+        void setRenderStateGizmoMask(size_t gizmoMask);
+        
+        void addRenderStateGizmo(size_t gizmoBit);
+        
+        void removeRenderStateGizmo(size_t gizmoBit);
+        
+        size_t getRenderStateGizmoMask() const {
+            return _renderState.gizmoMask;
         }
         
         /**

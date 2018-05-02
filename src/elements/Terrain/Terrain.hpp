@@ -73,11 +73,7 @@ namespace elements {
             int getLayer() const override {
                 return _drawLayer;
             }
-            
-            int getDrawPasses() const override {
-                return 1;
-            }
-            
+                        
             BatchDrawDelegateRef getBatchDrawDelegate() const override {
                 return nullptr;
             }

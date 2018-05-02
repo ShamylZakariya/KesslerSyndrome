@@ -310,27 +310,18 @@ namespace core {
     }
 
     void DrawDispatcher::draw(const render_state &state) {
-        render_state renderState = state;
-
-        for (vector<DrawComponentRef>::iterator
-                     dcIt(_collector.sorted.begin()),
-                     end(_collector.sorted.end());
+        for (vector<DrawComponentRef>::iterator dcIt(_collector.sorted.begin()), end(_collector.sorted.end());
              dcIt != end;
-             ++dcIt) {
+             ++dcIt)
+        {
             DrawComponentRef dc = *dcIt;
             DrawComponent::BatchDrawDelegateRef delegate = dc->getBatchDrawDelegate();
-            int drawPasses = dc->getDrawPasses();
-
-            vector<DrawComponentRef>::iterator newDcIt = dcIt;
-            for (renderState.pass = 0; renderState.pass < drawPasses; ++renderState.pass) {
-                if (delegate) {
-                    newDcIt = _drawDelegateRun(dcIt, end, renderState);
-                } else {
-                    dc->draw(renderState);
-                }
+            
+            if (delegate) {
+                dcIt = _drawDelegateRun(dcIt, end, state);
+            } else {
+                dc->draw(state);
             }
-
-            dcIt = newDcIt;
         }
     }
 
