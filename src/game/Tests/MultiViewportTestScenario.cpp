@@ -220,8 +220,8 @@ void MultiViewportTestScenario::setup()
     TrackableRef trackableA = playerA->getComponent<CharacterState>();
     TrackableRef trackableB = playerB->getComponent<CharacterState>();
     auto svc = make_shared<VoronoiSplitViewComposer>(trackableA, trackableB, viewportA, viewportB);
-    svc->getVoronoiSplitViewCompositor()->setShadowColor(ColorA(0.1,0.1,0.15,0.75));
-    svc->getVoronoiSplitViewCompositor()->setShadowWidth(0.7);
+    svc->getVoronoiSplitViewCompositor()->setShadowColor(ColorA(0.0,0.0,0.05,0.5));
+    svc->getVoronoiSplitViewCompositor()->setShadowWidth(0.5);
     setViewportComposer(svc);
     
      getStage()->addObject(Object::with("Zelda", {
