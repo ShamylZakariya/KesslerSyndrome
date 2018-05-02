@@ -4,16 +4,10 @@
 
 - Do I still need Scenario::clear????
 
-## Thoughts
-
-- TargetTrackingViewportControlComponent is... way obsolete at this point. But it has good ideas!
-
 ## BUGS PRIORITY HIGH
 - observe TerrainWorld::417 cpSpaceBBQuery - I might be able to use cpSPace queries to test if attachments are inside the cut volume. might be a lot faster than my approach, since chipmunk is pretty optimized.
 
 ## BUGS PRIORITY LOW
-
-Consider rewriting DrawDispatcher using raw pointers and not shared_ptr<> ?
 
 CameraControllerComponent is acting oddly - it no longer allows camera re-centering when alt key is pressed.
 	This is not a bug but the architecture acting as designed. The input is gobbled.
