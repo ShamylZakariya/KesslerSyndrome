@@ -3,7 +3,12 @@
 ## Presently
 
 - Do I still need Scenario::clear????
-- Having DrawComponent override getLayer is stupid, compared to having it make a call to setLayer, or some such. (or is it?)
+
+- Having DrawComponent subclasses override getLayer is stupid, compared to having them make a call to setLayer, or some such. 
+    - confirm that getBB() is sanely implemented - e.g., maybe default implementation should return cpBBInvalid for NEVER, infinity for ALWAYS, and ... assert false for CULLING?
+    - can I kill Object::getBB()???? It might not be getting called now
+
+- Greeble atlasses need some kind of probability bias
 
 ## Todo
 

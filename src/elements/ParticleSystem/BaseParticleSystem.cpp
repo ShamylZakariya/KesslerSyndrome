@@ -113,7 +113,9 @@ namespace elements {
     }
 
     BaseParticleSystemDrawComponent::BaseParticleSystemDrawComponent(config c) :
-            _config(c) {
+            DrawComponent(c.drawLayer, VisibilityDetermination::FRUSTUM_CULLING),
+            _config(c)
+    {
     }
 
     cpBB BaseParticleSystemDrawComponent::getBB() const {
@@ -121,10 +123,6 @@ namespace elements {
             return s->getBB();
         }
         return cpBBInvalid;
-    }
-
-    int BaseParticleSystemDrawComponent::getLayer() const {
-        return _config.drawLayer;
     }
 
 #pragma mark - BaseParticleSystem

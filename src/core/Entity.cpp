@@ -72,10 +72,12 @@ namespace core {
      bool _alive;
      */
 
-    EntityDrawComponent::EntityDrawComponent() :
+    EntityDrawComponent::EntityDrawComponent(int drawLayer, VisibilityDetermination::style visibilityDetermination) :
+            DrawComponent(drawLayer, visibilityDetermination),
             _healthiness(0),
             _deathCycleProgress(0),
-            _alive(false) {
+            _alive(false)
+    {
     }
 
     EntityDrawComponent::~EntityDrawComponent() {

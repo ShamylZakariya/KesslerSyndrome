@@ -280,30 +280,54 @@ namespace core {
         typedef shared_ptr<BatchDrawDelegate> BatchDrawDelegateRef;
 
     public:
-        DrawComponent() {
+        // create a DrawComponent that draws on `drawLayer and uses a visibibility determination style of `visibilityDetermination
+        // NOTE: VisibilityDetermination::style is of types ALWAYS_DRAW, FRUSTUM_CULLING, & NEVER_DRAW
+        // if mode is FRUSTUM_CULLING, your implementation must return a meaningful BB in getBB()
+        DrawComponent(int drawLayer, VisibilityDetermination::style visibilityDetermination):
+                _drawLayer(drawLayer),
+                _visibilityDetermination(visibilityDetermination)
+        {
         }
 
         virtual ~DrawComponent() {
         }
 
-        // default implementation asks Object for the physicsComponent's BB
+        // default implementation returns:
+        // cpBBInfinity for VisibilityDetermination::ALWAYS_DRAW
+        // cpBBInvalid for VisibilityDetermination::NEVER_DRAW
+        // getObject()->getBB() for frustum culling.
+        // it is recommended that, if you
         virtual cpBB getBB() const;
 
+        // draw to stage
         virtual void draw(const render_state &renderState) = 0;
 
+        // draw to screen
         virtual void drawScreen(const render_state &state) {
         };
 
-        virtual VisibilityDetermination::style getVisibilityDetermination() const = 0;
+        // returns the visibility determination type for this component.
+        VisibilityDetermination::style getVisibilityDetermination() const { return _visibilityDetermination; }
 
-        virtual int getLayer() const = 0;
+        // set the draw layer for this component. Lower values draw earlier, higher draw layer
+        virtual void setLayer(int drawLayer) { _drawLayer = drawLayer; }
+        
+        // get the draw layer for this component
+        int getLayer() const { return _drawLayer; }
 
+        // if your component takes part in a batch render pass, return your custom BatchDrawDelegate here
+        // default implementation returns null, which means, no batch render pass
         virtual BatchDrawDelegateRef getBatchDrawDelegate() const {
             return nullptr;
         }
 
         // Component
         void onReady(ObjectRef parent, StageRef stage) override;
+        
+    private:
+        
+        int _drawLayer;
+        VisibilityDetermination::style _visibilityDetermination;
 
     };
 
@@ -524,9 +548,6 @@ namespace core {
         virtual void step(const time_state &timeState);
 
         virtual void update(const time_state &timeState);
-
-        // if this Object has a PhysicsComponent get the reported BB, else return cpBBInfinity
-        virtual cpBB getBB() const;
 
         // if this Object has a PhysicsComponent, defers to PhysicsComponent::getGravitationLayerMask
         // otherwise default implementation returns ALL_GRAVITATION_LAYERS

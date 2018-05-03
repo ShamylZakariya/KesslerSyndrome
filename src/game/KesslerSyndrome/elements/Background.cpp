@@ -28,7 +28,9 @@ namespace game {
      gl::BatchRef _batch;
      */
     BackgroundFillDrawComponent::BackgroundFillDrawComponent(config c) :
-            _config(c) {
+            DrawComponent(DrawLayers::BACKGROUND - 1000, VisibilityDetermination::ALWAYS_DRAW),
+            _config(c)
+    {
         auto vsh = CI_GLSL(150,
                 uniform
                 mat4 ciModelViewProjection;

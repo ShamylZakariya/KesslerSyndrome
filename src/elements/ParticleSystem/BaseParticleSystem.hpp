@@ -195,12 +195,6 @@ namespace elements {
         void draw(const core::render_state &renderState) override {
         };
 
-        int getLayer() const override;
-
-        core::VisibilityDetermination::style getVisibilityDetermination() const override {
-            return core::VisibilityDetermination::FRUSTUM_CULLING;
-        };
-
         // BaseParticleSystemDrawComponent
         const config &getConfig() const {
             return _config;

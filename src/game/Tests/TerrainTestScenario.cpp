@@ -185,7 +185,10 @@ void TerrainTestScenario::setup() {
         make_shared<MouseViewportControlComponent>(_viewportController)
     });
 
-    auto grid = Object::with("Grid", {WorldCartesianGridDrawComponent::create()});
+    auto gridDc = WorldCartesianGridDrawComponent::create();
+    gridDc->setFillColor(ColorA(0.6,0.6,0.6,1));
+    gridDc->setGridColor(ColorA(0.9,0.9,0.9,1));
+    auto grid = Object::with("Grid", {gridDc});
 
     getStage()->addObject(dragger);
     getStage()->addObject(cutter);

@@ -553,8 +553,9 @@ namespace core {
             class SvgDrawComponent : public DrawComponent {
             public:
                 SvgDrawComponent(util::svg::GroupRef doc, int layer = 0) :
-                        _docRoot(doc),
-                        _layer(layer) {
+                        DrawComponent(layer, VisibilityDetermination::FRUSTUM_CULLING),
+                        _docRoot(doc)
+                {
                 }
 
                 cpBB getBB() const override {
@@ -565,25 +566,12 @@ namespace core {
                     _docRoot->draw(state);
                 }
 
-                VisibilityDetermination::style getVisibilityDetermination() const override {
-                    return VisibilityDetermination::FRUSTUM_CULLING;
-                }
-
-                int getLayer() const override {
-                    return _layer;
-                }
-
-                void setLayer(int layer) {
-                    _layer = layer;
-                }
-
                 const GroupRef &getSvg() const {
                     return _docRoot;
                 }
 
             private:
                 GroupRef _docRoot;
-                int _layer;
             };
 
 

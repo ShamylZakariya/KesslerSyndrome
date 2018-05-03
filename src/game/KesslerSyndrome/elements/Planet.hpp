@@ -132,10 +132,6 @@ namespace game {
 
         void draw(const core::render_state &renderState) override;
 
-        core::VisibilityDetermination::style getVisibilityDetermination() const override;
-
-        int getLayer() const override;
-
     private:
         CrackGeometryRef _crackGeometry;
         TriMeshRef _trimesh;

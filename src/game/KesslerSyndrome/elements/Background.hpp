@@ -46,19 +46,7 @@ namespace game {
 
         // DrawComponent
 
-        int getLayer() const override {
-            return DrawLayers::BACKGROUND - 1000;
-        }
-
-        cpBB getBB() const override {
-            return cpBBInfinity;
-        }
-
         void draw(const core::render_state &state) override;
-
-        core::VisibilityDetermination::style getVisibilityDetermination() const override {
-            return core::VisibilityDetermination::ALWAYS_DRAW;
-        }
 
     private:
 

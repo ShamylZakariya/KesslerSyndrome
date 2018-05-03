@@ -96,7 +96,7 @@ namespace core {
     class EntityDrawComponent : public DrawComponent {
     public:
 
-        EntityDrawComponent();
+        EntityDrawComponent(int drawLayer, VisibilityDetermination::style vibilityDetermination);
 
         virtual ~EntityDrawComponent();
 
