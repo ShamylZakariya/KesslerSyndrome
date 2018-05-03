@@ -283,7 +283,7 @@ namespace core {
 
                 void _makeLocal(const dvec2 &originWorld);
 
-                void _drawDebug(const render_state &state, const GroupRef &owner, double opacity, const TriMeshRef &mesh, vector <stroke> &strokes, const gl::GlslProgRef &shader);
+                void _drawGizmos(const render_state &state, const GroupRef &owner, double opacity, const TriMeshRef &mesh, vector <stroke> &strokes, const gl::GlslProgRef &shader);
 
                 void _drawGame(const render_state &state, const GroupRef &owner, double opacity, const TriMeshRef &mesh, vector <stroke> &strokes, const gl::GlslProgRef &shader);
 
@@ -553,8 +553,9 @@ namespace core {
             class SvgDrawComponent : public DrawComponent {
             public:
                 SvgDrawComponent(util::svg::GroupRef doc, int layer = 0) :
-                        _docRoot(doc),
-                        _layer(layer) {
+                        DrawComponent(layer, VisibilityDetermination::FRUSTUM_CULLING),
+                        _docRoot(doc)
+                {
                 }
 
                 cpBB getBB() const override {
@@ -565,25 +566,12 @@ namespace core {
                     _docRoot->draw(state);
                 }
 
-                VisibilityDetermination::style getVisibilityDetermination() const override {
-                    return VisibilityDetermination::FRUSTUM_CULLING;
-                }
-
-                int getLayer() const override {
-                    return _layer;
-                }
-
-                void setLayer(int layer) {
-                    _layer = layer;
-                }
-
                 const GroupRef &getSvg() const {
                     return _docRoot;
                 }
 
             private:
                 GroupRef _docRoot;
-                int _layer;
             };
 
 

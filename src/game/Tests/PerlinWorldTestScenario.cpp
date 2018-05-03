@@ -96,6 +96,7 @@ namespace {
     public:
         
         ImageDrawer(gl::Texture2dRef image, dvec2 topLeft):
+        DrawComponent(1, VisibilityDetermination::ALWAYS_DRAW),
         _image(image),
         _topLeft(topLeft)
         {}
@@ -107,14 +108,6 @@ namespace {
             const auto bounds = _image->getBounds();
             const auto dest = Rectf(_topLeft.x, _topLeft.y, _topLeft.x + bounds.getWidth(), _topLeft.y - bounds.getHeight());
             gl::draw(_image, bounds, dest);
-        }
-        
-        VisibilityDetermination::style getVisibilityDetermination() const override {
-            return VisibilityDetermination::ALWAYS_DRAW;
-        }
-        
-        int getLayer() const override {
-            return 1;
         }
         
     private:
@@ -365,10 +358,6 @@ bool PerlinWorldTestScenario::keyDown(const app::KeyEvent &event) {
     }
     
     switch(event.getCode()) {
-        case app::KeyEvent::KEY_BACKQUOTE: {
-            setRenderMode(RenderMode::mode((int(getRenderMode()) + 1) % RenderMode::COUNT));
-            return true;
-        }
         case app::KeyEvent::KEY_BACKSPACE: {
             CI_LOG_D("Clearing cut recorder");
             _terrainCutRecorder->clearCuts();

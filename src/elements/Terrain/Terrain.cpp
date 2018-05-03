@@ -128,6 +128,7 @@ namespace elements {
 #pragma mark - MouseCutterDrawComponent
         
         MouseCutterDrawComponent::MouseCutterDrawComponent(ColorA color) :
+        DrawComponent(numeric_limits<int>::max(), VisibilityDetermination::ALWAYS_DRAW),
         _color(color) {
         }
         

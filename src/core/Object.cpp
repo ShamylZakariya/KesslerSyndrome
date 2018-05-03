@@ -48,7 +48,15 @@ namespace core {
 #pragma mark - DrawComponent
 
     cpBB DrawComponent::getBB() const {
-        return getObject()->getBB();
+        switch(_visibilityDetermination) {
+            case VisibilityDetermination::ALWAYS_DRAW:
+                return cpBBInfinity;
+            case VisibilityDetermination::NEVER_DRAW:
+                return cpBBInvalid;
+            case VisibilityDetermination::FRUSTUM_CULLING:
+                CI_ASSERT_MSG(false, "DrawComponent with VisibilityDetermination::FRUSTUM_CULLING culling must implement getBB()");
+                return cpBBInvalid;
+        }
     }
 
     void DrawComponent::onReady(ObjectRef parent, StageRef stage) {
@@ -385,14 +393,6 @@ namespace core {
                 component->update(timeState);
             }
         }
-    }
-
-    // if this Object has a DrawComponent or a PhysicsComponent get the reported BB, else return cpBBInvalid
-    cpBB Object::getBB() const {
-        if (_physicsComponent) {
-            return _physicsComponent->getBB();
-        }
-        return cpBBInvalid;
     }
 
     size_t Object::getGravitationLayerMask(cpBody *body) const {

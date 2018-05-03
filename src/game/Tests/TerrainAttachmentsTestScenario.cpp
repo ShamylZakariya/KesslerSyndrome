@@ -85,7 +85,7 @@ TerrainAttachmentsTestScenario::~TerrainAttachmentsTestScenario() {
 
 void TerrainAttachmentsTestScenario::setup() {
     // go debug for rendering
-    setRenderMode(RenderMode::DEVELOPMENT);
+    setRenderStateGizmoMask(Gizmos::AABBS | Gizmos::LABELS | Gizmos::LABELS);
     
     setStage(make_shared<Stage>("Terrain Test Stage"));
     
@@ -149,8 +149,6 @@ bool TerrainAttachmentsTestScenario::keyDown(const app::KeyEvent &event) {
     } else if (event.getCode() == app::KeyEvent::KEY_SPACE) {
         //testExplicitCut();
         return true;
-    } else if (event.getCode() == app::KeyEvent::KEY_BACKQUOTE) {
-        setRenderMode(RenderMode::mode((int(getRenderMode()) + 1) % RenderMode::COUNT));
     }
     return false;
 }

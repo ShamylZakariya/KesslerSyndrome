@@ -196,14 +196,6 @@ namespace elements {
             
             void draw(const core::render_state &, const gl::GlslProgRef &shader);
             
-            void setDrawPasses(size_t passes) {
-                _drawPasses = passes;
-            }
-            
-            size_t getPasses() const {
-                return _drawPasses;
-            }
-            
             size_t visibleCount() const {
                 return _collector.sorted.size();
             }
@@ -229,7 +221,6 @@ namespace elements {
             cpSpatialIndex *_index;
             set <DrawableRef> _all;
             collector _collector;
-            size_t _drawPasses;
             
         };
         

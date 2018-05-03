@@ -151,9 +151,8 @@ TerrainTestScenario::~TerrainTestScenario() {
 }
 
 void TerrainTestScenario::setup() {
-    // go debug for rendering
-    setRenderMode(RenderMode::DEVELOPMENT);
-
+    setRenderStateGizmoMask(Gizmos::LABELS | Gizmos::ANCHORS);
+    
     setStage(make_shared<Stage>("Terrain Test Stage"));
 
     //auto world = testDistantTerrain();
@@ -186,7 +185,10 @@ void TerrainTestScenario::setup() {
         make_shared<MouseViewportControlComponent>(_viewportController)
     });
 
-    auto grid = Object::with("Grid", {WorldCartesianGridDrawComponent::create()});
+    auto gridDc = WorldCartesianGridDrawComponent::create();
+    gridDc->setFillColor(ColorA(0.6,0.6,0.6,1));
+    gridDc->setGridColor(ColorA(0.9,0.9,0.9,1));
+    auto grid = Object::with("Grid", {gridDc});
 
     getStage()->addObject(dragger);
     getStage()->addObject(cutter);
@@ -218,8 +220,6 @@ bool TerrainTestScenario::keyDown(const app::KeyEvent &event) {
     } else if (event.getCode() == app::KeyEvent::KEY_SPACE) {
         //testExplicitCut();
         return true;
-    } else if (event.getCode() == app::KeyEvent::KEY_BACKQUOTE) {
-        setRenderMode(RenderMode::mode((int(getRenderMode()) + 1) % RenderMode::COUNT));
     }
     return false;
 }

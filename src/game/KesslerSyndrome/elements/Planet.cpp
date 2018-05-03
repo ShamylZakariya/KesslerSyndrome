@@ -321,7 +321,9 @@ namespace game {
      */
 
     CrackGeometryDrawComponent::CrackGeometryDrawComponent(const CrackGeometryRef &crackGeometry) :
-            _crackGeometry(crackGeometry) {
+            DrawComponent(DrawLayers::EFFECTS, VisibilityDetermination::FRUSTUM_CULLING),
+            _crackGeometry(crackGeometry)
+    {
         // convert polygon to something we can tesselate
         vector<dpolygon2> crackPolys = {_crackGeometry->getPolygon()};
         vector<terrain::detail::polyline_with_holes> result = terrain::detail::dpolygon2_to_polyline_with_holes(crackPolys, dmat4());
@@ -348,14 +350,5 @@ namespace game {
         gl::color(0, 0, 0);
         _crackGeometry->debugDrawSkeleton();
     }
-
-    VisibilityDetermination::style CrackGeometryDrawComponent::getVisibilityDetermination() const {
-        return VisibilityDetermination::FRUSTUM_CULLING;
-    }
-
-    int CrackGeometryDrawComponent::getLayer() const {
-        return DrawLayers::EFFECTS;
-    }
-
 
 }

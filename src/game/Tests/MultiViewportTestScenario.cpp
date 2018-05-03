@@ -27,6 +27,7 @@ namespace {
     public:
         
         ImageDrawer(gl::Texture2dRef image, dvec2 topLeft):
+        DrawComponent(1, VisibilityDetermination::ALWAYS_DRAW),
         _image(image),
         _topLeft(topLeft)
         {}
@@ -38,14 +39,6 @@ namespace {
             const auto bounds = _image->getBounds();
             const auto dest = Rectf(_topLeft.x, _topLeft.y, _topLeft.x + bounds.getWidth(), _topLeft.y - bounds.getHeight());
             gl::draw(_image, bounds, dest);
-        }
-        
-        VisibilityDetermination::style getVisibilityDetermination() const override {
-            return VisibilityDetermination::ALWAYS_DRAW;
-        }
-        
-        int getLayer() const override {
-            return 1;
         }
         
     private:
@@ -84,7 +77,9 @@ namespace {
     
     class CharacterDrawComponent : public core::DrawComponent {
     public:
-        CharacterDrawComponent(){}
+        CharacterDrawComponent():
+        DrawComponent(100, VisibilityDetermination::FRUSTUM_CULLING)
+        {}
         
         void onReady(ObjectRef parent, StageRef stage) override {
             DrawComponent::onReady(parent, stage);
@@ -102,15 +97,7 @@ namespace {
             gl::ScopedColor sc(state->getColor());
             gl::drawSolidCircle(state->getPosition(), state->getRadius());
         }
-        
-        VisibilityDetermination::style getVisibilityDetermination() const override {
-            return VisibilityDetermination::FRUSTUM_CULLING;
-        }
-        
-        int getLayer() const override {
-            return 100;
-        }
-        
+            
     protected:
         
         weak_ptr<CharacterState> _state;

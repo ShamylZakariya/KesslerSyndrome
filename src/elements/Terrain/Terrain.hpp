@@ -52,31 +52,18 @@ namespace elements {
         class TerrainDrawComponent : public core::DrawComponent {
         public:
             
-            TerrainDrawComponent(int drawLayer) : _drawLayer(drawLayer) {
+            TerrainDrawComponent(int drawLayer) :
+            DrawComponent(drawLayer, core::VisibilityDetermination::ALWAYS_DRAW)
+            {
             }
             
             virtual ~TerrainDrawComponent() {
             }
             
             void onReady(core::ObjectRef parent, core::StageRef stage) override;
-            
-            cpBB getBB() const override {
-                return cpBBInfinity;
-            }
-            
+                        
             void draw(const core::render_state &renderState) override;
             
-            core::VisibilityDetermination::style getVisibilityDetermination() const override {
-                return core::VisibilityDetermination::ALWAYS_DRAW;
-            }
-            
-            int getLayer() const override {
-                return _drawLayer;
-            }
-            
-            int getDrawPasses() const override {
-                return 1;
-            }
             
             BatchDrawDelegateRef getBatchDrawDelegate() const override {
                 return nullptr;
@@ -85,7 +72,6 @@ namespace elements {
         private:
             
             WorldRef _world;
-            int _drawLayer;
             
         };
         
@@ -161,21 +147,9 @@ namespace elements {
             MouseCutterDrawComponent(ColorA color = ColorA(1, 1, 1, 0.5));
             
             void onReady(core::ObjectRef parent, core::StageRef stage) override;
-            
-            cpBB getBB() const override {
-                return cpBBInfinity;
-            }
-            
+                        
             void draw(const core::render_state &renderState) override;
-            
-            core::VisibilityDetermination::style getVisibilityDetermination() const override {
-                return core::VisibilityDetermination::ALWAYS_DRAW;
-            }
-            
-            int getLayer() const override {
-                return numeric_limits<int>::max();
-            };
-            
+                        
         private:
             
             ColorA _color;

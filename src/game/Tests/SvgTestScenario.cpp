@@ -71,8 +71,6 @@ bool SvgTestScenario::keyDown(const app::KeyEvent &event) {
     } else if (event.getCode() == app::KeyEvent::KEY_SPACE) {
 
         return true;
-    } else if (event.getCode() == app::KeyEvent::KEY_BACKQUOTE) {
-        setRenderMode(RenderMode::mode((int(getRenderMode()) + 1) % RenderMode::COUNT));
     }
     return false;
 }

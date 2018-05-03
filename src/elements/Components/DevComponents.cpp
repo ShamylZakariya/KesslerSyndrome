@@ -26,8 +26,8 @@ namespace elements {
         return make_shared<WorldCartesianGridDrawComponent>(tex, basePeriod, periodStep);
     }
     
-    WorldCartesianGridDrawComponent::WorldCartesianGridDrawComponent(gl::TextureRef tex, double basePeriod, double periodStep)
-    :
+    WorldCartesianGridDrawComponent::WorldCartesianGridDrawComponent(gl::TextureRef tex, double basePeriod, double periodStep):
+    DrawComponent(-999999, VisibilityDetermination::ALWAYS_DRAW),
     _texture(tex),
     _basePeriod(basePeriod),
     _periodStep(periodStep),
@@ -448,6 +448,7 @@ namespace elements {
 #pragma mark - MousePickDrawComponent
     
     MousePickDrawComponent::MousePickDrawComponent(ColorA color, float radius) :
+    DrawComponent(numeric_limits<int>::max(), VisibilityDetermination::ALWAYS_DRAW),
     _color(color),
     _radius(radius) {
     }

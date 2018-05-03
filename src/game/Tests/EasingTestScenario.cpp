@@ -21,6 +21,7 @@ namespace {
     public:
         
         EaseRenderer(string name, const EaseFunction &easer, int steps, dvec2 position, int displaySize):
+        DrawComponent(100, VisibilityDetermination::FRUSTUM_CULLING),
         _name(name),
         _position(position),
         _displaySize(displaySize)
@@ -60,13 +61,7 @@ namespace {
                 gl::drawString(_name, dvec2(0,10));
             }
         }
-        
-        VisibilityDetermination::style getVisibilityDetermination() const override {
-            return VisibilityDetermination::FRUSTUM_CULLING;
-        }
-        
-        int getLayer() const override { return 100; }
-        
+                        
         // Component
         void onReady(ObjectRef parent, StageRef stage) override {
             DrawComponent::onReady(parent, stage);

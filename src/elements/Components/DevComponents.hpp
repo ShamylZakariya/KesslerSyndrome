@@ -29,20 +29,8 @@ namespace elements {
         
         void onReady(core::ObjectRef parent, core::StageRef stage) override;
         
-        cpBB getBB() const override {
-            return cpBBInfinity;
-        }
-        
         void draw(const core::render_state &state) override;
-        
-        core::VisibilityDetermination::style getVisibilityDetermination() const override {
-            return core::VisibilityDetermination::ALWAYS_DRAW;
-        }
-        
-        int getLayer() const override {
-            return -1;
-        }
-        
+                
         // set color of background fill
         void setFillColor(ColorA fillColor) {
             _fillColor = fillColor;
@@ -207,21 +195,9 @@ namespace elements {
         MousePickDrawComponent(ColorA color = ColorA(1, 1, 1, 0.5), float radius = 4);
         
         void onReady(core::ObjectRef parent, core::StageRef stage) override;
-        
-        cpBB getBB() const override {
-            return cpBBInfinity;
-        }
-        
+                
         void draw(const core::render_state &renderState) override;
-        
-        core::VisibilityDetermination::style getVisibilityDetermination() const override {
-            return core::VisibilityDetermination::ALWAYS_DRAW;
-        }
-        
-        int getLayer() const override {
-            return numeric_limits<int>::max();
-        };
-        
+                
     private:
         
         ColorA _color;
