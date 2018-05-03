@@ -191,7 +191,7 @@ namespace game {
     GreeblingParticleSimulation::config GreeblingParticleSystem::config::createSimulationConfig() const {
         GreeblingParticleSimulation::config c;
         for (const auto &gd : greebleDescriptors) {
-            c.atlasDetails.push_back(GreeblingParticleSimulation::config::atlas_detail(gd.color, gd.radius, gd.upOffset));
+            c.atlasDetails.push_back(GreeblingParticleSimulation::config::atlas_detail(gd.color, gd.radius, gd.upOffset, gd.probability));
         }
         return c;
     }

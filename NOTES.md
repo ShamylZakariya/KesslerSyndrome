@@ -2,9 +2,6 @@
 
 ## Presently
 
-- Do I still need Scenario::clear????
-- Greeble atlasses need some kind of probability bias
-
 ## Todo
 
 - Make some kind of component which simplifies toggling of Gizmo masks at runtime

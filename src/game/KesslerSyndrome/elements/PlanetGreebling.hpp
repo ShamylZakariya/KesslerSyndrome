@@ -37,7 +37,7 @@ namespace game {
                 // each atlas element receives a probability of (probability / (sum of all atlas_detail.probability)
                 size_t probability;
                 
-                atlas_detail(ColorA color, double radius, double upOffset = 0, int probability = 1):
+                atlas_detail(ColorA color, double radius, double upOffset = 0, size_t probability = 1):
                 color(color),
                 radius(radius),
                 upOffset(upOffset),
