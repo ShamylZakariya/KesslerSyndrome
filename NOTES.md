@@ -2,12 +2,12 @@
 
 ## Presently
 
-- Rethink how RenderMode works. I think I should have a gizmo bitmask  mask like Unity
+- Do I still need Scenario::clear????
+- Having DrawComponent override getLayer is stupid, compared to having it make a call to setLayer, or some such. (or is it?)
 
 ## Todo
 
-- Do I still need Scenario::clear????
-- Having DrawComponent override getLayer is stupid, compared to having it make a call to setLayer, or some such. (or is it?)
+- Make some kind of component which simplifies toggling of Gizmo masks at runtime
 
 ## Optimization 
 - observe TerrainWorld::417 cpSpaceBBQuery - I might be able to use cpSPace queries to test if attachments are inside the cut volume. might be a lot faster than my approach, since chipmunk is pretty optimized.
