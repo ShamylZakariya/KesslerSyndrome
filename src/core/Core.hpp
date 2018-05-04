@@ -25,10 +25,12 @@
 #include "RenderState.hpp"
 #include "Viewport.hpp"
 
-// higher stage stuff
+// higher level stuff
 
 #include "Object.hpp"
+#include "Entity.hpp"
 #include "Stage.hpp"
 #include "Scenario.hpp"
+#include "Tracking.hpp"
 
 #endif /* Core_h */

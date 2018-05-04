@@ -58,7 +58,7 @@ namespace {
         {}
         
         void setPosition(dvec2 position) { _position = position; notifyMoved(); }
-        dvec2 getPosition() const override { return _position; }
+        dvec2 getPosition() const { return _position; }
         
         void setRadius(double r) { _radius = r; notifyMoved(); }
         double getRadius() const { return _radius; }
@@ -68,6 +68,9 @@ namespace {
         
         void setSpeed(double s) { _speed = s; }
         double getSpeed() const { return _speed; }
+        
+        // Trackable
+        dvec2 getTrackingPosition() const override { return _position; }
         
     private:
         dvec2 _position;

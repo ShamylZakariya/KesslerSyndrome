@@ -46,8 +46,8 @@ namespace core {
     Viewport::look Tracker::apply(Viewport::look look, const time_state &time) {
         TrackableRef trackableTarget = getTrackableTarget();
         if (trackableTarget) {
-            _target.world = trackableTarget->getPosition();
-            _target.up = trackableTarget->getUp();
+            _target.world = trackableTarget->getTrackingPosition();
+            _target.up = trackableTarget->getTrackingUp();
         }
         
         const double rate = 1.0 / time.deltaT;

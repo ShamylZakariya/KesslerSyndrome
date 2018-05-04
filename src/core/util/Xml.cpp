@@ -8,6 +8,10 @@
 
 #include "Xml.hpp"
 
+#include "Strings.hpp"
+
+using namespace std;
+
 namespace core {
     namespace util {
         namespace xml {

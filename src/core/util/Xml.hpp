@@ -9,14 +9,23 @@
 #ifndef Xml_hpp
 #define Xml_hpp
 
+#include <cinder/Color.h>
 #include <cinder/Xml.h>
 
-#include "Core.hpp"
+#include "MathHelpers.hpp"
 
 namespace core {
     namespace util {
         namespace xml {
+            
+            using std::initializer_list;
+            using std::vector;
+            using std::string;
 
+            using ci::XmlTree;
+            using ci::Color;
+            using ci::ColorA;
+            
             /**
              @class XmlMultiTree
              XmlMultiTree is used when we want two or more mirrored XML DOMs, where "closer" ones override values in "farther" ones.

@@ -11,7 +11,7 @@
 
 #include <cinder/Xml.h>
 
-#include "Core.hpp"
+#include "Object.hpp"
 #include "Xml.hpp"
 
 namespace core {
