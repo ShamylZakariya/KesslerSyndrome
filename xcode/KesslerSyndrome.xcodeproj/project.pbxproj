@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		63017F99209CB031004ABFA3 /* Player.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63017F97209CB031004ABFA3 /* Player.cpp */; };
 		630873582049A3FE000BCE27 /* PlanetGreebling.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 630873562049A3FE000BCE27 /* PlanetGreebling.cpp */; };
 		630873592049A3FE000BCE27 /* PlanetGreebling.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 630873562049A3FE000BCE27 /* PlanetGreebling.cpp */; };
 		631171361FAB72A50098069F /* ParticleSystemTestScenario.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 631171341FAB72A50098069F /* ParticleSystemTestScenario.cpp */; };
@@ -121,6 +122,8 @@
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		5323E6B10EAFCA74003A9687 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = /System/Library/Frameworks/CoreVideo.framework; sourceTree = "<absolute>"; };
+		63017F97209CB031004ABFA3 /* Player.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Player.cpp; sourceTree = "<group>"; };
+		63017F98209CB031004ABFA3 /* Player.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Player.hpp; sourceTree = "<group>"; };
 		630873562049A3FE000BCE27 /* PlanetGreebling.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PlanetGreebling.cpp; sourceTree = "<group>"; };
 		630873572049A3FE000BCE27 /* PlanetGreebling.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PlanetGreebling.hpp; sourceTree = "<group>"; };
 		631171341FAB72A50098069F /* ParticleSystemTestScenario.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ParticleSystemTestScenario.cpp; sourceTree = "<group>"; };
@@ -347,6 +350,15 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		63017F96209CB018004ABFA3 /* entities */ = {
+			isa = PBXGroup;
+			children = (
+				63017F97209CB031004ABFA3 /* Player.cpp */,
+				63017F98209CB031004ABFA3 /* Player.hpp */,
+			);
+			path = entities;
+			sourceTree = "<group>";
+		};
 		631CBB6D2066FAB3006D3E31 /* util */ = {
 			isa = PBXGroup;
 			children = (
@@ -540,6 +552,7 @@
 		63F93C711F87185A00F537CA /* KesslerSyndrome */ = {
 			isa = PBXGroup;
 			children = (
+				63017F96209CB018004ABFA3 /* entities */,
 				638F4D8F1F87D4E8004437E8 /* elements */,
 				63F93C741F87185A00F537CA /* GameApp.cpp */,
 				638F4D9E1F897F60004437E8 /* GameConstants.cpp */,
@@ -718,6 +731,7 @@
 				63F93C551F8714B200F537CA /* InputDispatcher.cpp in Sources */,
 				63F93C561F8714B200F537CA /* Scenario.cpp in Sources */,
 				63611A8D2087990C004EE731 /* Compositor.cpp in Sources */,
+				63017F99209CB031004ABFA3 /* Player.cpp in Sources */,
 				63F93C581F8714B200F537CA /* Stage.cpp in Sources */,
 				638F4D951F87D7BC004437E8 /* PerlinNoise.cpp in Sources */,
 				6332FF88202378C200279B7F /* PlanetGenerator.cpp in Sources */,
