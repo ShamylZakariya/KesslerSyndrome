@@ -26,7 +26,6 @@
 		6363640A209756F500806152 /* VoronoiSplitView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63636408209756F500806152 /* VoronoiSplitView.cpp */; };
 		6363640B209756F500806152 /* VoronoiSplitView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63636408209756F500806152 /* VoronoiSplitView.cpp */; };
 		638BFB1D203F28DE004163A9 /* IPTestsScenario.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 638BFB1B203F28DE004163A9 /* IPTestsScenario.cpp */; };
-		638F4D951F87D7BC004437E8 /* PerlinNoise.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 638F4D931F87D7BC004437E8 /* PerlinNoise.cpp */; };
 		638F4D991F895CE5004437E8 /* TerrainDetail.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 638F4D971F8957F8004437E8 /* TerrainDetail.cpp */; };
 		638F4D9A1F895CE5004437E8 /* Planet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 638F4D901F87D4F3004437E8 /* Planet.cpp */; };
 		638F4DA11F897FB7004437E8 /* GameConstants.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 638F4D9E1F897F60004437E8 /* GameConstants.cpp */; };
@@ -47,7 +46,6 @@
 		638F4DBB1F8BCFCE004437E8 /* InputDispatcher.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 632622F31E7D9A630051ABE2 /* InputDispatcher.cpp */; };
 		638F4DBC1F8BCFCE004437E8 /* Scenario.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 632622F81E7D9A630051ABE2 /* Scenario.cpp */; };
 		638F4DBE1F8BCFCE004437E8 /* Stage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63BFD8181E89ED2A00D821E4 /* Stage.cpp */; };
-		638F4DBF1F8BCFCE004437E8 /* PerlinNoise.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 638F4D931F87D7BC004437E8 /* PerlinNoise.cpp */; };
 		638F4DC01F8BCFCE004437E8 /* Entity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63F93C081F8681E100F537CA /* Entity.cpp */; };
 		638F4DC11F8BCFCE004437E8 /* App.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63F93C061F86804900F537CA /* App.cpp */; };
 		638F4DC31F8BCFCE004437E8 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 006D720219952D00008149E2 /* AVFoundation.framework */; };
@@ -170,8 +168,6 @@
 		638BFB1C203F28DE004163A9 /* IPTestsScenario.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IPTestsScenario.hpp; sourceTree = "<group>"; };
 		638F4D901F87D4F3004437E8 /* Planet.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Planet.cpp; sourceTree = "<group>"; };
 		638F4D911F87D4F3004437E8 /* Planet.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Planet.hpp; sourceTree = "<group>"; };
-		638F4D931F87D7BC004437E8 /* PerlinNoise.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PerlinNoise.cpp; sourceTree = "<group>"; };
-		638F4D941F87D7BC004437E8 /* PerlinNoise.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PerlinNoise.hpp; sourceTree = "<group>"; };
 		638F4D971F8957F8004437E8 /* TerrainDetail.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TerrainDetail.cpp; sourceTree = "<group>"; };
 		638F4D9B1F897BD5004437E8 /* Background.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Background.cpp; sourceTree = "<group>"; };
 		638F4D9C1F897BD5004437E8 /* Background.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Background.hpp; sourceTree = "<group>"; };
@@ -395,7 +391,6 @@
 				632622F41E7D9A630051ABE2 /* InputDispatcher.hpp */,
 				63BFD8181E89ED2A00D821E4 /* Stage.cpp */,
 				63BFD8191E89ED2A00D821E4 /* Stage.hpp */,
-				632622F51E7D9A630051ABE2 /* LineSegment.hpp */,
 				632622F61E7D9A630051ABE2 /* MathHelpers.hpp */,
 				63BFD8141E89565600D821E4 /* Object.cpp */,
 				63BFD8151E89565600D821E4 /* Object.hpp */,
@@ -403,7 +398,6 @@
 				632622F81E7D9A630051ABE2 /* Scenario.cpp */,
 				632622F91E7D9A630051ABE2 /* Scenario.hpp */,
 				632622FA1E7D9A630051ABE2 /* Signals.hpp */,
-				632622FB1E7D9A630051ABE2 /* SpatialIndex.hpp */,
 				632622FC1E7D9A630051ABE2 /* StopWatch.hpp */,
 				632622FD1E7D9A630051ABE2 /* Strings.hpp */,
 				632622FE1E7D9A630051ABE2 /* TimeState.hpp */,
@@ -531,9 +525,9 @@
 		63F93C321F86F96A00F537CA /* util */ = {
 			isa = PBXGroup;
 			children = (
+				632622F51E7D9A630051ABE2 /* LineSegment.hpp */,
+				632622FB1E7D9A630051ABE2 /* SpatialIndex.hpp */,
 				63F93C331F86F96A00F537CA /* ContourSimplification.hpp */,
-				638F4D931F87D7BC004437E8 /* PerlinNoise.cpp */,
-				638F4D941F87D7BC004437E8 /* PerlinNoise.hpp */,
 				63F93C341F86F96A00F537CA /* Svg.cpp */,
 				63F93C3B1F86F96A00F537CA /* Svg.hpp */,
 				63F93C381F86F96A00F537CA /* SvgParsing.cpp */,
@@ -692,7 +686,6 @@
 				638F4DBC1F8BCFCE004437E8 /* Scenario.cpp in Sources */,
 				638F4DBE1F8BCFCE004437E8 /* Stage.cpp in Sources */,
 				63E29EF41F97A4C300CAF39E /* BaseParticleSystem.cpp in Sources */,
-				638F4DBF1F8BCFCE004437E8 /* PerlinNoise.cpp in Sources */,
 				638F4DC01F8BCFCE004437E8 /* Entity.cpp in Sources */,
 				638F4DC11F8BCFCE004437E8 /* App.cpp in Sources */,
 			);
@@ -733,7 +726,6 @@
 				63611A8D2087990C004EE731 /* Compositor.cpp in Sources */,
 				63017F99209CB031004ABFA3 /* Player.cpp in Sources */,
 				63F93C581F8714B200F537CA /* Stage.cpp in Sources */,
-				638F4D951F87D7BC004437E8 /* PerlinNoise.cpp in Sources */,
 				6332FF88202378C200279B7F /* PlanetGenerator.cpp in Sources */,
 				63F93C591F8714B200F537CA /* Entity.cpp in Sources */,
 				63F93C5A1F8714B200F537CA /* App.cpp in Sources */,

@@ -4,6 +4,7 @@
 
 ## Todo
 
+- Replace use of my PerlinNoise element with ci::Perlin. 
 - Make some kind of component which simplifies toggling of Gizmo masks at runtime
 
 ## Optimization 

@@ -8,7 +8,6 @@
 #include "Planet.hpp"
 
 #include "TerrainDetail.hpp"
-#include "PerlinNoise.hpp"
 #include "GameConstants.hpp"
 
 using namespace core;
