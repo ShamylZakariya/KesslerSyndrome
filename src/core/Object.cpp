@@ -302,6 +302,10 @@ namespace core {
             CI_ASSERT_MSG(!_physicsComponent, "Can't assign more than one PhysicsComponent");
             _physicsComponent = pc;
         }
+        
+        if (ScreenDrawComponentRef sdc = dynamic_pointer_cast<ScreenDrawComponent>(component)) {
+            _screenDrawComponents.insert(sdc);
+        }
 
         if (_ready) {
             const auto self = shared_from_this();
@@ -318,6 +322,15 @@ namespace core {
             if (DrawComponentRef dc = dynamic_pointer_cast<DrawComponent>(component)) {
                 _drawComponents.erase(dc);
             }
+            
+            if (ScreenDrawComponentRef dc = dynamic_pointer_cast<ScreenDrawComponent>(component)) {
+                _screenDrawComponents.erase(dc);
+            }
+            
+            if (_physicsComponent == component) {
+                _physicsComponent = nullptr;
+            }
+
         }
     }
 

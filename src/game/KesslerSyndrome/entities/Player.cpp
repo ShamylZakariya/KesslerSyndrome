@@ -520,10 +520,6 @@ namespace game {
         drawPlayer(renderState);
     }
     
-    void PlayerDrawComponent::drawScreen(const render_state &renderState) {
-        drawCharge(renderState);
-    }
-    
     void PlayerDrawComponent::drawPlayer(const render_state &renderState) {
         JetpackUnicyclePlayerPhysicsComponentRef physics = _physics.lock();
         CI_ASSERT_MSG(physics, "JetpackUnicyclePlayerPhysicsComponentRef should be accessbile");
@@ -560,10 +556,33 @@ namespace game {
         }
     }
     
-    void PlayerDrawComponent::drawCharge(const render_state &renderState) {
-        // we're in screen space
-        Rectd bounds = renderState.viewport->getBounds();
-        
+#pragma mark - PlayerUIDrawComponent
+    
+    /*
+     JetpackUnicyclePlayerPhysicsComponentWeakRef _physics;
+     */
+    
+    PlayerUIDrawComponent::PlayerUIDrawComponent():
+            ScreenDrawComponent(ScreenDrawLayers::PLAYER)
+    {}
+    
+    PlayerUIDrawComponent::~PlayerUIDrawComponent()
+    {}
+    
+    void PlayerUIDrawComponent::onReady(core::ObjectRef parent, core::StageRef stage) {
+        ScreenDrawComponent::onReady(parent, stage);
+        _physics = getSibling<JetpackUnicyclePlayerPhysicsComponent>();
+    }
+    
+    void PlayerUIDrawComponent::drawScreen(const core::render_state &renderState) {
+        drawCharge(renderState);
+    }
+    
+    void PlayerUIDrawComponent::drawCharge(const core::render_state &renderState) {
+        auto physics = _physics.lock();
+        CI_ASSERT_MSG(physics, "JetpackUnicyclePlayerPhysicsComponentRef should be accessbile");
+
+        Rectd bounds = renderState.viewport->getBounds();        
         int w = 20;
         int h = 60;
         int p = 10;
@@ -572,13 +591,12 @@ namespace game {
         gl::color(0, 1, 1, 1);
         gl::drawStrokedRect(chargeRectFrame);
         
-        auto physics = _physics.lock();
         double charge = saturate(physics->getJetpackFuelLevel() / physics->getJetpackFuelMax());
         int fillHeight = static_cast<int>(ceil(charge * h));
         Rectf chargeRectFill(bounds.getWidth() - p, p + h - fillHeight, bounds.getWidth() - p - w, p + h);
         gl::drawSolidRect(chargeRectFill);
     }
-    
+
     
 #pragma mark - Player
     

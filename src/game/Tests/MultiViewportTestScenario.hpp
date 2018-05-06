@@ -20,10 +20,7 @@ public:
     
     void setup() override;
     void cleanup() override;
-    void update(const core::time_state &time) override;
-    void draw(const core::render_state &state) override;
-    void drawScreen(const core::render_state &state) override;
-    
+    void update(const core::time_state &time) override;    
     void reset();
     
 private:

@@ -217,14 +217,32 @@ namespace game {
         
         void draw(const core::render_state &renderState) override;
         
-        void drawScreen(const core::render_state &renderState) override;
-                
+        
     protected:
         
         void drawPlayer(const core::render_state &renderState);
         
-        void drawCharge(const core::render_state &renderState);
         
+    private:
+        
+        JetpackUnicyclePlayerPhysicsComponentWeakRef _physics;
+        
+    };
+    
+    class PlayerUIDrawComponent : public core::ScreenDrawComponent {
+    public:
+        
+        PlayerUIDrawComponent();
+        virtual ~PlayerUIDrawComponent();
+        
+        // ScreenDrawComponent
+        void onReady(core::ObjectRef parent, core::StageRef stage) override;
+        void drawScreen(const core::render_state &renderState) override;
+
+    protected:
+        
+        void drawCharge(const core::render_state &renderState);
+
     private:
         
         JetpackUnicyclePlayerPhysicsComponentWeakRef _physics;

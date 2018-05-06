@@ -637,5 +637,17 @@ namespace elements {
         _angularVel = (_svgDoc->getAngle() - _lastAngle) / timeState.deltaT;
     }
     
+#pragma mark - PerformanceDrawComponent
+    
+    void PerformanceDisplayComponent::drawScreen(const render_state &renderState) {
+        stringstream ss;
+        ss << setprecision(2)
+           << "fps: " << core::App::get()->getAverageFps()
+           << " sps: " << core::App::get()->getAverageSps();
+        
+        gl::ScopedBlendAlpha sba;
+        gl::drawString(ss.str(), _topLeft, _color);
+    }
+    
 } // end namespace elements
 

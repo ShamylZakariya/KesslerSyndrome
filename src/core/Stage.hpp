@@ -575,13 +575,14 @@ namespace core {
 
         cpSpace *_space;
         SpaceAccessRef _spaceAccess;
-        bool _ready, _paused;
+        bool _ready, _paused, _screenDrawComponentsChanged;
         ScenarioWeakRef _scenario;
         set<ObjectRef> _objects;
         map<size_t, ObjectRef> _objectsById;
         time_state _time;
         string _name;
         DrawDispatcherRef _drawDispatcher;
+        vector<ScreenDrawComponentRef> _screenDrawComponents;
         cpBodyVelocityFunc _bodyVelocityFunc;
         vector<GravitationCalculatorRef> _gravities;
 

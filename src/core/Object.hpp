@@ -302,10 +302,6 @@ namespace core {
         // draw to stage
         virtual void draw(const render_state &renderState) = 0;
 
-        // draw to screen
-        virtual void drawScreen(const render_state &state) {
-        };
-
         // returns the visibility determination type for this component.
         VisibilityDetermination::style getVisibilityDetermination() const { return _visibilityDetermination; }
 
@@ -329,6 +325,36 @@ namespace core {
         int _drawLayer;
         VisibilityDetermination::style _visibilityDetermination;
 
+    };
+
+#pragma mark - ScreenDrawComponent
+    
+    SMART_PTR(ScreenDrawComponent);
+    
+    /**
+     ScreenDrawComponent is a component for drawing during the Stage's drawScreen pass.
+     During this pass, we have  standard 1-1 unity to pixel top-left coordinate system.
+     Objects that want to draw UI, text balloons, etc, should consider use of ScreenDrawComponent.
+     */
+    class ScreenDrawComponent : public Component {
+    public:
+        
+        ScreenDrawComponent(int drawLayer):_drawLayer(drawLayer) {}
+        virtual ~ScreenDrawComponent(){}
+        
+        // draw to screen
+        virtual void drawScreen(const render_state &renderState) = 0;
+        
+        // set the draw layer for this component. Lower values draw earlier, higher draw layer
+        virtual void setLayer(int drawLayer) { _drawLayer = drawLayer; }
+        
+        // get the draw layer for this component
+        int getLayer() const { return _drawLayer; }
+
+    private:
+        
+        int _drawLayer;
+        
     };
 
 #pragma mark - InputComponent
@@ -524,6 +550,11 @@ namespace core {
         const set<DrawComponentRef> &getDrawComponents() const {
             return _drawComponents;
         }
+        
+        // get all screen draw components attached to this object
+        const set<ScreenDrawComponentRef> &getScreenDrawComponents() const {
+            return _screenDrawComponents;
+        }
 
         // get the PhysicsComponent attached to this Object
         PhysicsComponentRef getPhysicsComponent() const {
@@ -579,6 +610,7 @@ namespace core {
         bool _ready;
         set<ComponentRef> _components;
         set<DrawComponentRef> _drawComponents;
+        set<ScreenDrawComponentRef> _screenDrawComponents;
         PhysicsComponentRef _physicsComponent;
         StageWeakRef _stage;
 

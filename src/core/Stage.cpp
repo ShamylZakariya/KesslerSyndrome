@@ -188,6 +188,10 @@ namespace core {
 
             return a->getObject()->getId() < b->getObject()->getId();
         }
+        
+        bool ScreenDrawComponentSorter(const ScreenDrawComponentRef &a, const ScreenDrawComponentRef &b) {
+            return a->getLayer() < b->getLayer();
+        }
 
     }
 
@@ -382,13 +386,14 @@ namespace core {
     /*
      cpSpace *_space;
      SpaceAccessRef _spaceAccess;
-     bool _ready, _paused;
+     bool _ready, _paused, _screenDrawComponentsChanged;
      ScenarioWeakRef _scenario;
      set<ObjectRef> _objects;
      map<size_t, ObjectRef> _objectsById;
      time_state _time;
      string _name;
      DrawDispatcherRef _drawDispatcher;
+     vector<ScreenDrawComponentRef> _screenDrawComponents;
      cpBodyVelocityFunc _bodyVelocityFunc;
      vector<GravitationCalculatorRef> _gravities;
      
@@ -396,12 +401,14 @@ namespace core {
      map<collision_type_pair, vector<EarlyCollisionCallback>> _collisionBeginHandlers, _collisionPreSolveHandlers;
      map<collision_type_pair, vector<LateCollisionCallback>> _collisionPostSolveHandlers, _collisionSeparateHandlers;
      map<collision_type_pair, vector<ContactCallback>> _contactHandlers;
-     map<collision_type_pair, vector<pair<ObjectRef, ObjectRef>>> _syntheticContacts;     */
+     map<collision_type_pair, vector<pair<ObjectRef, ObjectRef>>> _syntheticContacts;
+     */
 
     Stage::Stage(string name) :
             _space(cpSpaceNew()),
             _ready(false),
             _paused(false),
+            _screenDrawComponentsChanged(false),
             _time(0, 0, 1, 0),
             _name(name),
             _drawDispatcher(make_shared<DrawDispatcher>()),
@@ -548,8 +555,13 @@ namespace core {
     }
 
     void Stage::drawScreen(const render_state &state) {
-        for (const auto &dc : _drawDispatcher->all()) {
-            dc->drawScreen(state);
+        if (_screenDrawComponentsChanged) {
+            std::sort(_screenDrawComponents.begin(), _screenDrawComponents.end(), ScreenDrawComponentSorter);
+            _screenDrawComponentsChanged = false;
+        }
+        
+        for (const auto &sdc : _screenDrawComponents) {
+            sdc->drawScreen(state);
         }
     }
 
@@ -563,6 +575,11 @@ namespace core {
 
         for (auto &dc : obj->getDrawComponents()) {
             _drawDispatcher->add(id, dc);
+        }
+        
+        for (const auto &sdc : obj->getScreenDrawComponents()) {
+            _screenDrawComponents.push_back(sdc);
+            _screenDrawComponentsChanged = true;
         }
 
         obj->onAddedToStage(shared_from_this_as<Stage>());
