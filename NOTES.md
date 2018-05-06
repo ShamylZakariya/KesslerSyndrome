@@ -4,6 +4,7 @@
 
 ## Todo
 
+- Kill XmlMultiTree - I'm not even using it, and it adds complexity.
 - Make some kind of component which simplifies toggling of Gizmo masks at runtime
 
 ## Optimization 

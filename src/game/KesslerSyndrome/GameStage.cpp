@@ -152,6 +152,16 @@ namespace game {
         buildDustParticleSystem();
         
         //
+        //    Load the player
+        //
+        auto playersNode = util::xml::findElement(stageNode, "players");
+        if (playersNode) {
+            for (const auto &child : playersNode->getChildren()) {
+                loadPlayer(*child);
+            }
+        }
+        
+        //
         //  Build development control components
         //
 
@@ -217,7 +227,7 @@ namespace game {
     void GameStage::onCollisionSeparate(cpArbiter *arb) {
     }
 
-    void GameStage::applySpaceAttributes(XmlTree spaceNode) {
+    void GameStage::applySpaceAttributes(const XmlTree &spaceNode) {
         if (spaceNode.hasAttribute("damping")) {
             double damping = util::xml::readNumericAttribute<double>(spaceNode, "damping", 0.95);
             damping = clamp(damping, 0.0, 1.0);
@@ -225,7 +235,7 @@ namespace game {
         }
     }
 
-    void GameStage::buildGravity(XmlTree gravityNode) {
+    void GameStage::buildGravity(const XmlTree &gravityNode) {
         string type = gravityNode.getAttribute("type").getValue();
         if (type == "radial") {
             dvec2 origin = util::xml::readPointAttribute(gravityNode, "origin", dvec2(0, 0));
@@ -245,12 +255,12 @@ namespace game {
         }
     }
 
-    void GameStage::loadBackground(XmlTree backgroundNode) {
+    void GameStage::loadBackground(const XmlTree &backgroundNode) {
         _background = Background::create(backgroundNode);
         addObject(_background);
     }
 
-    void GameStage::loadPlanet(XmlTree planetNode) {
+    void GameStage::loadPlanet(const XmlTree &planetNode) {
         double friction = util::xml::readNumericAttribute<double>(planetNode, "friction", 1);
         double density = util::xml::readNumericAttribute<double>(planetNode, "density", 1);
         double collisionShapeRadius = 0.1;
@@ -278,8 +288,17 @@ namespace game {
             _gravity->setCenterOfMass(_planet->getOrigin());
         }
     }
+    
+    void GameStage::loadPlayer(const XmlTree &playerNode) {
+        
+        ci::DataSourceRef playerTemplate = app::loadAsset(playerNode.getAttribute("template").getValue());
+        int idx = util::xml::readNumericAttribute<int>(playerNode, "id", 0);
+        string name = "player_" + str(idx);
+        _player = Player::create(name, playerTemplate, dvec2(0,1000));
+        addObject(_player);
+    }
 
-    CloudLayerParticleSystemRef GameStage::loadCloudLayer(XmlTree cloudLayer, int drawLayer) {
+    CloudLayerParticleSystemRef GameStage::loadCloudLayer(const XmlTree &cloudLayer, int drawLayer) {
         CloudLayerParticleSystem::config config = CloudLayerParticleSystem::config::parse(cloudLayer);
         config.drawConfig.drawLayer = drawLayer;
         auto cl = CloudLayerParticleSystem::create(config);

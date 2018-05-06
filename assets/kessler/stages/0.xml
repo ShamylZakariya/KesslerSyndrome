@@ -86,4 +86,7 @@
 			<particle minRadius="10" maxRadius="100" minRadiusNoiseValue="0.5" color="255,255,255,255"/>
 		</simulation>
 	</cloudLayer>
+	<players>
+		<player id="0" template="kessler/players/player0.xml"/>
+	</players>
 </stage>
