@@ -50,7 +50,7 @@ namespace elements {
         _shader->uniform("ColorTex1", 1);
         _shader->uniform("Tint0", ColorA(1,1,1,1));
         _shader->uniform("Tint1", ColorA(1,1,1,1));
-        _shader->uniform("ShadowWidth", _shadowWidth);
+        _shader->uniform("ShadowWidth", _shadowWidth * _shadowIntensity);
         _shader->uniform("ShadowColor", ColorA(_shadowColor, _shadowColor.a * _shadowIntensity));
         _shader->uniform("Side", _side);
         _batch->draw();
@@ -140,7 +140,7 @@ namespace elements {
         // update the shader
         // shadow effect fased in as voronoi mix goes to 1
         _vspc->setSplitSideDir(dir);
-        _vspc->setShadowIntensity(curvedVoronoiMix);
+        _vspc->setShadowIntensity(util::easing::quad_ease_out(voronoiMix));
     }
     
 } // end namespace elements
