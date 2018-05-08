@@ -17,6 +17,7 @@ namespace game {
     SMART_PTR(JetpackUnicyclePlayerPhysicsComponent);
     SMART_PTR(PlayerInputComponent);
     SMART_PTR(PlayerDrawComponent);
+    SMART_PTR(PlayerUIDrawComponent);
     SMART_PTR(Player);
     
 #pragma mark - PlayerPhysicsComponent
@@ -27,6 +28,8 @@ namespace game {
         struct config {
             // initial position of player in world units
             dvec2 position;
+            // local up vector of world at position (used to position player)
+            dvec2 localUp;
             
             double width;
             double height;
@@ -272,7 +275,7 @@ namespace game {
         /**
          Create a player configured via the XML in playerXmlFile, at a given position in world units
          */
-        static PlayerRef create(string name, ci::DataSourceRef playerXmlFile, dvec2 position);
+        static PlayerRef create(string name, ci::DataSourceRef playerXmlFile, dvec2 position, dvec2 localUp);
         
     public:
         Player(string name);
@@ -311,6 +314,7 @@ namespace game {
         config _config;
         PlayerPhysicsComponentRef _physics;
         PlayerDrawComponentRef _drawing;
+        PlayerUIDrawComponentRef _uiDrawing;
         PlayerInputComponentRef _input;
         core::HealthComponentRef _health;
         

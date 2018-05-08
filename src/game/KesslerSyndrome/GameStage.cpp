@@ -290,11 +290,49 @@ namespace game {
     }
     
     void GameStage::loadPlayer(const XmlTree &playerNode) {
+        dvec2 position(0,0);
+        dvec2 localUp(1,0);
+
+        const string positionDescription = playerNode.getAttribute("position");
+        const bool isRadians = positionDescription.find("radians") != string::npos;
+        const bool isDegrees = positionDescription.find("degrees") != string::npos;
+
+        if (isRadians || isDegrees) {
+            size_t leftParen = positionDescription.find("(");
+            size_t rightParen = positionDescription.find(")");
+            if (leftParen == string::npos || rightParen == string::npos) {
+                CI_ASSERT_MSG(false, "Missing left or right paren. Expected form of \"radians(NUMBER)\" for <player> position attribute value.");
+            }
+            string value = positionDescription.substr(leftParen+1, rightParen - (leftParen+1));
+            double radians = 0;
+            if (isRadians) {
+                radians = strtod(value.c_str(), nullptr);
+            } else {
+                radians = toRadians(strtod(value.c_str(), nullptr));
+            }
+            
+            // perform raycast to find a start position
+            dvec2 origin = getPlanet()->getOrigin();
+            dvec2 raycastOrigin = origin + 9999.0 * dvec2(cos(M_PI_2+radians), sin(M_PI_2+radians));
+            
+            auto result = querySegment(raycastOrigin, origin, 1, CP_SHAPE_FILTER_ALL);
+            if (result) {
+                localUp = normalize(raycastOrigin - origin);
+                position = result.point;
+            } else {
+                CI_ASSERT_MSG(false, "Unable to find a start position for player given position");
+                return;
+            }
+        } else {
+            CI_ASSERT_MSG(false, "Only radial positioning supported for <player> valid position attribute value is \"radians(...)\"");
+            return;
+        }
         
-        ci::DataSourceRef playerTemplate = app::loadAsset(playerNode.getAttribute("template").getValue());
-        int idx = util::xml::readNumericAttribute<int>(playerNode, "id", 0);
-        string name = "player_" + str(idx);
-        _player = Player::create(name, playerTemplate, dvec2(0,1000));
+        const int idx = util::xml::readNumericAttribute<int>(playerNode, "id", 0);
+        const string name = "player_" + str(idx);
+        const ci::DataSourceRef playerTemplate = app::loadAsset(playerNode.getAttribute("template").getValue());
+
+        _player = Player::create(name, playerTemplate, position, localUp);
         addObject(_player);
     }
 

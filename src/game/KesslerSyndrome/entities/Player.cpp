@@ -196,7 +196,7 @@ namespace game {
         
         _totalMass = Mass + WheelMass;
         _body = add(cpBodyNew(Mass, Moment));
-        cpBodySetPosition(_body, cpv(getConfig().position));
+        cpBodySetPosition(_body, cpv(getConfig().position + getConfig().localUp * (HalfHeight + WheelRadius)));
         
         //
         // lozenge shape for body and gear joint to orient it
@@ -606,7 +606,7 @@ namespace game {
      PlayerDrawComponentRef _drawing;
      PlayerInputComponentRef _input;
      */
-    PlayerRef Player::create(string name, ci::DataSourceRef playerXmlFile, dvec2 position) {
+    PlayerRef Player::create(string name, ci::DataSourceRef playerXmlFile, dvec2 position, dvec2 localUp) {
         Player::config config;
         
         XmlTree playerNode = XmlTree(playerXmlFile).getChild("player");
@@ -620,6 +620,7 @@ namespace game {
         XmlTree physicsNode = playerNode.getChild("physics");
         
         config.physics.position = position;
+        config.physics.localUp = localUp;
         config.physics.width = util::xml::readNumericAttribute<double>(physicsNode, "width", 5);
         config.physics.height = util::xml::readNumericAttribute<double>(physicsNode, "height", 20);
         config.physics.density = util::xml::readNumericAttribute<double>(physicsNode, "density", 1);
@@ -694,6 +695,7 @@ namespace game {
         _config = c;
         _input = make_shared<PlayerInputComponent>();
         _drawing = make_shared<PlayerDrawComponent>();
+        _uiDrawing = make_shared<PlayerUIDrawComponent>();
         _physics = make_shared<JetpackUnicyclePlayerPhysicsComponent>(c.physics);
         _health = make_shared<HealthComponent>(c.health);
         
@@ -701,6 +703,7 @@ namespace game {
         addComponent(_drawing);
         addComponent(_physics);
         addComponent(_health);
+        addComponent(_uiDrawing);
     }
     
 }

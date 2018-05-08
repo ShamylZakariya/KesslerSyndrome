@@ -498,7 +498,7 @@ namespace core {
             }
         };
 
-        query_nearest_result queryNearest(dvec2 point, cpShapeFilter filter, double maxDistance = INFINITY);
+        query_nearest_result queryNearest(dvec2 point, cpShapeFilter filter = CP_SHAPE_FILTER_ALL, double maxDistance = INFINITY);
 
         struct query_segment_result {
             dvec2 point;
@@ -517,7 +517,7 @@ namespace core {
             }
         };
 
-        query_segment_result querySegment(dvec2 a, dvec2 b, double radius, cpShapeFilter filter);
+        query_segment_result querySegment(dvec2 a, dvec2 b, double radius, cpShapeFilter filter = CP_SHAPE_FILTER_ALL);
 
     protected:
 

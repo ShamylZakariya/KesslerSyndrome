@@ -49,8 +49,7 @@ namespace game {
         PlayerRef getPlayer() const {
             return _player;
         }
-
-
+        
     protected:
 
         // Stage

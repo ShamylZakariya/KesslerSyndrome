@@ -10,7 +10,7 @@
 		<fill spaceColor="196,211,147" atmosphereColor="209,219,169" steps="3" innerRadius="1000" outerRadius="3000"/>
 		<!-- other stuff like clouds, stars, planets, etc -->
 	</background>
-	<planet origin="0,0" friction="0.5" density="1" partitionSize="250" color="72,95,112" coreColor="60,71,79">
+	<planet origin="0,0" friction="1" density="1" partitionSize="250" color="72,95,112" coreColor="60,71,79">
 		<surface
 			seed="34567"
 			radius="1000"
@@ -87,6 +87,6 @@
 		</simulation>
 	</cloudLayer>
 	<players>
-		<player id="0" template="kessler/players/player0.xml"/>
+		<player id="0" position="degrees(0)" template="kessler/players/player0.xml"/>
 	</players>
 </stage>
