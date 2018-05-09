@@ -216,6 +216,7 @@ namespace game {
         cpBodySetPosition(_wheelBody, cpvadd(cpBodyGetPosition(_body), WheelPositionOffset));
         _wheelShape = add(cpCircleShapeNew(_wheelBody, _wheelRadius, cpvzero));
         cpShapeSetFriction(_wheelShape, config.footFriction);
+        cpShapeSetElasticity(_wheelShape, config.footElasticity);
         _wheelMotor = add(cpSimpleMotorNew(_body, _wheelBody, 0));
         
         //
@@ -625,6 +626,7 @@ namespace game {
         config.physics.height = util::xml::readNumericAttribute<double>(physicsNode, "height", 20);
         config.physics.density = util::xml::readNumericAttribute<double>(physicsNode, "density", 1);
         config.physics.footFriction = util::xml::readNumericAttribute<double>(physicsNode, "footFriction", 1);
+        config.physics.footElasticity = util::xml::readNumericAttribute<double>(physicsNode, "footElasticity", 1);
         config.physics.bodyFriction = util::xml::readNumericAttribute<double>(physicsNode, "bodyFriction", 0.2);
         
         XmlTree jetpackNode = physicsNode.getChild("jetpack");

@@ -36,6 +36,7 @@ namespace game {
             double density;
             double footFriction;
             double bodyFriction;
+            double footElasticity;
             
             double jetpackAntigravity;
             double jetpackFuelMax;
