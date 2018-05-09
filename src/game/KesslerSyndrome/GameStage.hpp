@@ -102,6 +102,8 @@ namespace game {
         elements::ParticleEmitterRef _explosionEmitter;
         elements::ParticleEmitterRef _dustEmitter;
         elements::ViewportControllerRef _viewportController;
+        
+        double _planetRadius;
 
     };
 

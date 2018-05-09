@@ -45,29 +45,39 @@ namespace game {
 
         static PlanetRef create(string name, elements::terrain::WorldRef world, const config &surfaceConfig, const config &coreConfig, const vector<planet_generation::params::perimeter_attachment_params> &attachments, dvec2 origin, double partitionSize, int drawLayer);
 
-    public:
+    private:
 
         Planet(string name, elements::terrain::WorldRef world, const map<size_t,vector<elements::terrain::AttachmentRef>> &attachmentsByBatchId, int drawLayer);
 
+    public:
+        
         virtual ~Planet();
 
         // Object
         void onReady(core::StageRef stage) override;
 
         // Planet
-        dvec2 getOrigin() const {
-            return _origin;
-        }
         
+        // get the origin of the planet in world space
+        dvec2 getOrigin() const { return _origin; }
+        
+        // get all attachments as map of attachment id to vector of AttachmentRef
         const map<size_t,vector<elements::terrain::AttachmentRef>> &getAttachments() const { return _attachmentsByBatchId; }
         
+        // get all attachments for a given id
         vector<elements::terrain::AttachmentRef> getAttachmentsByBatchId(size_t batchId) const;
 
+        // get the parameters used to generate the surface geometry
+        const config &getSurfaceConfig() const { return _surfaceConfig; }
+        
+        // get the parameters used to generate the core geometry
+        const config &getCoreConfig() const { return _coreConfig; }
+        
     private:
 
         dvec2 _origin;
         map<size_t,vector<elements::terrain::AttachmentRef>> _attachmentsByBatchId;
-
+        config _surfaceConfig, _coreConfig;
     };
 
 

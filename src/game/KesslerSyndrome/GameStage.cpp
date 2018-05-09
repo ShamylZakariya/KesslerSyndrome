@@ -58,14 +58,19 @@ namespace game {
     /*
      BackgroundRef _background;
      PlanetRef _planet;
+     PlayerRef _player;
      vector <CloudLayerParticleSystemRef> _cloudLayers;
      core::RadialGravitationCalculatorRef _gravity;
      elements::ParticleEmitterRef _explosionEmitter;
      elements::ParticleEmitterRef _dustEmitter;
+     elements::ViewportControllerRef _viewportController;
+     
+     double _planetRadius;
      */
 
     GameStage::GameStage() :
-            Stage("Unnamed") {
+            Stage("Unnamed"),
+            _planetRadius(0) {
     }
 
     GameStage::~GameStage() {
@@ -313,7 +318,8 @@ namespace game {
             
             // perform raycast to find a start position
             dvec2 origin = getPlanet()->getOrigin();
-            dvec2 raycastOrigin = origin + 9999.0 * dvec2(cos(M_PI_2+radians), sin(M_PI_2+radians));
+            double raycastDistance = getPlanet()->getSurfaceConfig().radius * 4;
+            dvec2 raycastOrigin = origin + (raycastDistance * dvec2(cos(M_PI_2+radians), sin(M_PI_2+radians)));
             
             auto result = querySegment(raycastOrigin, origin, 1, CP_SHAPE_FILTER_ALL);
             if (result) {

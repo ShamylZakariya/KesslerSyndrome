@@ -19,6 +19,7 @@ namespace game {
     namespace {
         
         const int MAP_RESOLUTION = 512;
+        int batchId = 0;
     
         planet_generation::params create_planet_generation_params(const Planet::config &surfaceConfig, const Planet::config &coreConfig, dvec2 worldOrigin, double worldRadius) {
             
@@ -52,7 +53,7 @@ namespace game {
         
         planet_generation::params::perimeter_attachment_params parseAttachmentGenerator(const core::util::xml::XmlMultiTree &node) {
             planet_generation::params::perimeter_attachment_params p(0);
-            p.batchId = util::xml::readNumericAttribute<size_t>(node, "batchId", 0);
+            p.batchId = util::xml::readNumericAttribute<size_t>(node, "batchId", batchId++);
             p.normalToUpDotTarget = util::xml::readNumericAttribute<double>(node, "normalToUpDotTarget", 1);
             p.normalToUpDotRange = util::xml::readNumericAttribute<double>(node, "normalToUpDotRange", 0.75);
             p.probability = util::xml::readNumericAttribute<double>(node, "probability", 0.5);
@@ -109,7 +110,12 @@ namespace game {
         auto result = planet_generation::generate(params, world);
 
         // finally create the Planet
-        return make_shared<Planet>(name, result.world, result.attachmentsByBatchId, drawLayer);
+        auto planet = PlanetRef(new Planet(name, result.world, result.attachmentsByBatchId, drawLayer));
+
+        planet->_surfaceConfig = surfaceConfig;
+        planet->_coreConfig = coreConfig;
+
+        return planet;
     }
 
     Planet::Planet(string name, terrain::WorldRef world, const map<size_t,vector<terrain::AttachmentRef>> &attachmentsByBatchId, int drawLayer) :
