@@ -2,10 +2,18 @@
 
 ## Presently
 
-## Todo
+- Player
+    - needs SVG body
+    - needs "fronds"
+    - needs weapon
 
 - Kill XmlMultiTree - I'm not even using it, and it adds complexity.
-- Make some kind of component which simplifies toggling of Gizmo masks at runtime
+
+- Explosions should be re-done. 
+    - erase a "noisy" circle at impact point, and use spider webbing to make rubble around the noisy center.
+
+## Todo
+
 
 ## Optimization 
 - observe TerrainWorld::417 cpSpaceBBQuery - I might be able to use cpSPace queries to test if attachments are inside the cut volume. might be a lot faster than my approach, since chipmunk is pretty optimized.

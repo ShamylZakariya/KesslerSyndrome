@@ -63,82 +63,22 @@ namespace game {
     
     /**
      config _config;
-     vector<cpBody*> _bodies;
-     vector<cpShape*> _shapes;
-     vector<cpConstraint*> _constraints;
      bool _flying;
      double _speed;
+     
+     cpBody *_body, *_wheelBody;
+     cpShape *_bodyShape, *_wheelShape, *_groundContactSensorShape;
+     cpConstraint *_wheelMotor, *_orientationConstraint;
+     double _wheelRadius, _wheelFriction, _touchingGroundAcc, _totalMass;
+     double _jetpackFuelLevel, _jetpackFuelMax, _lean;
+     dvec2 _up, _groundNormal, _jetpackForceDir;
+     PlayerInputComponentWeakRef _input;
      */
+
     PlayerPhysicsComponent::PlayerPhysicsComponent(config c) :
     _config(c),
     _flying(false),
-    _speed(0) {
-    }
-    
-    PlayerPhysicsComponent::~PlayerPhysicsComponent() {
-    }
-    
-    void PlayerPhysicsComponent::onReady(ObjectRef parent, StageRef stage) {
-        PhysicsComponent::onReady(parent, stage);
-    }
-    
-    dvec2 PlayerPhysicsComponent::_getGroundNormal() const {
-        const double
-        HalfWidth = getConfig().width * 0.5,
-        SegmentRadius = HalfWidth * 0.125,
-        CastDistance = 10000;
-        
-        const dvec2 Position(v2(cpBodyGetPosition(getFootBody())));
-        
-        const auto G = getSpace()->getGravity(Position);
-        
-        const dvec2
-        Down = G.dir,
-        Right = rotateCCW(Down);
-        
-        const cpVect
-        DownCast = cpvmult(cpv(Down), CastDistance);
-        
-        ground_slope_handler_data handlerData;
-        cpSpace *space = getSpace()->getSpace();
-        
-        handlerData.start = cpv(Position + Right);
-        handlerData.end = cpvadd(handlerData.start, DownCast);
-        cpSpaceSegmentQuery(space, handlerData.start, handlerData.end, SegmentRadius, CP_SHAPE_FILTER_ALL, groundSlopeRaycastHandler, &handlerData);
-        cpVect normal = handlerData.normal;
-        
-        handlerData.start = cpv(Position);
-        handlerData.end = cpvadd(handlerData.start, DownCast);
-        cpSpaceSegmentQuery(space, handlerData.start, handlerData.end, SegmentRadius, CP_SHAPE_FILTER_ALL, groundSlopeRaycastHandler, &handlerData);
-        normal = cpvadd(normal, handlerData.normal);
-        
-        handlerData.start = cpv(Position - Right);
-        handlerData.end = cpvadd(handlerData.start, DownCast);
-        cpSpaceSegmentQuery(space, handlerData.start, handlerData.end, SegmentRadius, CP_SHAPE_FILTER_ALL, groundSlopeRaycastHandler, &handlerData);
-        normal = cpvadd(normal, handlerData.normal);
-        
-        return normalize(v2(normal));
-    }
-    
-    bool PlayerPhysicsComponent::_isTouchingGround(cpShape *shape) const {
-        bool touchingGroundQuery = false;
-        cpSpaceShapeQuery(getSpace()->getSpace(), shape, groundContactQuery, &touchingGroundQuery);
-        
-        return touchingGroundQuery;
-    }
-    
-#pragma mark - JetpackUnicyclePlayerPhysicsComponent
-    
-    /*
-     cpBody *_body, *_wheelBody;
-     cpShape *_bodyShape, *_wheelShape, *_groundContactSensorShape;
-     cpConstraint *_wheelMotor, *_orientationGear;
-     double _wheelRadius, _wheelFriction, _touchingGroundAcc;
-     double _jetpackFuelLevel, _jetpackFuelMax, _lean;
-     dvec2 _up, _groundNormal;
-     */
-    JetpackUnicyclePlayerPhysicsComponent::JetpackUnicyclePlayerPhysicsComponent(config c) :
-    PlayerPhysicsComponent(c),
+    _speed(0),
     _body(nullptr),
     _wheelBody(nullptr),
     _bodyShape(nullptr),
@@ -153,15 +93,14 @@ namespace game {
     _jetpackFuelMax(0),
     _lean(0),
     _up(0, 0),
-    _groundNormal(0, 0) {
+    _groundNormal(0, 0)
+    {
     }
     
-    JetpackUnicyclePlayerPhysicsComponent::~JetpackUnicyclePlayerPhysicsComponent() {
+    PlayerPhysicsComponent::~PlayerPhysicsComponent() {
     }
     
-    // PhysicsComponent
-    
-    cpBB JetpackUnicyclePlayerPhysicsComponent::getBB() const {
+    cpBB PlayerPhysicsComponent::getBB() const {
         if (_body) {
             return cpBBNewForCircle(cpv(getPosition()), getConfig().height);
         } else {
@@ -169,8 +108,8 @@ namespace game {
         }
     }
     
-    void JetpackUnicyclePlayerPhysicsComponent::onReady(ObjectRef parent, StageRef stage) {
-        PlayerPhysicsComponent::onReady(parent, stage);
+    void PlayerPhysicsComponent::onReady(ObjectRef parent, StageRef stage) {
+        PhysicsComponent::onReady(parent, stage);
         
         _input = getSibling<PlayerInputComponent>();
         
@@ -244,9 +183,9 @@ namespace game {
         build(filter, CollisionType::PLAYER);
     }
     
-    void JetpackUnicyclePlayerPhysicsComponent::step(const time_state &timeState) {
-        PlayerPhysicsComponent::step(timeState);
-        
+    void PlayerPhysicsComponent::step(const time_state &timeState) {
+        PhysicsComponent::step(timeState);
+
         const PlayerRef player = getObjectAs<Player>();
         const PlayerPhysicsComponent::config config = getConfig();
         
@@ -393,51 +332,51 @@ namespace game {
         notifyMoved();
     }
     
-    dvec2 JetpackUnicyclePlayerPhysicsComponent::getPosition() const {
+    dvec2 PlayerPhysicsComponent::getPosition() const {
         return v2(cpBodyGetPosition(_body));
     }
     
-    dvec2 JetpackUnicyclePlayerPhysicsComponent::getUp() const {
+    dvec2 PlayerPhysicsComponent::getUp() const {
         return _up;
     }
     
-    dvec2 JetpackUnicyclePlayerPhysicsComponent::getGroundNormal() const {
+    dvec2 PlayerPhysicsComponent::getGroundNormal() const {
         return _groundNormal;
     }
     
-    bool JetpackUnicyclePlayerPhysicsComponent::isTouchingGround() const {
+    bool PlayerPhysicsComponent::isTouchingGround() const {
         return _touchingGroundAcc >= 0.5;
     }
     
-    cpBody *JetpackUnicyclePlayerPhysicsComponent::getBody() const {
+    cpBody *PlayerPhysicsComponent::getBody() const {
         return _body;
     }
     
-    cpBody *JetpackUnicyclePlayerPhysicsComponent::getFootBody() const {
+    cpBody *PlayerPhysicsComponent::getFootBody() const {
         return _wheelBody;
     }
     
-    cpShape *JetpackUnicyclePlayerPhysicsComponent::getBodyShape() const {
+    cpShape *PlayerPhysicsComponent::getBodyShape() const {
         return _bodyShape;
     }
     
-    cpShape *JetpackUnicyclePlayerPhysicsComponent::getFootShape() const {
+    cpShape *PlayerPhysicsComponent::getFootShape() const {
         return _wheelShape;
     }
     
-    double JetpackUnicyclePlayerPhysicsComponent::getJetpackFuelLevel() const {
+    double PlayerPhysicsComponent::getJetpackFuelLevel() const {
         return _jetpackFuelLevel;
     }
     
-    double JetpackUnicyclePlayerPhysicsComponent::getJetpackFuelMax() const {
+    double PlayerPhysicsComponent::getJetpackFuelMax() const {
         return _jetpackFuelMax;
     }
     
-    dvec2 JetpackUnicyclePlayerPhysicsComponent::getJetpackThrustDirection() const {
+    dvec2 PlayerPhysicsComponent::getJetpackThrustDirection() const {
         return _jetpackForceDir;
     }
     
-    JetpackUnicyclePlayerPhysicsComponent::capsule JetpackUnicyclePlayerPhysicsComponent::getBodyCapsule() const {
+    PlayerPhysicsComponent::capsule PlayerPhysicsComponent::getBodyCapsule() const {
         capsule cap;
         cap.a = v2(cpBodyLocalToWorld(cpShapeGetBody(_bodyShape), cpSegmentShapeGetA(_bodyShape)));
         cap.b = v2(cpBodyLocalToWorld(cpShapeGetBody(_bodyShape), cpSegmentShapeGetB(_bodyShape)));
@@ -445,7 +384,7 @@ namespace game {
         return cap;
     }
     
-    JetpackUnicyclePlayerPhysicsComponent::wheel JetpackUnicyclePlayerPhysicsComponent::getFootWheel() const {
+    PlayerPhysicsComponent::wheel PlayerPhysicsComponent::getFootWheel() const {
         wheel w;
         w.position = v2(cpBodyGetPosition(_wheelBody));
         w.radius = cpCircleShapeGetRadius(_wheelShape);
@@ -454,6 +393,50 @@ namespace game {
         return w;
     }
     
+    dvec2 PlayerPhysicsComponent::_getGroundNormal() const {
+        const double
+        HalfWidth = getConfig().width * 0.5,
+        SegmentRadius = HalfWidth * 0.125,
+        CastDistance = 10000;
+        
+        const dvec2 Position(v2(cpBodyGetPosition(getFootBody())));
+        
+        const auto G = getSpace()->getGravity(Position);
+        
+        const dvec2
+        Down = G.dir,
+        Right = rotateCCW(Down);
+        
+        const cpVect
+        DownCast = cpvmult(cpv(Down), CastDistance);
+        
+        ground_slope_handler_data handlerData;
+        cpSpace *space = getSpace()->getSpace();
+        
+        handlerData.start = cpv(Position + Right);
+        handlerData.end = cpvadd(handlerData.start, DownCast);
+        cpSpaceSegmentQuery(space, handlerData.start, handlerData.end, SegmentRadius, CP_SHAPE_FILTER_ALL, groundSlopeRaycastHandler, &handlerData);
+        cpVect normal = handlerData.normal;
+        
+        handlerData.start = cpv(Position);
+        handlerData.end = cpvadd(handlerData.start, DownCast);
+        cpSpaceSegmentQuery(space, handlerData.start, handlerData.end, SegmentRadius, CP_SHAPE_FILTER_ALL, groundSlopeRaycastHandler, &handlerData);
+        normal = cpvadd(normal, handlerData.normal);
+        
+        handlerData.start = cpv(Position - Right);
+        handlerData.end = cpvadd(handlerData.start, DownCast);
+        cpSpaceSegmentQuery(space, handlerData.start, handlerData.end, SegmentRadius, CP_SHAPE_FILTER_ALL, groundSlopeRaycastHandler, &handlerData);
+        normal = cpvadd(normal, handlerData.normal);
+        
+        return normalize(v2(normal));
+    }
+    
+    bool PlayerPhysicsComponent::_isTouchingGround(cpShape *shape) const {
+        bool touchingGroundQuery = false;
+        cpSpaceShapeQuery(getSpace()->getSpace(), shape, groundContactQuery, &touchingGroundQuery);
+        
+        return touchingGroundQuery;
+    }
     
 #pragma mark - PlayerInputComponent
     
@@ -506,7 +489,7 @@ namespace game {
     
     void PlayerDrawComponent::onReady(ObjectRef parent, StageRef stage) {
         DrawComponent::onReady(parent, stage);
-        _physics = getSibling<JetpackUnicyclePlayerPhysicsComponent>();
+        _physics = getSibling<PlayerPhysicsComponent>();
     }
     
     cpBB PlayerDrawComponent::getBB() const {
@@ -522,11 +505,11 @@ namespace game {
     }
     
     void PlayerDrawComponent::drawPlayer(const render_state &renderState) {
-        JetpackUnicyclePlayerPhysicsComponentRef physics = _physics.lock();
-        CI_ASSERT_MSG(physics, "JetpackUnicyclePlayerPhysicsComponentRef should be accessbile");
+        PlayerPhysicsComponentRef physics = _physics.lock();
+        CI_ASSERT_MSG(physics, "PlayerPhysicsComponentRef should be accessbile");
         
-        const JetpackUnicyclePlayerPhysicsComponent::wheel FootWheel = physics->getFootWheel();
-        const JetpackUnicyclePlayerPhysicsComponent::capsule BodyCapsule = physics->getBodyCapsule();
+        const PlayerPhysicsComponent::wheel FootWheel = physics->getFootWheel();
+        const PlayerPhysicsComponent::capsule BodyCapsule = physics->getBodyCapsule();
         
         // draw the wheel
         gl::color(1, 1, 1);
@@ -560,7 +543,7 @@ namespace game {
 #pragma mark - PlayerUIDrawComponent
     
     /*
-     JetpackUnicyclePlayerPhysicsComponentWeakRef _physics;
+     PlayerPhysicsComponentWeakRef _physics;
      */
     
     PlayerUIDrawComponent::PlayerUIDrawComponent():
@@ -572,7 +555,7 @@ namespace game {
     
     void PlayerUIDrawComponent::onReady(core::ObjectRef parent, core::StageRef stage) {
         ScreenDrawComponent::onReady(parent, stage);
-        _physics = getSibling<JetpackUnicyclePlayerPhysicsComponent>();
+        _physics = getSibling<PlayerPhysicsComponent>();
     }
     
     void PlayerUIDrawComponent::drawScreen(const core::render_state &renderState) {
@@ -581,7 +564,7 @@ namespace game {
     
     void PlayerUIDrawComponent::drawCharge(const core::render_state &renderState) {
         auto physics = _physics.lock();
-        CI_ASSERT_MSG(physics, "JetpackUnicyclePlayerPhysicsComponentRef should be accessbile");
+        CI_ASSERT_MSG(physics, "PlayerPhysicsComponentRef should be accessbile");
 
         Rectd bounds = renderState.viewport->getBounds();        
         int w = 20;
@@ -698,7 +681,7 @@ namespace game {
         _input = make_shared<PlayerInputComponent>();
         _drawing = make_shared<PlayerDrawComponent>();
         _uiDrawing = make_shared<PlayerUIDrawComponent>();
-        _physics = make_shared<JetpackUnicyclePlayerPhysicsComponent>(c.physics);
+        _physics = make_shared<PlayerPhysicsComponent>(c.physics);
         _health = make_shared<HealthComponent>(c.health);
         
         addComponent(_input);

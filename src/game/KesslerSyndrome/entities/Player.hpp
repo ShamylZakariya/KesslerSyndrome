@@ -14,10 +14,10 @@
 namespace game {
     
     SMART_PTR(PlayerPhysicsComponent);
-    SMART_PTR(JetpackUnicyclePlayerPhysicsComponent);
     SMART_PTR(PlayerInputComponent);
     SMART_PTR(PlayerDrawComponent);
     SMART_PTR(PlayerUIDrawComponent);
+    SMART_PTR(PlayerPhysicsComponent);
     SMART_PTR(Player);
     
 #pragma mark - PlayerPhysicsComponent
@@ -53,32 +53,36 @@ namespace game {
         // PhysicsComponent
         void onReady(core::ObjectRef parent, core::StageRef stage) override;
         
+        cpBB getBB() const override;
+        
+        void step(const core::time_state &timeState) override;
+
         // PlayerPhysicsComponent
         const config &getConfig() const {
             return _config;
         }
         
-        virtual dvec2 getPosition() const = 0;
+        virtual dvec2 getPosition() const;
         
-        virtual dvec2 getUp() const = 0;
+        virtual dvec2 getUp() const;
         
-        virtual dvec2 getGroundNormal() const = 0;
+        virtual dvec2 getGroundNormal() const;
         
-        virtual bool isTouchingGround() const = 0;
+        virtual bool isTouchingGround() const;
         
-        virtual cpBody *getBody() const = 0;
+        virtual cpBody *getBody() const;
         
-        virtual cpBody *getFootBody() const = 0;
+        virtual cpBody *getFootBody() const;
         
-        virtual cpShape *getBodyShape() const = 0;
+        virtual cpShape *getBodyShape() const;
         
-        virtual cpShape *getFootShape() const = 0;
+        virtual cpShape *getFootShape() const;
         
-        virtual double getJetpackFuelLevel() const = 0;
+        virtual double getJetpackFuelLevel() const;
         
-        virtual double getJetpackFuelMax() const = 0;
+        virtual double getJetpackFuelMax() const;
         
-        virtual dvec2 getJetpackThrustDirection() const = 0;
+        virtual dvec2 getJetpackThrustDirection() const;
         
         // Control inputs, called by Player in Player::update
         virtual void setSpeed(double vel) {
@@ -97,60 +101,6 @@ namespace game {
             return _flying;
         }
         
-    protected:
-        
-        dvec2 _getGroundNormal() const;
-        
-        bool _isTouchingGround(cpShape *shape) const;
-        
-        
-    protected:
-        
-        config _config;
-        bool _flying;
-        double _speed;
-        
-    };
-    
-#pragma mark - JetpackUnicyclePlayerPhysicsComponent
-    
-    class JetpackUnicyclePlayerPhysicsComponent : public PlayerPhysicsComponent {
-    public:
-        
-        JetpackUnicyclePlayerPhysicsComponent(config c);
-        
-        virtual ~JetpackUnicyclePlayerPhysicsComponent();
-        
-        // PhysicsComponent
-        cpBB getBB() const override;
-        
-        void onReady(core::ObjectRef parent, core::StageRef stage) override;
-        
-        void step(const core::time_state &timeState) override;
-        
-        // PlayerPhysicsComponent
-        dvec2 getPosition() const override;
-        
-        dvec2 getUp() const override;
-        
-        dvec2 getGroundNormal() const override;
-        
-        bool isTouchingGround() const override;
-        
-        cpBody *getBody() const override;
-        
-        cpBody *getFootBody() const override;
-        
-        cpShape *getBodyShape() const override;
-        
-        cpShape *getFootShape() const override;
-        
-        double getJetpackFuelLevel() const override;
-        
-        double getJetpackFuelMax() const override;
-        
-        dvec2 getJetpackThrustDirection() const override;
-        
         struct capsule {
             dvec2 a, b;
             double radius;
@@ -166,8 +116,17 @@ namespace game {
         
         wheel getFootWheel() const;
         
+    protected:
         
-    private:
+        dvec2 _getGroundNormal() const;
+        
+        bool _isTouchingGround(cpShape *shape) const;
+        
+    protected:
+        
+        config _config;
+        bool _flying;
+        double _speed;
         
         cpBody *_body, *_wheelBody;
         cpShape *_bodyShape, *_wheelShape, *_groundContactSensorShape;
@@ -176,7 +135,6 @@ namespace game {
         double _jetpackFuelLevel, _jetpackFuelMax, _lean;
         dvec2 _up, _groundNormal, _jetpackForceDir;
         PlayerInputComponentWeakRef _input;
-
     };
     
 #pragma mark - PlayerInputComponent
@@ -229,7 +187,7 @@ namespace game {
         
     private:
         
-        JetpackUnicyclePlayerPhysicsComponentWeakRef _physics;
+        PlayerPhysicsComponentWeakRef _physics;
         
     };
     
@@ -249,7 +207,7 @@ namespace game {
 
     private:
         
-        JetpackUnicyclePlayerPhysicsComponentWeakRef _physics;
+        PlayerPhysicsComponentWeakRef _physics;
         
     };
     
