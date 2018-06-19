@@ -13,12 +13,77 @@
 
 namespace game {
     
+    SMART_PTR(LegPhysics);
+    SMART_PTR(LegDrawer);
     SMART_PTR(PlayerPhysicsComponent);
     SMART_PTR(PlayerInputComponent);
     SMART_PTR(PlayerDrawComponent);
     SMART_PTR(PlayerUIDrawComponent);
     SMART_PTR(PlayerPhysicsComponent);
     SMART_PTR(Player);
+    
+#pragma mark - LegPhysics
+
+    /**
+     Simulates leg dynamics for the player. Is not a full Component because it is simple,
+     and can be a lightweight thing owned by the PlayerPhysicsComponent
+    */
+    class LegPhysics {
+    public:
+        
+        enum Phase {
+            ProbingForContact,
+            Contact,
+            Retracting
+        };
+        
+    public:
+        
+        LegPhysics(cpBody *unownedParentBody, vec2 originOnParentBody, vec2 directionFromParentBody, double maxExtension, double maxDeflectionRadians, double minExtension, double phaseOffset, double phaseDuration);
+        
+        void step(const core::time_state &time);
+
+        dvec2 getWorldOrigin() const { return v2(_worldOrigin); }
+        dvec2 getWorldEnd() const { return v2(_worldEnd); }
+        dvec2 getWorldUp() const { return v2(cpBodyLocalToWorld(_unownedParentBody, cpv(0,1))); }
+        dvec2 getWorldDirection() const { return v2(_worldDirection); }
+        double getMaxExtension() const { return _maxExtension; }
+        Phase getPhase() const { return _phase; }
+
+    protected:
+        
+        friend class PlayerDrawComponent;
+        bool _canMaintainGroundContact(const core::time_state &time);
+        bool _probeForGroundContact();
+
+    protected:
+        
+        cpBody *_unownedParentBody;
+        cpVect _localOrigin, _localEnd, _localDirection, _localRest;
+        cpVect _worldOrigin, _worldEnd, _worldDirection, _worldContact, _probeOrigin, _probeEnd;
+        double _maxExtension, _maxDeflection, _temporalPhaseOffset, _temporalPhaseDuration;
+        Phase _phase;
+    };
+    
+#pragma mark - LegDrawer
+    
+    class LegDrawer {
+    public:
+        
+        LegDrawer(LegPhysicsRef leg):
+        _leg(leg)
+        {
+            _bezierControlPoints.resize(4);
+        }
+        
+        void draw(const core::render_state &state);
+        
+    private:
+        
+        LegPhysicsWeakRef _leg;
+        vector<dvec2> _bezierControlPoints;
+        
+    };
     
 #pragma mark - PlayerPhysicsComponent
     
@@ -42,6 +107,9 @@ namespace game {
             double jetpackFuelMax;
             double jetpackFuelConsumptionPerSecond;
             double jetpackFuelRegenerationPerSecond;
+            
+            size_t numLegs;
+            double maxLegExtension;
         };
         
     public:
@@ -116,6 +184,8 @@ namespace game {
         
         wheel getFootWheel() const;
         
+        const vector<LegPhysicsRef> &getLegs() const { return _legSimulations; }
+        
     protected:
         
         dvec2 _getGroundNormal() const;
@@ -135,6 +205,8 @@ namespace game {
         double _jetpackFuelLevel, _jetpackFuelMax, _lean;
         dvec2 _up, _groundNormal, _jetpackForceDir;
         PlayerInputComponentWeakRef _input;
+        
+        vector<LegPhysicsRef> _legSimulations;
     };
     
 #pragma mark - PlayerInputComponent
@@ -164,7 +236,7 @@ namespace game {
     };
     
 #pragma mark - PlayerDrawComponent
-    
+        
     class PlayerDrawComponent : public core::EntityDrawComponent {
     public:
         
@@ -188,6 +260,7 @@ namespace game {
     private:
         
         PlayerPhysicsComponentWeakRef _physics;
+        vector<LegDrawerRef> _legDrawers;
         
     };
     

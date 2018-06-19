@@ -9,13 +9,7 @@
 #ifndef LineSegment_h
 #define LineSegment_h
 
-#include <cinder/CinderMath.h>
-#include <cinder/Area.h>
-#include <chipmunk/chipmunk.h>
-#include <cinder/gl/scoped.h>
-
 #include "MathHelpers.hpp"
-#include "Signals.hpp"
 
 namespace core {
     namespace util {

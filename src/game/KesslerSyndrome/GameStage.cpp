@@ -313,7 +313,7 @@ namespace game {
             if (isRadians) {
                 radians = strtod(value.c_str(), nullptr);
             } else {
-                radians = toRadians(strtod(value.c_str(), nullptr));
+                radians = ::radians(strtod(value.c_str(), nullptr));
             }
             
             // perform raycast to find a start position

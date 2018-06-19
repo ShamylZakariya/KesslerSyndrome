@@ -61,7 +61,7 @@
 					swayPeriod="0.5"
 				/>
 				<greeble
-					color="255,0,0,255"
+					color="0,255,255,255"
 					radius="10"
 					upOffset="0.1"
 					swayFactor="0"

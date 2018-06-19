@@ -184,6 +184,7 @@
 		63A282721FD067E400962F8E /* ImageProcessing.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ImageProcessing.hpp; sourceTree = "<group>"; };
 		63A5ED11204C9432001BD62E /* EasingTestScenario.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = EasingTestScenario.cpp; sourceTree = "<group>"; };
 		63A5ED12204C9432001BD62E /* EasingTestScenario.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = EasingTestScenario.hpp; sourceTree = "<group>"; };
+		63A9967020D807E000EF3785 /* Bezier.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Bezier.hpp; sourceTree = "<group>"; };
 		63B8AF05202CA1A70021AC63 /* TerrainAttachmentsTestScenario.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TerrainAttachmentsTestScenario.cpp; sourceTree = "<group>"; };
 		63B8AF06202CA1A70021AC63 /* TerrainAttachmentsTestScenario.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TerrainAttachmentsTestScenario.hpp; sourceTree = "<group>"; };
 		63BFD8141E89565600D821E4 /* Object.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Object.cpp; sourceTree = "<group>"; };
@@ -539,6 +540,7 @@
 				632CBA21204B181B0008B94D /* Easing.hpp */,
 				63597BE920766F7700B65C2A /* GlslProgLoader.cpp */,
 				63597BEA20766F7700B65C2A /* GlslProgLoader.hpp */,
+				63A9967020D807E000EF3785 /* Bezier.hpp */,
 			);
 			path = util;
 			sourceTree = "<group>";

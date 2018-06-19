@@ -8,11 +8,188 @@
 
 #include "Player.hpp"
 
+#include "Bezier.hpp"
 #include "GameConstants.hpp"
+#include <cinder/Rand.h>
 
 using namespace core;
 
 namespace game {
+    
+#pragma mark - LegPhysics
+    
+    namespace {
+        
+        struct leg_contact_segment_query_data {
+            double dist;
+            double dist2;
+            cpVect contact, start;
+            
+            leg_contact_segment_query_data(cpVect start):
+            dist(numeric_limits<double>::max()),
+            dist2(numeric_limits<double>::max()),
+            start(start)
+            {}
+        };
+        
+        void legContactSegmentQueryHandler(cpShape *shape, cpVect point, cpVect normal, cpFloat alpha, void *dataPtr) {
+            if (cpShapeGetCollisionType(shape) != CollisionType::PLAYER) {
+                auto data = static_cast<leg_contact_segment_query_data*>(dataPtr);
+                double d2 = cpvdistsq(point, data->start);
+                if (d2 < data->dist2) {
+                    data->dist2 = d2;
+                    data->dist = sqrt(d2);
+                    data->contact = point;
+                }
+            }
+        }
+    }
+
+    /*
+     cpBody *_unownedParentBody;
+     cpVect _localOrigin, _localEnd, _localDirection, _localRest;
+     cpVect _worldOrigin, _worldEnd, _worldDirection, _worldRest, _worldContact, _probeOrigin, _probeEnd;
+     double _maxExtension, _maxDeflection, _temporalPhaseOffset, _temporalPhaseDuration;
+     Phase _phase;
+     */
+    
+    LegPhysics::LegPhysics(cpBody *unownedParentBody, vec2 originOnParentBody, vec2 directionFromParentBody, double maxExtension, double maxDeflectionRadians, double minExtension, double phaseOffset, double phaseDuration):
+        _unownedParentBody(unownedParentBody),
+        _localOrigin(cpv(originOnParentBody)),
+        _localRest(cpvadd(_localOrigin, cpvmult(_localDirection,minExtension))),
+        _localDirection(cpv(directionFromParentBody)),
+        _worldOrigin(cpBodyLocalToWorld(unownedParentBody, _localOrigin)),
+        _worldEnd(_worldOrigin),
+        _maxExtension(maxExtension),
+        _maxDeflection(cos(maxDeflectionRadians)),
+        _temporalPhaseOffset(phaseOffset),
+        _temporalPhaseDuration(phaseDuration),
+        _phase(Phase::ProbingForContact)
+    {
+        _localEnd = _localRest;
+    }
+    
+    void LegPhysics::step(const core::time_state &time) {
+        _worldOrigin = cpBodyLocalToWorld(_unownedParentBody, _localOrigin);
+
+        const auto rotation = cpBodyGetRotation(_unownedParentBody);
+        _worldDirection = cpvrotate(_localDirection, rotation);
+
+        switch(_phase) {
+            case Phase::ProbingForContact:
+                // while probing, our endpoint is defined in local space
+                _worldEnd = cpBodyLocalToWorld(_unownedParentBody, _localEnd);
+
+                if (_probeForGroundContact()) {
+                    _phase = Phase::Contact;
+                }
+
+                break;
+
+            case Phase::Contact:
+                // when in contact with ground, endpoint is defined in world space
+                _worldEnd = cpvlerp(_worldEnd, _worldContact, 25 * time.deltaT);
+                _localEnd = cpBodyWorldToLocal(_unownedParentBody, _worldEnd);
+
+                if (!_canMaintainGroundContact(time)) {
+                    _phase = Phase::Retracting;
+                }
+
+                break;
+
+            case Phase::Retracting:
+
+                // we perform retraction in local space since we're not attached to the ground any longer
+                _localEnd = cpvlerp(_localEnd, _localRest, 25 * time.deltaT);
+                _worldEnd = cpBodyLocalToWorld(_unownedParentBody, _localEnd);
+
+                if (cpvdistsq(_localEnd, _localRest) < 0.01) {
+                    _phase = Phase::ProbingForContact;
+                }
+
+                break;
+        }
+    }
+    
+    bool LegPhysics::_canMaintainGroundContact(const core::time_state &time) {
+        const seconds_t cycle = time.time - floor(time.time);
+        if (cycle > _temporalPhaseOffset && cycle < _temporalPhaseOffset + _temporalPhaseDuration) {
+
+            // check for hyperxtension
+            if (cpvdistsq(_worldEnd, _worldOrigin) > (_maxExtension * _maxExtension)) {
+                return false;
+            }
+            
+            // check for deflection from the natural probe angle
+            const auto currentLocalDir = cpvnormalize(cpvsub(_localEnd, _localOrigin));
+            const auto deflection = cpvdot(currentLocalDir, _localDirection);
+            if (deflection < _maxDeflection) { // maxDeflection is cached as cos(maxDeflection)
+                return false;
+            }
+
+        }
+        
+        return true;
+    }
+    
+    bool LegPhysics::_probeForGroundContact() {
+        _probeOrigin = _worldOrigin;
+        _probeEnd = cpvadd(_probeOrigin, cpvmult(_worldDirection, _maxExtension));
+        
+        leg_contact_segment_query_data data(_worldOrigin);
+        cpSpaceSegmentQuery(cpBodyGetSpace(_unownedParentBody), _probeOrigin, _probeEnd, 1, CP_SHAPE_FILTER_ALL, legContactSegmentQueryHandler, &data);
+        if (data.dist < _maxExtension * 0.7) {
+            _worldContact = data.contact;
+            return true;
+        }
+        return false;
+    }
+    
+#pragma mark - LegDrawer
+    
+    /*
+     LegPhysicsWeakRef _leg;
+     vector<dvec2> _bezierControlPoints;
+     */
+    void LegDrawer::draw(const core::render_state &state) {
+        const LegPhysicsRef leg = _leg.lock();
+
+        // assign start and end points
+        _bezierControlPoints[0] = leg->getWorldOrigin();
+        _bezierControlPoints[3] = leg->getWorldEnd();
+
+        // we're doing a simple bezier curve where the control points are equal. we're using
+        // the a point along the leg span, offset by its perpendicular
+        const auto basePoint = lrp(0.85, leg->getWorldOrigin(), leg->getWorldEnd());
+        const auto len = length(leg->getWorldEnd() - leg->getWorldOrigin()) + 1e-4;
+        const auto dir = (leg->getWorldEnd() - leg->getWorldOrigin()) / len;
+        const auto deflectionLen = len * 1;
+
+        if (dot(rotateCCW(dir), leg->getWorldUp()) > 0) {
+            const auto cp = basePoint + (deflectionLen * rotateCCW(dir));
+            _bezierControlPoints[1] = cp;
+            _bezierControlPoints[2] = cp;
+        } else {
+            const auto cp = basePoint + (deflectionLen * rotateCW(dir));
+            _bezierControlPoints[1] = cp;
+            _bezierControlPoints[2] = cp;
+        }
+        
+        
+        const size_t numSegments = 10;
+        const double stepSize = 1 / static_cast<double>(numSegments);
+        dvec2 v = _bezierControlPoints[0];
+
+        gl::color(0,1,1,1);
+        for (auto seg = 0; seg < numSegments; seg++) {
+            const auto t = (seg+1) * stepSize;
+            const auto v2 = util::bezier(t, _bezierControlPoints[0], _bezierControlPoints[1], _bezierControlPoints[2], _bezierControlPoints[3]);
+            gl::drawLine(v, v2);
+            v = v2;
+        }
+        
+    }
+
     
 #pragma mark - PlayerPhysicsComponent
     
@@ -25,33 +202,35 @@ namespace game {
             }
         }
         
-        struct ground_slope_handler_data {
-            double dist;
+        struct ground_slope_segment_query_data {
+            double dist, dist2;
             cpVect contact, normal, start, end;
             
-            ground_slope_handler_data() :
-            dist(FLT_MAX),
+            ground_slope_segment_query_data() :
+            dist(numeric_limits<double>::max()),
+            dist2(numeric_limits<double>::max()),
             normal(cpv(0, 1)) {
             }
         };
         
-        void groundSlopeRaycastHandler(cpShape *shape, cpVect point, cpVect normal, cpFloat alpha, void *data) {
+        void groundSlopeSegmentQueryHandler(cpShape *shape, cpVect point, cpVect normal, cpFloat alpha, void *dataPtr) {
             if (cpShapeGetCollisionType(shape) != CollisionType::PLAYER) {
-                ground_slope_handler_data *handlerData = (ground_slope_handler_data *) data;
-                double d2 = cpvdistsq(point, handlerData->start);
-                if (d2 < handlerData->dist) {
-                    handlerData->dist = sqrt(d2);
-                    handlerData->contact = point;
-                    handlerData->normal = normal;
+                auto data = static_cast<ground_slope_segment_query_data *>(dataPtr);
+                const double d2 = cpvdistsq(point, data->start);
+                if (d2 < data->dist2) {
+                    data->dist2 = d2;
+                    data->dist = sqrt(d2);
+                    data->contact = point;
+                    data->normal = normal;
                 }
             }
         }
         
         void drawCapsule(dvec2 a, dvec2 b, double radius) {
-            dvec2 center = (a + b) * 0.5;
-            double len = distance(a, b);
-            dvec2 dir = (b - a) / len;
-            double angle = atan2(dir.y, dir.x);
+            const dvec2 center = (a + b) * 0.5;
+            const double len = distance(a, b);
+            const dvec2 dir = (b - a) / len;
+            const double angle = atan2(dir.y, dir.x);
             
             gl::ScopedModelMatrix smm;
             mat4 M = glm::translate(dvec3(center.x, center.y, 0)) * glm::rotate(angle, dvec3(0, 0, 1));
@@ -73,6 +252,7 @@ namespace game {
      double _jetpackFuelLevel, _jetpackFuelMax, _lean;
      dvec2 _up, _groundNormal, _jetpackForceDir;
      PlayerInputComponentWeakRef _input;
+     vector<LegPhysicsRef> _legSimulations;
      */
 
     PlayerPhysicsComponent::PlayerPhysicsComponent(config c) :
@@ -119,19 +299,19 @@ namespace game {
         _jetpackFuelLevel = _jetpackFuelMax = config.jetpackFuelMax;
         
         const double
-        Width = getConfig().width,
-        Height = getConfig().height,
-        Density = getConfig().density,
-        HalfWidth = Width / 2,
-        HalfHeight = Height / 2,
-        Mass = Width * Height * Density,
-        Moment = cpMomentForBox(Mass, Width, Height),
-        WheelRadius = HalfWidth * 1.25,
-        WheelSensorRadius = WheelRadius * 1.1,
-        WheelMass = Density * M_PI * WheelRadius * WheelRadius;
+            Width = getConfig().width,
+            Height = getConfig().height,
+            Density = getConfig().density,
+            HalfWidth = Width / 2,
+            HalfHeight = Height / 2,
+            Mass = Width * Height * Density,
+            Moment = cpMomentForBox(Mass, Width, Height),
+            WheelRadius = HalfWidth * 1.25,
+            WheelSensorRadius = WheelRadius * 1.1,
+            WheelMass = Density * M_PI * WheelRadius * WheelRadius;
         
         const cpVect
-        WheelPositionOffset = cpv(0, -HalfHeight);
+            WheelPositionOffset = cpv(0, -HalfHeight);
         
         _totalMass = Mass + WheelMass;
         _body = add(cpBodyNew(Mass, Moment));
@@ -176,9 +356,37 @@ namespace game {
         //    Finalize
         //
         
-        // group just has to be a unique integer so the player parts don't collide with eachother
+        // note: group has to be a unique integer so the player parts don't collide with eachother
         cpShapeFilter filter = ShapeFilters::PLAYER;
         filter.group = reinterpret_cast<cpGroup>(player.get());
+        
+        //
+        //  Build our legs
+        //
+        
+        {
+            const size_t count = 8;
+            const double legAngleRange = radians(135.0);
+            const double startAngle = radians(-90.0) - legAngleRange * 0.5;
+            const double phaseDuration = 1 / static_cast<double>(count);
+            ci::Rand rng;
+            
+            for (size_t i = 0; i < count; i++) {
+                const double phaseOffset = i * phaseDuration;
+                const double angle = startAngle + (legAngleRange * phaseOffset) + rng.nextFloat(-0.05, 0.05);
+                const dvec2 dir(cos(angle), sin(angle));
+                const double legDeflectionScale = (i / static_cast<double>(count-1)) * 2.0 - 1.0;
+                
+                const dvec2 originOnParentBody = dvec2(0, -HalfHeight) + (dir * WheelRadius * 0.75);
+                const dvec2 probeDir = normalize(dir + dvec2(0.1f * rng.nextVec2()));
+                const double maxLegExtension = Height * (1.5 + rng.nextFloat(-0.3, 0.3));
+                const double maxLegDeflection = radians(25 + abs(legDeflectionScale) * 65 + rng.nextFloat(-10, 10));
+                const double minLegExtension = Height * (0.3 + rng.nextFloat(-0.1, 0.1));
+
+                const auto lp = make_shared<LegPhysics>(_body, originOnParentBody, probeDir, maxLegExtension, maxLegDeflection, minLegExtension, phaseOffset, phaseDuration);
+                _legSimulations.push_back(lp);
+            }
+        }
         
         build(filter, CollisionType::PLAYER);
     }
@@ -190,18 +398,18 @@ namespace game {
         const PlayerPhysicsComponent::config config = getConfig();
         
         const bool
-        Alive = true, //player->iaAlive(),
-        Restrained = false; // player->isRestrained();
+            Alive = true,
+            Restrained = false;
         
         const double
-        Vel = getSpeed(),
-        Dir = sign(getSpeed());
+            Vel = getSpeed(),
+            Dir = sign(getSpeed());
         
         const auto G = getSpace()->getGravity(v2(cpBodyGetPosition(_wheelBody)));
         
         const dvec2
-        Down = G.dir,
-        Right = rotateCCW(Down);
+            Down = G.dir,
+            Right = rotateCCW(Down);
         
         //
         //    Smoothly update touching ground state as well as ground normal
@@ -326,6 +534,14 @@ namespace game {
         }
         
         //
+        //  Update legs
+        //
+        
+        for (const auto &leg : _legSimulations) {
+            leg->step(timeState);
+        }
+        
+        //
         //    Draw component needs update its BB for draw dispatch
         //
         
@@ -410,23 +626,23 @@ namespace game {
         const cpVect
         DownCast = cpvmult(cpv(Down), CastDistance);
         
-        ground_slope_handler_data handlerData;
+        ground_slope_segment_query_data data;
         cpSpace *space = getSpace()->getSpace();
         
-        handlerData.start = cpv(Position + Right);
-        handlerData.end = cpvadd(handlerData.start, DownCast);
-        cpSpaceSegmentQuery(space, handlerData.start, handlerData.end, SegmentRadius, CP_SHAPE_FILTER_ALL, groundSlopeRaycastHandler, &handlerData);
-        cpVect normal = handlerData.normal;
+        data.start = cpv(Position + Right);
+        data.end = cpvadd(data.start, DownCast);
+        cpSpaceSegmentQuery(space, data.start, data.end, SegmentRadius, CP_SHAPE_FILTER_ALL, groundSlopeSegmentQueryHandler, &data);
+        cpVect normal = data.normal;
         
-        handlerData.start = cpv(Position);
-        handlerData.end = cpvadd(handlerData.start, DownCast);
-        cpSpaceSegmentQuery(space, handlerData.start, handlerData.end, SegmentRadius, CP_SHAPE_FILTER_ALL, groundSlopeRaycastHandler, &handlerData);
-        normal = cpvadd(normal, handlerData.normal);
+        data.start = cpv(Position);
+        data.end = cpvadd(data.start, DownCast);
+        cpSpaceSegmentQuery(space, data.start, data.end, SegmentRadius, CP_SHAPE_FILTER_ALL, groundSlopeSegmentQueryHandler, &data);
+        normal = cpvadd(normal, data.normal);
         
-        handlerData.start = cpv(Position - Right);
-        handlerData.end = cpvadd(handlerData.start, DownCast);
-        cpSpaceSegmentQuery(space, handlerData.start, handlerData.end, SegmentRadius, CP_SHAPE_FILTER_ALL, groundSlopeRaycastHandler, &handlerData);
-        normal = cpvadd(normal, handlerData.normal);
+        data.start = cpv(Position - Right);
+        data.end = cpvadd(data.start, DownCast);
+        cpSpaceSegmentQuery(space, data.start, data.end, SegmentRadius, CP_SHAPE_FILTER_ALL, groundSlopeSegmentQueryHandler, &data);
+        normal = cpvadd(normal, data.normal);
         
         return normalize(v2(normal));
     }
@@ -479,6 +695,11 @@ namespace game {
     
 #pragma mark - PlayerDrawComponent
     
+    /*
+     PlayerPhysicsComponentWeakRef _physics;
+     vector<LegDrawerRef> _legDrawers;
+     */
+    
     PlayerDrawComponent::PlayerDrawComponent():
             EntityDrawComponent(DrawLayers::PLAYER, VisibilityDetermination::FRUSTUM_CULLING)
     {
@@ -489,7 +710,12 @@ namespace game {
     
     void PlayerDrawComponent::onReady(ObjectRef parent, StageRef stage) {
         DrawComponent::onReady(parent, stage);
-        _physics = getSibling<PlayerPhysicsComponent>();
+        auto physics = getSibling<PlayerPhysicsComponent>();
+        _physics = physics;
+        
+        for (const auto &leg : physics->getLegs()) {
+            _legDrawers.push_back(make_shared<LegDrawer>(leg));
+        }
     }
     
     cpBB PlayerDrawComponent::getBB() const {
@@ -507,6 +733,8 @@ namespace game {
     void PlayerDrawComponent::drawPlayer(const render_state &renderState) {
         PlayerPhysicsComponentRef physics = _physics.lock();
         CI_ASSERT_MSG(physics, "PlayerPhysicsComponentRef should be accessbile");
+        
+        gl::ScopedBlendAlpha sba;
         
         const PlayerPhysicsComponent::wheel FootWheel = physics->getFootWheel();
         const PlayerPhysicsComponent::capsule BodyCapsule = physics->getBodyCapsule();
@@ -537,6 +765,10 @@ namespace game {
             
             gl::color(1, 0, 0);
             gl::drawSolidTriangle(dvec2(-FootWheel.radius, 0), dvec2(FootWheel.radius, 0), dvec2(0, -4 * FootWheel.radius));
+        }
+        
+        for (const auto &ld : _legDrawers) {
+            ld->draw(renderState);
         }
     }
     
