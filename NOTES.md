@@ -3,9 +3,11 @@
 ## Presently
 
 - Player
+    - tesselate the legs
     - needs SVG body
-    - needs "fronds"
+    - needs "fronds" (?)
     - needs weapon
+    
 
 - Kill XmlMultiTree - I'm not even using it, and it adds complexity.
 

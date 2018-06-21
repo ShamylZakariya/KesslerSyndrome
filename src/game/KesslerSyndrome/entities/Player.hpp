@@ -10,6 +10,7 @@
 #define Player_hpp
 
 #include "Core.hpp"
+#include <cinder/Perlin.h>
 
 namespace game {
     
@@ -37,31 +38,44 @@ namespace game {
             Retracting
         };
         
+        struct config {
+            cpBody *unownedParentBody;
+            ci::Perlin *unownedPerlin;
+            dvec2 localOrigin;
+            dvec2 localDir;
+            double rotationExtent;
+            double maxLength;
+            double restLength;
+            double cycleScale;
+            double cycleOffset;
+        };
+        
     public:
         
-        LegPhysics(cpBody *unownedParentBody, vec2 originOnParentBody, vec2 directionFromParentBody, double maxExtension, double maxDeflectionRadians, double minExtension, double phaseOffset, double phaseDuration);
+        LegPhysics(config c);
         
         void step(const core::time_state &time);
 
         dvec2 getWorldOrigin() const { return v2(_worldOrigin); }
         dvec2 getWorldEnd() const { return v2(_worldEnd); }
         dvec2 getWorldUp() const { return v2(cpBodyLocalToWorld(_unownedParentBody, cpv(0,1))); }
-        dvec2 getWorldDirection() const { return v2(_worldDirection); }
-        double getMaxExtension() const { return _maxExtension; }
+        double getMaxLength() const { return _maxLength; }
         Phase getPhase() const { return _phase; }
 
     protected:
         
-        friend class PlayerDrawComponent;
+        friend class LegDrawer;
         bool _canMaintainGroundContact(const core::time_state &time);
         bool _probeForGroundContact();
+        cpVect _getLocalProbeDir() const;
 
     protected:
         
         cpBody *_unownedParentBody;
-        cpVect _localOrigin, _localEnd, _localDirection, _localRest;
-        cpVect _worldOrigin, _worldEnd, _worldDirection, _worldContact, _probeOrigin, _probeEnd;
-        double _maxExtension, _maxDeflection, _temporalPhaseOffset, _temporalPhaseDuration;
+        ci::Perlin *_unownedPerlin;
+        cpVect _localOrigin, _localEnd, _localDir, _localRest;
+        cpVect _worldOrigin, _worldEnd, _worldContact;
+        double _maxLength, _restLength, _rotationExtent, _cosRotationExtent, _cycleScale, _cycleOffset;
         Phase _phase;
     };
     
@@ -198,6 +212,7 @@ namespace game {
         bool _flying;
         double _speed;
         
+        ci::Perlin _perlin;
         cpBody *_body, *_wheelBody;
         cpShape *_bodyShape, *_wheelShape, *_groundContactSensorShape;
         cpConstraint *_wheelMotor, *_orientationConstraint;

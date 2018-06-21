@@ -46,39 +46,52 @@ namespace game {
     }
 
     /*
+     struct config {
+     cpBody *unownedParentBody;
+     ci::Perlin *_unownedPerlin;
+     dvec2 localOrigin;
+     dvec2 localDir;
+     double rotationExtent;
+     double maxLength;
+     double restLength;
+     double cycleScale;
+     double cycleOffset;
+     };
+
      cpBody *_unownedParentBody;
-     cpVect _localOrigin, _localEnd, _localDirection, _localRest;
-     cpVect _worldOrigin, _worldEnd, _worldDirection, _worldRest, _worldContact, _probeOrigin, _probeEnd;
-     double _maxExtension, _maxDeflection, _temporalPhaseOffset, _temporalPhaseDuration;
+     ci::Perlin *unownedPerlin;
+     cpVect _localOrigin, _localEnd, _localDir, _localRest;
+     cpVect _worldOrigin, _worldEnd, _worldContact;
+     double _maxLength, _restLength, _rotationExtent, _cosRotationExtent, _cycleScale, _cycleOffset;
      Phase _phase;
      */
     
-    LegPhysics::LegPhysics(cpBody *unownedParentBody, vec2 originOnParentBody, vec2 directionFromParentBody, double maxExtension, double maxDeflectionRadians, double minExtension, double phaseOffset, double phaseDuration):
-        _unownedParentBody(unownedParentBody),
-        _localOrigin(cpv(originOnParentBody)),
-        _localRest(cpvadd(_localOrigin, cpvmult(_localDirection,minExtension))),
-        _localDirection(cpv(directionFromParentBody)),
-        _worldOrigin(cpBodyLocalToWorld(unownedParentBody, _localOrigin)),
-        _worldEnd(_worldOrigin),
-        _maxExtension(maxExtension),
-        _maxDeflection(cos(maxDeflectionRadians)),
-        _temporalPhaseOffset(phaseOffset),
-        _temporalPhaseDuration(phaseDuration),
+    LegPhysics::LegPhysics(config c):
+        _unownedParentBody(c.unownedParentBody),
+        _unownedPerlin(c.unownedPerlin),
+        _localOrigin(cpv(c.localOrigin)),
+        _localDir(cpv(c.localDir)),
+        _localRest(cpv(c.localOrigin + (c.restLength * c.localDir))),
+        _worldOrigin(cpBodyLocalToWorld(c.unownedParentBody, _localOrigin)),
+        _maxLength(c.maxLength),
+        _restLength(c.restLength),
+        _rotationExtent(c.rotationExtent),
+        _cosRotationExtent(cos(c.rotationExtent)),
+        _cycleScale(c.cycleScale),
+        _cycleOffset(c.cycleOffset),
         _phase(Phase::ProbingForContact)
     {
         _localEnd = _localRest;
+        _worldEnd = cpBodyLocalToWorld(_unownedParentBody, _localEnd);
     }
     
-    void LegPhysics::step(const core::time_state &time) {
+    void LegPhysics::step(const core::time_state &time) {        
         _worldOrigin = cpBodyLocalToWorld(_unownedParentBody, _localOrigin);
-
-        const auto rotation = cpBodyGetRotation(_unownedParentBody);
-        _worldDirection = cpvrotate(_localDirection, rotation);
 
         switch(_phase) {
             case Phase::ProbingForContact:
                 // while probing, our endpoint is defined in local space
-                _worldEnd = cpBodyLocalToWorld(_unownedParentBody, _localEnd);
+                _worldEnd = cpBodyLocalToWorld(_unownedParentBody, _localRest);
 
                 if (_probeForGroundContact()) {
                     _phase = Phase::Contact;
@@ -112,38 +125,43 @@ namespace game {
     }
     
     bool LegPhysics::_canMaintainGroundContact(const core::time_state &time) {
-        const seconds_t cycle = time.time - floor(time.time);
-        if (cycle > _temporalPhaseOffset && cycle < _temporalPhaseOffset + _temporalPhaseDuration) {
+        const seconds_t cycle = (time.time * _cycleScale) + _cycleOffset;
+        if (_unownedPerlin->fBm(cycle) > 0.4) {
+            return false;
+        }
 
-            // check for hyperxtension
-            if (cpvdistsq(_worldEnd, _worldOrigin) > (_maxExtension * _maxExtension)) {
-                return false;
-            }
-            
-            // check for deflection from the natural probe angle
-            const auto currentLocalDir = cpvnormalize(cpvsub(_localEnd, _localOrigin));
-            const auto deflection = cpvdot(currentLocalDir, _localDirection);
-            if (deflection < _maxDeflection) { // maxDeflection is cached as cos(maxDeflection)
-                return false;
-            }
-
+        if (cpvdistsq(_worldEnd, _worldOrigin) > (_maxLength * _maxLength)) {
+            return false;
+        }
+        
+        const auto currentLocalDir = cpvnormalize(cpvsub(_localEnd, _localOrigin));
+        const auto deflection = cpvdot(currentLocalDir, _localDir);
+        if (deflection < _cosRotationExtent) { // _cosRotationExtent is cos(_rotationExtent)
+            return false;
         }
         
         return true;
     }
     
     bool LegPhysics::_probeForGroundContact() {
-        _probeOrigin = _worldOrigin;
-        _probeEnd = cpvadd(_probeOrigin, cpvmult(_worldDirection, _maxExtension));
+        const auto rotation = cpBodyGetRotation(_unownedParentBody);
+        const auto probeDir = cpvrotate(_getLocalProbeDir(), rotation);
+        const auto probeOrigin = _worldOrigin;
+        const auto probeEnd = cpvadd(probeOrigin, cpvmult(probeDir, _maxLength));
         
         leg_contact_segment_query_data data(_worldOrigin);
-        cpSpaceSegmentQuery(cpBodyGetSpace(_unownedParentBody), _probeOrigin, _probeEnd, 1, CP_SHAPE_FILTER_ALL, legContactSegmentQueryHandler, &data);
-        if (data.dist < _maxExtension * 0.7) {
+        cpSpaceSegmentQuery(cpBodyGetSpace(_unownedParentBody), probeOrigin, probeEnd, 1, CP_SHAPE_FILTER_ALL, legContactSegmentQueryHandler, &data);
+        if (data.dist < _maxLength * 1.0) {
             _worldContact = data.contact;
             return true;
         }
         return false;
     }
+
+    cpVect LegPhysics::_getLocalProbeDir() const {
+        return _localDir;
+    }
+
     
 #pragma mark - LegDrawer
     
@@ -154,33 +172,43 @@ namespace game {
     void LegDrawer::draw(const core::render_state &state) {
         const LegPhysicsRef leg = _leg.lock();
 
-        // assign start and end points
-        _bezierControlPoints[0] = leg->getWorldOrigin();
-        _bezierControlPoints[3] = leg->getWorldEnd();
+        const seconds_t cycle = (state.time * leg->_cycleScale) + leg->_cycleOffset;
+        ci::Perlin *perlin = leg->_unownedPerlin;
+        dvec2 cp0Offset(perlin->fBm(cycle + 1), perlin->fBm(cycle + 2));
+        dvec2 cp1Offset(perlin->fBm(cycle + 10), perlin->fBm(cycle + 20));
+        dvec2 endOffset(perlin->fBm(cycle + 30), perlin->fBm(cycle + 40));
 
+        
         // we're doing a simple bezier curve where the control points are equal. we're using
         // the a point along the leg span, offset by its perpendicular
         const auto basePoint = lrp(0.85, leg->getWorldOrigin(), leg->getWorldEnd());
         const auto len = length(leg->getWorldEnd() - leg->getWorldOrigin()) + 1e-4;
         const auto dir = (leg->getWorldEnd() - leg->getWorldOrigin()) / len;
-        const auto deflectionLen = len * 1;
+        const auto maxControlPointDeflection = leg->_maxLength * 0.3;
+        const auto minControlPointDeflection = leg->_maxLength * 0.01;
+        const auto controlPointWiggleRange = leg->_maxLength * 0.5;
+        const auto endWiggleRange = leg->_restLength * 0.25;
+        const auto controlPointDeflection = lrp((len / leg->_maxLength), minControlPointDeflection, maxControlPointDeflection);
+
+        // assign start and end points
+        _bezierControlPoints[0] = leg->getWorldOrigin();
+        _bezierControlPoints[3] = leg->getWorldEnd() + endWiggleRange * endOffset;
 
         if (dot(rotateCCW(dir), leg->getWorldUp()) > 0) {
-            const auto cp = basePoint + (deflectionLen * rotateCCW(dir));
-            _bezierControlPoints[1] = cp;
-            _bezierControlPoints[2] = cp;
+            const auto cp = basePoint + (controlPointDeflection * rotateCCW(dir));
+            _bezierControlPoints[1] = cp + controlPointWiggleRange * cp0Offset;
+            _bezierControlPoints[2] = cp + controlPointWiggleRange * cp1Offset;
         } else {
-            const auto cp = basePoint + (deflectionLen * rotateCW(dir));
-            _bezierControlPoints[1] = cp;
-            _bezierControlPoints[2] = cp;
+            const auto cp = basePoint + (controlPointDeflection * rotateCW(dir));
+            _bezierControlPoints[1] = cp + controlPointWiggleRange * cp0Offset;
+            _bezierControlPoints[2] = cp + controlPointWiggleRange * cp1Offset;
         }
-        
         
         const size_t numSegments = 10;
         const double stepSize = 1 / static_cast<double>(numSegments);
         dvec2 v = _bezierControlPoints[0];
 
-        gl::color(0,1,1,1);
+        gl::color(1,0.1,0.1,1);
         for (auto seg = 0; seg < numSegments; seg++) {
             const auto t = (seg+1) * stepSize;
             const auto v2 = util::bezier(t, _bezierControlPoints[0], _bezierControlPoints[1], _bezierControlPoints[2], _bezierControlPoints[3]);
@@ -245,6 +273,7 @@ namespace game {
      bool _flying;
      double _speed;
      
+     ci::Perlin _perlin;
      cpBody *_body, *_wheelBody;
      cpShape *_bodyShape, *_wheelShape, *_groundContactSensorShape;
      cpConstraint *_wheelMotor, *_orientationConstraint;
@@ -252,6 +281,7 @@ namespace game {
      double _jetpackFuelLevel, _jetpackFuelMax, _lean;
      dvec2 _up, _groundNormal, _jetpackForceDir;
      PlayerInputComponentWeakRef _input;
+     
      vector<LegPhysicsRef> _legSimulations;
      */
 
@@ -368,23 +398,28 @@ namespace game {
             const size_t count = 8;
             const double legAngleRange = radians(135.0);
             const double startAngle = radians(-90.0) - legAngleRange * 0.5;
-            const double phaseDuration = 1 / static_cast<double>(count);
+            const double cycleStep = 1 / static_cast<double>(count);
             ci::Rand rng;
             
             for (size_t i = 0; i < count; i++) {
-                const double phaseOffset = i * phaseDuration;
-                const double angle = startAngle + (legAngleRange * phaseOffset) + rng.nextFloat(-0.05, 0.05);
+                const double cycleOffset = i * cycleStep;
+                const double angle = startAngle + (legAngleRange * cycleOffset) + rng.nextFloat(-0.05, 0.05);
                 const dvec2 dir(cos(angle), sin(angle));
                 const double legDeflectionScale = (i / static_cast<double>(count-1)) * 2.0 - 1.0;
+                const auto rngContrib = 0.0;
                 
-                const dvec2 originOnParentBody = dvec2(0, -HalfHeight) + (dir * WheelRadius * 0.75);
-                const dvec2 probeDir = normalize(dir + dvec2(0.1f * rng.nextVec2()));
-                const double maxLegExtension = Height * (1.5 + rng.nextFloat(-0.3, 0.3));
-                const double maxLegDeflection = radians(25 + abs(legDeflectionScale) * 65 + rng.nextFloat(-10, 10));
-                const double minLegExtension = Height * (0.3 + rng.nextFloat(-0.1, 0.1));
+                LegPhysics::config c;
+                c.unownedParentBody = _body;
+                c.unownedPerlin = &_perlin;
+                c.localOrigin = dvec2(0, -HalfHeight) + (dir * WheelRadius * 0.75 + (rngContrib * dvec2(rng.nextVec2()) * WheelRadius * 0.1));
+                c.localDir = normalize(dir + dvec2(0.1 * rngContrib * dvec2(rng.nextVec2())));
+                c.rotationExtent = radians(25 + abs(legDeflectionScale) * 65 + rngContrib * rng.nextFloat(-10, 10));
+                c.maxLength = Height * (1.5 +  rngContrib * rng.nextFloat(-0.3, 0.3));
+                c.restLength = Height * (0.3 + rngContrib * rng.nextFloat(-0.1, 0.1));
+                c.cycleOffset = cycleOffset;
+                c.cycleScale = 0.5;
 
-                const auto lp = make_shared<LegPhysics>(_body, originOnParentBody, probeDir, maxLegExtension, maxLegDeflection, minLegExtension, phaseOffset, phaseDuration);
-                _legSimulations.push_back(lp);
+                _legSimulations.push_back(make_shared<LegPhysics>(c));
             }
         }
         
