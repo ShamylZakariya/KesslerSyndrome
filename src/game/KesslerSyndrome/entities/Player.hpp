@@ -15,7 +15,8 @@
 namespace game {
     
     SMART_PTR(LegPhysics);
-    SMART_PTR(LegDrawer);
+    SMART_PTR(LegTessellator);
+    SMART_PTR(LegBatchDrawer);
     SMART_PTR(PlayerPhysicsComponent);
     SMART_PTR(PlayerInputComponent);
     SMART_PTR(PlayerDrawComponent);
@@ -64,7 +65,7 @@ namespace game {
 
     protected:
         
-        friend class LegDrawer;
+        friend class LegTessellator;
         bool _canMaintainGroundContact(const core::time_state &time);
         bool _probeForGroundContact();
         cpVect _getLocalProbeDir() const;
@@ -81,27 +82,47 @@ namespace game {
     
 #pragma mark - LegDrawer
     
-    class LegDrawer {
+    class LegTessellator {
     public:
         
-        LegDrawer(LegPhysicsRef leg):
+        struct vertex {
+            vec2 position;
+            ColorA color;
+        };
+
+        
+        LegTessellator(LegPhysicsRef leg):
         _leg(leg)
         {
             _bezierControlPoints.resize(4);
         }
         
-        void draw(const core::render_state &state);
-        
-    protected:
-        
-        void _computeBezier(const LegPhysicsRef &leg, const core::render_state &state);
-        void _tessellate(const core::render_state &state, float width, size_t subdivisions);
+        LegPhysicsRef getLeg() const { return _leg.lock(); }
+        void computeBezier(const core::render_state &state);
+        void tessellate(const core::render_state &state, float width, size_t subdivisions, ColorA color, vector<vertex> &triangles);
+        void debugDrawTriangles(const core::render_state &state, float width, ColorA color, size_t subdivisions);
         
     protected:
         
         LegPhysicsWeakRef _leg;
         vector<vec2> _bezierControlPoints;
-        vector<vec2> _vertices;
+    };
+    
+
+    class LegBatchDrawer {
+    public:
+        
+        LegBatchDrawer(vector<LegTessellatorRef> legTessellators);
+
+        void draw(const core::render_state &state);
+
+    private:
+
+        vector<LegTessellatorRef> _legTessellators;
+        vector<LegTessellator::vertex> _vertices;
+        gl::GlslProgRef _shader;
+        gl::VboRef _vbo;
+        gl::BatchRef _batch;
         
     };
     
@@ -281,7 +302,7 @@ namespace game {
     private:
         
         PlayerPhysicsComponentWeakRef _physics;
-        vector<LegDrawerRef> _legDrawers;
+        LegBatchDrawerRef _legBatchDrawer;
         
     };
     

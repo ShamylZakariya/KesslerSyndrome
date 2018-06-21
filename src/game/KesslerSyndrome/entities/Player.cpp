@@ -10,6 +10,8 @@
 
 #include "Bezier.hpp"
 #include "GameConstants.hpp"
+#include "GlslProgLoader.hpp"
+
 #include <cinder/Rand.h>
 
 using namespace core;
@@ -163,30 +165,33 @@ namespace game {
     }
 
     
-#pragma mark - LegDrawer
+#pragma mark - LegTessellator
     
     /*
      LegPhysicsWeakRef _leg;
      vector<dvec2> _bezierControlPoints;
      vector<vec2> _vertices;
      */
-    void LegDrawer::draw(const core::render_state &state) {
-        const LegPhysicsRef leg = _leg.lock();
-        _computeBezier(leg, state);
-        _tessellate(state, 2, 10);
+    
+    void LegTessellator::debugDrawTriangles(const core::render_state &state, float width, ColorA color, size_t subdivisions) {
+        computeBezier(state);
         
-        gl::color(1,0.1,0.1,1);
-        for (int i = 0; i < _vertices.size(); i += 3) {
-            vec2 a = _vertices[i + 0];
-            vec2 b = _vertices[i + 1];
-            vec2 c = _vertices[i + 2];
+        vector<vertex> vertices;
+        tessellate(state, 2, 10, color, vertices);
+
+        gl::color(color);
+        for (int i = 0; i < vertices.size(); i += 3) {
+            vec2 a = vertices[i + 0].position;
+            vec2 b = vertices[i + 1].position;
+            vec2 c = vertices[i + 2].position;
             gl::drawLine(a, b);
             gl::drawLine(b, c);
             gl::drawLine(c, a);
         }
     }
-    
-    void LegDrawer::_computeBezier(const LegPhysicsRef &leg, const core::render_state &state) {
+
+    void LegTessellator::computeBezier(const core::render_state &state) {
+        const LegPhysicsRef leg = _leg.lock();
         const seconds_t cycle = (state.time * leg->_cycleScale) + leg->_cycleOffset;
         ci::Perlin *perlin = leg->_unownedPerlin;
         dvec2 cp0Offset(perlin->fBm(cycle + 1), perlin->fBm(cycle + 2));
@@ -220,9 +225,7 @@ namespace game {
         }
     }
 
-    void LegDrawer::_tessellate(const core::render_state &state, float width, size_t subdivisions) {
-        _vertices.clear();
-        
+    void LegTessellator::tessellate(const core::render_state &state, float width, size_t subdivisions, ColorA color, vector<vertex> &vertices) {
         const auto step = 1 / static_cast<float>(subdivisions);
         
         // bzA bezier segment start
@@ -242,9 +245,9 @@ namespace game {
         vec2 tBr = bzB + width * bzDirPerp;
 
         // create first triangle
-        _vertices.push_back(_bezierControlPoints[0]);
-        _vertices.push_back(tBl);
-        _vertices.push_back(tBr);
+        vertices.push_back({_bezierControlPoints[0], color});
+        vertices.push_back({tBl, color});
+        vertices.push_back({tBr, color});
         
         bzA = bzB;
         vec2 tAl = tBl;
@@ -260,24 +263,84 @@ namespace game {
             tBl = bzB - scaledWidth * bzDirPerp;
             tBr = bzB + scaledWidth * bzDirPerp;
             
-            _vertices.push_back(tAl);
-            _vertices.push_back(tBl);
-            _vertices.push_back(tAr);
+            vertices.push_back({tAl, color});
+            vertices.push_back({tBl, color});
+            vertices.push_back({tAr, color});
 
-            _vertices.push_back(tAr);
-            _vertices.push_back(tBl);
-            _vertices.push_back(tBr);
+            vertices.push_back({tAr, color});
+            vertices.push_back({tBl, color});
+            vertices.push_back({tBr, color});
             
             tAl = tBl;
             tAr = tBr;
         }
         
         // create last triangle
-        _vertices.push_back(_bezierControlPoints[3]);
-        _vertices.push_back(tBr);
-        _vertices.push_back(tBl);
+        vertices.push_back({_bezierControlPoints[3], color});
+        vertices.push_back({tBr, color});
+        vertices.push_back({tBl, color});
     }
 
+#pragma mark - LegBatchDrawer
+
+    /*
+     vector<LegTessellatorRef> _legTessellators;
+     vector<LegTessellator::vertex> _vertices;
+     gl::GlslProgRef _shader;
+     gl::VboRef _vbo;
+     gl::BatchRef _batch;
+     */
+    LegBatchDrawer::LegBatchDrawer(vector<LegTessellatorRef> legTessellators):
+        _legTessellators(legTessellators),
+        _shader(core::util::loadGlslAsset("kessler/shaders/player_leg.glsl"))
+    {
+    }
+    
+    void LegBatchDrawer::draw(const core::render_state &state) {
+
+        //
+        // update and tesselate our leg geometry
+        //
+
+        _vertices.clear();
+        for (const auto &lt : _legTessellators) {
+            lt->computeBezier(state);
+            lt->tessellate(state, 2, 10, ColorA(1,0.1,0.1,1), _vertices);
+        }
+        
+        if (!_vbo) {
+
+            //
+            //  Lazily create VBO - note we have a constant number of vertices
+            //
+    
+            _vbo = gl::Vbo::create(GL_ARRAY_BUFFER, _vertices, GL_STREAM_DRAW);
+
+            geom::BufferLayout particleLayout;
+            particleLayout.append(geom::Attrib::POSITION, 2, sizeof(LegTessellator::vertex), offsetof(LegTessellator::vertex, position));
+            particleLayout.append(geom::Attrib::COLOR, 4, sizeof(LegTessellator::vertex), offsetof(LegTessellator::vertex, color));
+
+            // pair our layout with vbo to create a cinder Batch
+            auto mesh = gl::VboMesh::create(static_cast<uint32_t>(_vertices.size()), GL_TRIANGLES, {{particleLayout, _vbo}});
+            _batch = gl::Batch::create(mesh, _shader);
+        } else {
+
+            //
+            // Vbo exists, so just copy new positions over
+            //
+
+            void *gpuMem = _vbo->mapReplace();
+            memcpy(gpuMem, _vertices.data(), _vertices.size() * sizeof(LegTessellator::vertex));
+            _vbo->unmap();
+        }
+        
+        //
+        //  Now draw
+        //
+        
+        _batch->draw();
+    }
+    
 
     
 #pragma mark - PlayerPhysicsComponent
@@ -809,9 +872,11 @@ namespace game {
         auto physics = getSibling<PlayerPhysicsComponent>();
         _physics = physics;
         
+        vector<LegTessellatorRef> tesselators;
         for (const auto &leg : physics->getLegs()) {
-            _legDrawers.push_back(make_shared<LegDrawer>(leg));
+            tesselators.push_back(make_shared<LegTessellator>(leg));
         }
+        _legBatchDrawer = make_shared<LegBatchDrawer>(tesselators);
     }
     
     cpBB PlayerDrawComponent::getBB() const {
@@ -863,9 +928,7 @@ namespace game {
             gl::drawSolidTriangle(dvec2(-FootWheel.radius, 0), dvec2(FootWheel.radius, 0), dvec2(0, -4 * FootWheel.radius));
         }
         
-        for (const auto &ld : _legDrawers) {
-            ld->draw(renderState);
-        }
+        _legBatchDrawer->draw(renderState);
     }
     
 #pragma mark - PlayerUIDrawComponent
