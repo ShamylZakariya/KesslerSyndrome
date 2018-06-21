@@ -92,10 +92,16 @@ namespace game {
         
         void draw(const core::render_state &state);
         
-    private:
+    protected:
+        
+        void _computeBezier(const LegPhysicsRef &leg, const core::render_state &state);
+        void _tessellate(const core::render_state &state, float width, size_t subdivisions);
+        
+    protected:
         
         LegPhysicsWeakRef _leg;
-        vector<dvec2> _bezierControlPoints;
+        vector<vec2> _bezierControlPoints;
+        vector<vec2> _vertices;
         
     };
     

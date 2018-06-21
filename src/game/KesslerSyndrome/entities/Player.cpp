@@ -168,16 +168,31 @@ namespace game {
     /*
      LegPhysicsWeakRef _leg;
      vector<dvec2> _bezierControlPoints;
+     vector<vec2> _vertices;
      */
     void LegDrawer::draw(const core::render_state &state) {
         const LegPhysicsRef leg = _leg.lock();
-
+        _computeBezier(leg, state);
+        _tessellate(state, 2, 10);
+        
+        gl::color(1,0.1,0.1,1);
+        for (int i = 0; i < _vertices.size(); i += 3) {
+            vec2 a = _vertices[i + 0];
+            vec2 b = _vertices[i + 1];
+            vec2 c = _vertices[i + 2];
+            gl::drawLine(a, b);
+            gl::drawLine(b, c);
+            gl::drawLine(c, a);
+        }
+    }
+    
+    void LegDrawer::_computeBezier(const LegPhysicsRef &leg, const core::render_state &state) {
         const seconds_t cycle = (state.time * leg->_cycleScale) + leg->_cycleOffset;
         ci::Perlin *perlin = leg->_unownedPerlin;
         dvec2 cp0Offset(perlin->fBm(cycle + 1), perlin->fBm(cycle + 2));
         dvec2 cp1Offset(perlin->fBm(cycle + 10), perlin->fBm(cycle + 20));
         dvec2 endOffset(perlin->fBm(cycle + 30), perlin->fBm(cycle + 40));
-
+        
         
         // we're doing a simple bezier curve where the control points are equal. we're using
         // the a point along the leg span, offset by its perpendicular
@@ -189,11 +204,11 @@ namespace game {
         const auto controlPointWiggleRange = leg->_maxLength * 0.5;
         const auto endWiggleRange = leg->_restLength * 0.25;
         const auto controlPointDeflection = lrp((len / leg->_maxLength), minControlPointDeflection, maxControlPointDeflection);
-
+        
         // assign start and end points
         _bezierControlPoints[0] = leg->getWorldOrigin();
         _bezierControlPoints[3] = leg->getWorldEnd() + endWiggleRange * endOffset;
-
+        
         if (dot(rotateCCW(dir), leg->getWorldUp()) > 0) {
             const auto cp = basePoint + (controlPointDeflection * rotateCCW(dir));
             _bezierControlPoints[1] = cp + controlPointWiggleRange * cp0Offset;
@@ -203,20 +218,66 @@ namespace game {
             _bezierControlPoints[1] = cp + controlPointWiggleRange * cp0Offset;
             _bezierControlPoints[2] = cp + controlPointWiggleRange * cp1Offset;
         }
-        
-        const size_t numSegments = 10;
-        const double stepSize = 1 / static_cast<double>(numSegments);
-        dvec2 v = _bezierControlPoints[0];
+    }
 
-        gl::color(1,0.1,0.1,1);
-        for (auto seg = 0; seg < numSegments; seg++) {
-            const auto t = (seg+1) * stepSize;
-            const auto v2 = util::bezier(t, _bezierControlPoints[0], _bezierControlPoints[1], _bezierControlPoints[2], _bezierControlPoints[3]);
-            gl::drawLine(v, v2);
-            v = v2;
+    void LegDrawer::_tessellate(const core::render_state &state, float width, size_t subdivisions) {
+        _vertices.clear();
+        
+        const auto step = 1 / static_cast<float>(subdivisions);
+        
+        // bzA bezier segment start
+        // bzB bezier segment end
+        // bzDir normalized segment dir
+        // bzDirPerp CW-perpendicular to dir
+        // tAl tesselated segment start left
+        // tAr tesselated segment start right
+        // tBl tesselated segment end left
+        // tBr tesselated segment end right
+
+        vec2 bzA = _bezierControlPoints[0];
+        vec2 bzB = util::bezier(step, _bezierControlPoints[0], _bezierControlPoints[1], _bezierControlPoints[2], _bezierControlPoints[3]);
+        vec2 bzDir = normalize(bzB - bzA);
+        vec2 bzDirPerp = rotateCW(bzDir);
+        vec2 tBl = bzB - width * bzDirPerp;
+        vec2 tBr = bzB + width * bzDirPerp;
+
+        // create first triangle
+        _vertices.push_back(_bezierControlPoints[0]);
+        _vertices.push_back(tBl);
+        _vertices.push_back(tBr);
+        
+        bzA = bzB;
+        vec2 tAl = tBl;
+        vec2 tAr = tBr;
+
+        for (size_t seg = 1; seg < subdivisions - 1; seg++) {
+            const auto t = (seg+1) * step;
+            bzB = util::bezier(t, _bezierControlPoints[0], _bezierControlPoints[1], _bezierControlPoints[2], _bezierControlPoints[3]);
+            bzDir = normalize(bzB - bzA);
+            bzDirPerp = rotateCW(bzDir);
+
+            const auto scaledWidth = width * (1-t);
+            tBl = bzB - scaledWidth * bzDirPerp;
+            tBr = bzB + scaledWidth * bzDirPerp;
+            
+            _vertices.push_back(tAl);
+            _vertices.push_back(tBl);
+            _vertices.push_back(tAr);
+
+            _vertices.push_back(tAr);
+            _vertices.push_back(tBl);
+            _vertices.push_back(tBr);
+            
+            tAl = tBl;
+            tAr = tBr;
         }
         
+        // create last triangle
+        _vertices.push_back(_bezierControlPoints[3]);
+        _vertices.push_back(tBr);
+        _vertices.push_back(tBl);
     }
+
 
     
 #pragma mark - PlayerPhysicsComponent
@@ -411,7 +472,7 @@ namespace game {
                 LegPhysics::config c;
                 c.unownedParentBody = _body;
                 c.unownedPerlin = &_perlin;
-                c.localOrigin = dvec2(0, -HalfHeight) + (dir * WheelRadius * 0.75 + (rngContrib * dvec2(rng.nextVec2()) * WheelRadius * 0.1));
+                c.localOrigin = dvec2(0, -HalfHeight) + (dvec2(dir.x,-dir.y) * WheelRadius * 0.75 + (rngContrib * dvec2(rng.nextVec2()) * WheelRadius * 0.1));
                 c.localDir = normalize(dir + dvec2(0.1 * rngContrib * dvec2(rng.nextVec2())));
                 c.rotationExtent = radians(25 + abs(legDeflectionScale) * 65 + rngContrib * rng.nextFloat(-10, 10));
                 c.maxLength = Height * (1.5 +  rngContrib * rng.nextFloat(-0.3, 0.3));
