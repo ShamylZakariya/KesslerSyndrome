@@ -26,13 +26,14 @@
 			<generator
 				batchId="0"
 				normalToUpDotTarget="1"
-				normalToUpDotRange="1"
+				normalToUpDotRange="0.3"
 				probability="0.1"
 				density="1"
 				includeHoleContours="true"
 			/>
 		</attachmentGenerators>
 
+		
 		<greebleSystems>
 			<greebleSystem 
 				attachmentBatchId="0"
