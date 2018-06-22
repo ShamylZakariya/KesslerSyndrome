@@ -11,6 +11,7 @@
 
 #include "Core.hpp"
 #include <cinder/Perlin.h>
+#include "Svg.hpp"
 
 namespace game {
     
@@ -112,9 +113,12 @@ namespace game {
     class LegBatchDrawer {
     public:
         
-        LegBatchDrawer(vector<LegTessellatorRef> legTessellators);
+        LegBatchDrawer(vector<LegTessellatorRef> legTessellators, ColorA legColor);
 
         void draw(const core::render_state &state);
+        
+        void setLegColor(ColorA color) { _legColor = color; }
+        ColorA getLegColor() const { return _legColor; }
 
     private:
 
@@ -123,6 +127,7 @@ namespace game {
         gl::GlslProgRef _shader;
         gl::VboRef _vbo;
         gl::BatchRef _batch;
+        ColorA _legColor;
         
     };
     
@@ -291,18 +296,21 @@ namespace game {
         
         cpBB getBB() const override;
         
+        void update(const core::time_state &timeState) override;
         void draw(const core::render_state &renderState) override;
         
         
     protected:
         
         void drawPlayer(const core::render_state &renderState);
-        
-        
+        void drawPlayerPhysics(const core::render_state &renderState);
+
     private:
         
         PlayerPhysicsComponentWeakRef _physics;
         LegBatchDrawerRef _legBatchDrawer;
+        core::util::svg::GroupRef _svgDoc;
+        vector<core::util::svg::GroupRef> _eyes;
         
     };
     

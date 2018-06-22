@@ -236,6 +236,8 @@ namespace core {
                 const AppearanceRef &getAppearance() const {
                     return _appearance;
                 }
+                
+                AppearanceRef &getAppearance() { return _appearance; }
 
                 /**
                  Get bounding box of this shape's geometry in its local coordinate space

@@ -289,15 +289,16 @@ namespace game {
      gl::GlslProgRef _shader;
      gl::VboRef _vbo;
      gl::BatchRef _batch;
+     ColorA _legColor;
      */
-    LegBatchDrawer::LegBatchDrawer(vector<LegTessellatorRef> legTessellators):
+    LegBatchDrawer::LegBatchDrawer(vector<LegTessellatorRef> legTessellators, ColorA legColor):
         _legTessellators(legTessellators),
-        _shader(core::util::loadGlslAsset("kessler/shaders/player_leg.glsl"))
+        _shader(core::util::loadGlslAsset("kessler/shaders/player_leg.glsl")),
+        _legColor(legColor)
     {
     }
     
     void LegBatchDrawer::draw(const core::render_state &state) {
-
         //
         // update and tesselate our leg geometry
         //
@@ -305,7 +306,7 @@ namespace game {
         _vertices.clear();
         for (const auto &lt : _legTessellators) {
             lt->computeBezier(state);
-            lt->tessellate(state, 2, 10, ColorA(1,0.1,0.1,1), _vertices);
+            lt->tessellate(state, 2, 10, _legColor, _vertices);
         }
         
         if (!_vbo) {
@@ -339,6 +340,19 @@ namespace game {
         //
         
         _batch->draw();
+        
+        if (state.testGizmoBit(Gizmos::WIREFRAME)) {
+            gl::ScopedColor(ColorA(1,1,1,1));
+            
+            for (int i = 0; i < _vertices.size(); i += 3) {
+                vec2 a = _vertices[i + 0].position;
+                vec2 b = _vertices[i + 1].position;
+                vec2 c = _vertices[i + 2].position;
+                gl::drawLine(a, b);
+                gl::drawLine(b, c);
+                gl::drawLine(c, a);
+            }
+        }
     }
     
 
@@ -377,8 +391,8 @@ namespace game {
                 }
             }
         }
-        
-        void drawCapsule(dvec2 a, dvec2 b, double radius) {
+
+        void drawStrokedCapsule(dvec2 a, dvec2 b, double radius) {
             const dvec2 center = (a + b) * 0.5;
             const double len = distance(a, b);
             const dvec2 dir = (b - a) / len;
@@ -388,8 +402,9 @@ namespace game {
             mat4 M = glm::translate(dvec3(center.x, center.y, 0)) * glm::rotate(angle, dvec3(0, 0, 1));
             gl::multModelMatrix(M);
             
-            gl::drawSolidRoundedRect(Rectf(-len / 2 - radius, -radius, +len / 2 + radius, +radius), radius, 8);
+            gl::drawStrokedRoundedRect(Rectf(-len / 2 - radius, -radius, +len / 2 + radius, +radius), radius, 8);
         }
+
     }
     
     /**
@@ -856,11 +871,14 @@ namespace game {
     
     /*
      PlayerPhysicsComponentWeakRef _physics;
-     vector<LegDrawerRef> _legDrawers;
+     LegBatchDrawerRef _legBatchDrawer;
+     core::util::svg::GroupRef _svgDoc;
+     vector<core::util::svg::ShapeRef> _eyes;
      */
     
     PlayerDrawComponent::PlayerDrawComponent():
-            EntityDrawComponent(DrawLayers::PLAYER, VisibilityDetermination::FRUSTUM_CULLING)
+            EntityDrawComponent(DrawLayers::PLAYER, VisibilityDetermination::FRUSTUM_CULLING),
+            _svgDoc(util::svg::Group::loadSvgDocument(app::loadAsset("kessler/players/player.svg"), 1))
     {
     }
     
@@ -872,11 +890,40 @@ namespace game {
         auto physics = getSibling<PlayerPhysicsComponent>();
         _physics = physics;
         
+        //
+        // determine the approximate world size of the physics component, and scale our SVG accordingly
+        //
+        
+        const auto physicsHeight = physics->getConfig().height;
+        const auto svgHeight = _svgDoc->getBB().t - _svgDoc->getBB().b;
+        const auto scale = physicsHeight / svgHeight;
+        _svgDoc->setScale(scale);
+        
+        //
+        //  Now determine leg color by examining the SVG
+        //
+        
+        const auto root = _svgDoc->find("doc/player/Group/root");
+        const auto shape = root->getShapeNamed("leg_root");
+        const auto appearance = shape->getAppearance();
+        const auto legColor = ColorA(appearance->getFillColor(), appearance->getFillAlpha());
+        
+        //
+        // create the leg tessellators, and a batch drawer to render them
+        //
+        
         vector<LegTessellatorRef> tesselators;
         for (const auto &leg : physics->getLegs()) {
             tesselators.push_back(make_shared<LegTessellator>(leg));
         }
-        _legBatchDrawer = make_shared<LegBatchDrawer>(tesselators);
+        _legBatchDrawer = make_shared<LegBatchDrawer>(tesselators, legColor);
+        
+        //
+        //  Find the "eye" shapes
+        //
+        
+        const auto eyeGroup = _svgDoc->find("doc/player/Group/bulb/eyes");
+        _eyes = eyeGroup->getGroups();
     }
     
     cpBB PlayerDrawComponent::getBB() const {
@@ -887,11 +934,36 @@ namespace game {
         return cpBBInvalid;
     }
     
+    void PlayerDrawComponent::update(const core::time_state &timeState) {
+        auto cycle = timeState.time * 0.5 * M_PI;
+        auto step = 1 / static_cast<double>(_eyes.size());
+        for (auto &eye : _eyes) {
+            auto phase = lrp<double>((cos(cycle) + 1) * 0.5, 0.25, 1.0);
+            cycle += M_PI * step;
+            eye->setOpacity(phase);
+        }
+    }
+    
     void PlayerDrawComponent::draw(const render_state &renderState) {
         drawPlayer(renderState);
+        
+        if (true || renderState.testGizmoBit(Gizmos::PHYSICS)) {
+            drawPlayerPhysics(renderState);
+        }
     }
     
     void PlayerDrawComponent::drawPlayer(const render_state &renderState) {
+        PlayerPhysicsComponentRef physics = _physics.lock();
+        CI_ASSERT_MSG(physics, "PlayerPhysicsComponentRef should be accessbile");
+
+        _legBatchDrawer->draw(renderState);
+
+        _svgDoc->setPosition(physics->getPosition());
+        _svgDoc->setRotation(v2(cpBodyGetRotation(physics->getBody())));
+        _svgDoc->draw(renderState);
+    }
+    
+    void PlayerDrawComponent::drawPlayerPhysics(const core::render_state &renderState) {
         PlayerPhysicsComponentRef physics = _physics.lock();
         CI_ASSERT_MSG(physics, "PlayerPhysicsComponentRef should be accessbile");
         
@@ -901,17 +973,17 @@ namespace game {
         const PlayerPhysicsComponent::capsule BodyCapsule = physics->getBodyCapsule();
         
         // draw the wheel
-        gl::color(1, 1, 1);
-        gl::drawSolidCircle(FootWheel.position, FootWheel.radius, 32);
-        gl::color(0, 0, 0);
+        gl::color(1, 1, 1, 0.5);
+        gl::drawStrokedCircle(FootWheel.position, FootWheel.radius, 32);
+        gl::color(0, 0, 0, 0.5);
         gl::drawLine(FootWheel.position, FootWheel.position + FootWheel.radius * dvec2(cos(FootWheel.radians), sin(FootWheel.radians)));
         
         // draw the capsule
-        gl::color(1, 1, 1);
-        drawCapsule(BodyCapsule.a, BodyCapsule.b, BodyCapsule.radius);
+        gl::color(1, 1, 1, 0.5);
+        drawStrokedCapsule(BodyCapsule.a, BodyCapsule.b, BodyCapsule.radius);
         
         // draw the ground normal indicator
-        gl::color(1, 0, 0);
+        gl::color(1, 0, 0, 0.5);
         gl::drawLine(physics->getPosition(), physics->getPosition() + physics->getGroundNormal() * 10.0);
         gl::drawSolidCircle(physics->getPosition(), 1, 12);
         
@@ -924,12 +996,16 @@ namespace game {
             gl::ScopedModelMatrix smm;
             gl::multModelMatrix(glm::translate(dvec3(pos, 0)) * glm::rotate(angle, dvec3(0, 0, 1)));
             
-            gl::color(1, 0, 0);
-            gl::drawSolidTriangle(dvec2(-FootWheel.radius, 0), dvec2(FootWheel.radius, 0), dvec2(0, -4 * FootWheel.radius));
+            gl::color(1, 0, 0, 0.5);
+            dvec2 a = dvec2(-FootWheel.radius, 0);
+            dvec2 b = dvec2(FootWheel.radius, 0);
+            dvec2 c = dvec2(0, -4 * FootWheel.radius);
+            gl::drawLine(a,b);
+            gl::drawLine(b,c);
+            gl::drawLine(c,a);
         }
-        
-        _legBatchDrawer->draw(renderState);
     }
+
     
 #pragma mark - PlayerUIDrawComponent
     

@@ -8,6 +8,9 @@
     - needs "fronds" (?)
     - needs weapon
     
+Svg Group needs a "find element by Id", because the path thing works but is awful
+
+    
 
 - Kill XmlMultiTree - I'm not even using it, and it adds complexity.
 
