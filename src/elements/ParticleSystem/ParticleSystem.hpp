@@ -277,7 +277,7 @@ namespace elements {
         }
 
     protected:
-
+        
         virtual void _prepareForSimulation(const core::time_state &time);
 
         virtual void _simulate(const core::time_state &time);

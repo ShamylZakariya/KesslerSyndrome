@@ -261,7 +261,7 @@ namespace core {
      bool _finished, _finishingAfterDelay;
      seconds_t _finishingDelay, _finishedAfterTime;
      bool _ready;
-     set<ComponentRef> _components;
+     vector<ComponentRef> _components;
      set<DrawComponentRef> _drawComponents;
      PhysicsComponentRef _physicsComponent;
      StageWeakRef _stage;
@@ -292,7 +292,7 @@ namespace core {
     void Object::addComponent(ComponentRef component) {
         CI_ASSERT_MSG(component->getObject() == nullptr, "Cannot add a component that already has been added to another Object");
 
-        _components.insert(component);
+        _components.push_back(component);
 
         if (DrawComponentRef dc = dynamic_pointer_cast<DrawComponent>(component)) {
             _drawComponents.insert(dc);
@@ -309,28 +309,27 @@ namespace core {
 
         if (_ready) {
             const auto self = shared_from_this();
-            component->attachedToObject(self);
+            component->_object = self;
             component->onReady(self, getStage());
         }
     }
 
     void Object::removeComponent(ComponentRef component) {
-        if (component->getObject() && component->getObject().get() == this) {
-            _components.erase(component);
-            component->detachedFromObject();
+        CI_ASSERT_MSG(component->getObject() && component->getObject().get() == this, "Cannot remove a component from an object which it is not attached to");
 
-            if (DrawComponentRef dc = dynamic_pointer_cast<DrawComponent>(component)) {
-                _drawComponents.erase(dc);
-            }
-            
-            if (ScreenDrawComponentRef dc = dynamic_pointer_cast<ScreenDrawComponent>(component)) {
-                _screenDrawComponents.erase(dc);
-            }
-            
-            if (_physicsComponent == component) {
-                _physicsComponent = nullptr;
-            }
+        _components.erase(remove(begin(_components), end(_components), component), end(_components));
+        component->_object.reset();
 
+        if (DrawComponentRef dc = dynamic_pointer_cast<DrawComponent>(component)) {
+            _drawComponents.erase(dc);
+        }
+        
+        if (ScreenDrawComponentRef dc = dynamic_pointer_cast<ScreenDrawComponent>(component)) {
+            _screenDrawComponents.erase(dc);
+        }
+        
+        if (_physicsComponent == component) {
+            _physicsComponent = nullptr;
         }
     }
 
@@ -355,17 +354,17 @@ namespace core {
         }
     }
 
-
     void Object::onReady(StageRef stage) {
         if (!_ready) {
+            _ready = true;
+
             const auto self = shared_from_this();
             for (auto &component : _components) {
-                component->attachedToObject(self);
+                component->_object = self;
             }
             for (auto &component : _components) {
                 component->onReady(self, stage);
             }
-            _ready = true;
         }
     }
 

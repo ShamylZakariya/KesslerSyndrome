@@ -861,12 +861,12 @@ namespace core {
 
     void Stage::onReady() {
         CI_ASSERT_MSG(!_ready, "Can't call onReady() on Stage that is already ready");
+        _ready = true;
 
         const auto self = shared_from_this_as<Stage>();
         for (auto &obj : _objects) {
             obj->onReady(self);
         }
-        _ready = true;
     }
 
     void Stage::onBodyAddedToSpace(cpBody *body) {

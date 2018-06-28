@@ -113,7 +113,7 @@ namespace elements {
         _pending.back().position = world;
         _pending.back()._velocity = dir * particle.initialVelocity;
     }
-
+    
     void ParticleSimulation::_prepareForSimulation(const core::time_state &time) {
         // run a first pass where we update age and completion, then if necessary perform a compaction pass
         size_t expiredCount = 0;
@@ -834,8 +834,8 @@ namespace elements {
         auto draw = make_shared<ParticleSystemDrawComponent>(c.drawConfig);
 
         ParticleSystemRef ps = make_shared<ParticleSystem>(name, c);
-        ps->addComponent(draw);
         ps->addComponent(simulation);
+        ps->addComponent(draw);
 
         return ps;
     }

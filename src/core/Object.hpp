@@ -92,6 +92,9 @@ namespace core {
         shared_ptr<T> getSibling() const;
 
         // called when the owning Object has been added to a stage
+        // each Component has onReady called in the order in which it was added to its
+        // parent object. So, if component B's onReady depends on component A's onReady being complete,
+        // add component A to the parent Object before component B.
         virtual void onReady(ObjectRef parent, StageRef stage) {
         }
 
@@ -106,18 +109,6 @@ namespace core {
 
     protected:
         friend class Object;
-
-        // called on Components immediately after being added to a Object
-        // a component at this point can access its Object owne, but does not
-        // necessarily have access to its neighbors, or to a Stage. Wait for onReady
-        // for these types of actions.
-        virtual void attachedToObject(ObjectRef object) {
-            _object = object;
-        }
-
-        virtual void detachedFromObject() {
-            _object.reset();
-        }
 
         // call this if some change moved the represented object. it will be dispatched
         // up to object, and down to DrawComponents to notify the draw dispatch graph
@@ -590,7 +581,7 @@ namespace core {
 
         friend class Component;
 
-        virtual void onAddedToStage(StageRef stage) {
+        void onAddedToStage(StageRef stage) {
             _stage = stage;
         }
 
@@ -608,7 +599,7 @@ namespace core {
         bool _finished, _finishingAfterDelay;
         seconds_t _finishingDelay, _finishedAfterTime;
         bool _ready;
-        set<ComponentRef> _components;
+        vector<ComponentRef> _components;
         set<DrawComponentRef> _drawComponents;
         set<ScreenDrawComponentRef> _screenDrawComponents;
         PhysicsComponentRef _physicsComponent;
