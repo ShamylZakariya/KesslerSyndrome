@@ -12,6 +12,7 @@
 #include "Core.hpp"
 #include <cinder/Perlin.h>
 #include "Svg.hpp"
+#include "ParticleSystem.hpp"
 
 namespace game {
     
@@ -42,7 +43,6 @@ namespace game {
         
         struct config {
             cpBody *unownedParentBody;
-            ci::Perlin *unownedPerlin;
             dvec2 localOrigin;
             dvec2 localDir;
             double rotationExtent;
@@ -74,7 +74,6 @@ namespace game {
     protected:
         
         cpBody *_unownedParentBody;
-        ci::Perlin *_unownedPerlin;
         cpVect _localOrigin, _localEnd, _localDir, _localRest;
         cpVect _worldOrigin, _worldEnd, _worldContact;
         double _maxLength, _restLength, _rotationExtent, _cosRotationExtent, _cycleScale, _cycleOffset;
@@ -99,9 +98,8 @@ namespace game {
         }
         
         LegPhysicsRef getLeg() const { return _leg.lock(); }
-        void computeBezier(const core::render_state &state);
+        void computeBezier(const core::render_state &state, Perlin &perlin);
         void tessellate(const core::render_state &state, float width, size_t subdivisions, ColorA color, vector<vertex> &triangles);
-        void debugDrawTriangles(const core::render_state &state, float width, ColorA color, size_t subdivisions);
         
     protected:
         
@@ -115,7 +113,7 @@ namespace game {
         
         LegBatchDrawer(vector<LegTessellatorRef> legTessellators, ColorA legColor);
 
-        void draw(const core::render_state &state);
+        void draw(const core::render_state &state, Perlin &perlin);
         
         void setLegColor(ColorA color) { _legColor = color; }
         ColorA getLegColor() const { return _legColor; }
@@ -244,7 +242,6 @@ namespace game {
         bool _flying;
         double _speed;
         
-        ci::Perlin _perlin;
         cpBody *_body, *_wheelBody;
         cpShape *_bodyShape, *_wheelShape, *_groundContactSensorShape;
         cpConstraint *_wheelMotor, *_orientationConstraint;
@@ -304,14 +301,18 @@ namespace game {
         
         void drawPlayer(const core::render_state &renderState);
         void drawPlayerPhysics(const core::render_state &renderState);
+        void buildThrustParticleSystem(core::StageRef stage);
 
     private:
         
         PlayerPhysicsComponentWeakRef _physics;
         LegBatchDrawerRef _legBatchDrawer;
-        core::util::svg::GroupRef _svgDoc;
+        core::util::svg::GroupRef _svgDoc, _root, _bulb;
         vector<core::util::svg::GroupRef> _eyes;
-        
+        ci::Perlin _perlin;
+        elements::ParticleSystemRef _thrustParticleSystem;
+        elements::ParticleEmitterRef _thrustParticleEmitter;
+        elements::ParticleEmitter::emission_id _thrustEmissionId;
     };
     
     class PlayerUIDrawComponent : public core::ScreenDrawComponent {

@@ -301,7 +301,7 @@ namespace elements {
             // a circular volume of this radius
             double radius;
 
-            // max spread in radians from the emission direction. A value of zero
+            // max spread from the emission direction. A value of zero
             // results in a laser-like emission, a value of 0.25 is a cone with 90° tip.
             // A value of 1 is a full circular emission regardless of direction.
             double spread;

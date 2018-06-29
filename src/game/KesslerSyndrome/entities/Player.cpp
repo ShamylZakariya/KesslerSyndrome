@@ -50,7 +50,6 @@ namespace game {
     /*
      struct config {
      cpBody *unownedParentBody;
-     ci::Perlin *_unownedPerlin;
      dvec2 localOrigin;
      dvec2 localDir;
      double rotationExtent;
@@ -61,7 +60,6 @@ namespace game {
      };
 
      cpBody *_unownedParentBody;
-     ci::Perlin *unownedPerlin;
      cpVect _localOrigin, _localEnd, _localDir, _localRest;
      cpVect _worldOrigin, _worldEnd, _worldContact;
      double _maxLength, _restLength, _rotationExtent, _cosRotationExtent, _cycleScale, _cycleOffset;
@@ -70,7 +68,6 @@ namespace game {
     
     LegPhysics::LegPhysics(config c):
         _unownedParentBody(c.unownedParentBody),
-        _unownedPerlin(c.unownedPerlin),
         _localOrigin(cpv(c.localOrigin)),
         _localDir(cpv(c.localDir)),
         _localRest(cpv(c.localOrigin + (c.restLength * c.localDir))),
@@ -103,7 +100,7 @@ namespace game {
 
             case Phase::Contact:
                 // when in contact with ground, endpoint is defined in world space
-                _worldEnd = cpvlerp(_worldEnd, _worldContact, 25 * time.deltaT);
+                _worldEnd = cpvlerp(_worldEnd, _worldContact, 7 * time.deltaT);
                 _localEnd = cpBodyWorldToLocal(_unownedParentBody, _worldEnd);
 
                 if (!_canMaintainGroundContact(time)) {
@@ -115,7 +112,7 @@ namespace game {
             case Phase::Retracting:
 
                 // we perform retraction in local space since we're not attached to the ground any longer
-                _localEnd = cpvlerp(_localEnd, _localRest, 25 * time.deltaT);
+                _localEnd = cpvlerp(_localEnd, _localRest, 7 * time.deltaT);
                 _worldEnd = cpBodyLocalToWorld(_unownedParentBody, _localEnd);
 
                 if (cpvdistsq(_localEnd, _localRest) < 0.01) {
@@ -127,11 +124,6 @@ namespace game {
     }
     
     bool LegPhysics::_canMaintainGroundContact(const core::time_state &time) {
-        const seconds_t cycle = (time.time * _cycleScale) + _cycleOffset;
-        if (_unownedPerlin->fBm(cycle) > 0.4) {
-            return false;
-        }
-
         if (cpvdistsq(_worldEnd, _worldOrigin) > (_maxLength * _maxLength)) {
             return false;
         }
@@ -172,31 +164,13 @@ namespace game {
      vector<dvec2> _bezierControlPoints;
      vector<vec2> _vertices;
      */
-    
-    void LegTessellator::debugDrawTriangles(const core::render_state &state, float width, ColorA color, size_t subdivisions) {
-        computeBezier(state);
-        
-        vector<vertex> vertices;
-        tessellate(state, 2, 10, color, vertices);
 
-        gl::color(color);
-        for (int i = 0; i < vertices.size(); i += 3) {
-            vec2 a = vertices[i + 0].position;
-            vec2 b = vertices[i + 1].position;
-            vec2 c = vertices[i + 2].position;
-            gl::drawLine(a, b);
-            gl::drawLine(b, c);
-            gl::drawLine(c, a);
-        }
-    }
-
-    void LegTessellator::computeBezier(const core::render_state &state) {
+    void LegTessellator::computeBezier(const core::render_state &state, Perlin &perlin) {
         const LegPhysicsRef leg = _leg.lock();
         const seconds_t cycle = (state.time * leg->_cycleScale) + leg->_cycleOffset;
-        ci::Perlin *perlin = leg->_unownedPerlin;
-        dvec2 cp0Offset(perlin->fBm(cycle + 1), perlin->fBm(cycle + 2));
-        dvec2 cp1Offset(perlin->fBm(cycle + 10), perlin->fBm(cycle + 20));
-        dvec2 endOffset(perlin->fBm(cycle + 30), perlin->fBm(cycle + 40));
+        dvec2 cp0Offset(perlin.fBm(cycle + 1), perlin.fBm(cycle + 2));
+        dvec2 cp1Offset(perlin.fBm(cycle + 10), perlin.fBm(cycle + 20));
+        dvec2 endOffset(perlin.fBm(cycle + 30), perlin.fBm(cycle + 40));
         
         
         // we're doing a simple bezier curve where the control points are equal. we're using
@@ -204,8 +178,8 @@ namespace game {
         const auto basePoint = lrp(0.85, leg->getWorldOrigin(), leg->getWorldEnd());
         const auto len = length(leg->getWorldEnd() - leg->getWorldOrigin()) + 1e-4;
         const auto dir = (leg->getWorldEnd() - leg->getWorldOrigin()) / len;
-        const auto maxControlPointDeflection = leg->_maxLength * 0.3;
-        const auto minControlPointDeflection = leg->_maxLength * 0.01;
+        const auto maxControlPointDeflection = leg->_maxLength * 0.4;
+        const auto minControlPointDeflection = leg->_maxLength * 0.05;
         const auto controlPointWiggleRange = leg->_maxLength * 0.5;
         const auto endWiggleRange = leg->_restLength * 0.25;
         const auto controlPointDeflection = lrp((len / leg->_maxLength), minControlPointDeflection, maxControlPointDeflection);
@@ -259,7 +233,7 @@ namespace game {
             bzDir = normalize(bzB - bzA);
             bzDirPerp = rotateCW(bzDir);
 
-            const auto scaledWidth = width * (1-t);
+            const auto scaledWidth = lrp<float>(t, width, width * 0.5f);
             tBl = bzB - scaledWidth * bzDirPerp;
             tBr = bzB + scaledWidth * bzDirPerp;
             
@@ -298,15 +272,15 @@ namespace game {
     {
     }
     
-    void LegBatchDrawer::draw(const core::render_state &state) {
+    void LegBatchDrawer::draw(const core::render_state &state, Perlin &perlin) {
         //
         // update and tesselate our leg geometry
         //
 
         _vertices.clear();
         for (const auto &lt : _legTessellators) {
-            lt->computeBezier(state);
-            lt->tessellate(state, 2, 10, _legColor, _vertices);
+            lt->computeBezier(state, perlin);
+            lt->tessellate(state, 1.5, 10, _legColor, _vertices);
         }
         
         if (!_vbo) {
@@ -342,7 +316,7 @@ namespace game {
         _batch->draw();
         
         if (state.testGizmoBit(Gizmos::WIREFRAME)) {
-            gl::ScopedColor(ColorA(1,1,1,1));
+            gl::ScopedColor(ColorA(1,0,1,1));
             
             for (int i = 0; i < _vertices.size(); i += 3) {
                 vec2 a = _vertices[i + 0].position;
@@ -545,11 +519,10 @@ namespace game {
                 const double angle = startAngle + (legAngleRange * cycleOffset) + rng.nextFloat(-0.05, 0.05);
                 const dvec2 dir(cos(angle), sin(angle));
                 const double legDeflectionScale = (i / static_cast<double>(count-1)) * 2.0 - 1.0;
-                const auto rngContrib = 0.0;
+                const auto rngContrib = 1.0;
                 
                 LegPhysics::config c;
                 c.unownedParentBody = _body;
-                c.unownedPerlin = &_perlin;
                 c.localOrigin = dvec2(0, -HalfHeight) + (dvec2(dir.x,-dir.y) * WheelRadius * 0.75 + (rngContrib * dvec2(rng.nextVec2()) * WheelRadius * 0.1));
                 c.localDir = normalize(dir + dvec2(0.1 * rngContrib * dvec2(rng.nextVec2())));
                 c.rotationExtent = radians(25 + abs(legDeflectionScale) * 65 + rngContrib * rng.nextFloat(-10, 10));
@@ -872,13 +845,18 @@ namespace game {
     /*
      PlayerPhysicsComponentWeakRef _physics;
      LegBatchDrawerRef _legBatchDrawer;
-     core::util::svg::GroupRef _svgDoc;
-     vector<core::util::svg::ShapeRef> _eyes;
+     core::util::svg::GroupRef _svgDoc, _root, _bulb;
+     vector<core::util::svg::GroupRef> _eyes;
+     ci::Perlin _perlin;
+     elements::ParticleSystemRef _thrustParticleSystem;
+     elements::ParticleEmitterRef _thrustParticleEmitter;
+     elements::ParticleEmitter::emission_id _thrustEmissionId;
      */
     
     PlayerDrawComponent::PlayerDrawComponent():
             EntityDrawComponent(DrawLayers::PLAYER, VisibilityDetermination::FRUSTUM_CULLING),
-            _svgDoc(util::svg::Group::loadSvgDocument(app::loadAsset("kessler/players/player.svg"), 1))
+            _svgDoc(util::svg::Group::loadSvgDocument(app::loadAsset("kessler/players/player.svg"), 1)),
+            _thrustEmissionId(0)
     {
     }
     
@@ -900,11 +878,18 @@ namespace game {
         _svgDoc->setScale(scale);
         
         //
+        //  Find various components that we animate
+        //
+
+        _root = _svgDoc->find("doc/player/Group/root");
+        _eyes = _svgDoc->find("doc/player/Group/bulb/eyes")->getGroups();
+        _bulb = _svgDoc->find("doc/player/Group/bulb");
+
+        //
         //  Now determine leg color by examining the SVG
         //
-        
-        const auto root = _svgDoc->find("doc/player/Group/root");
-        const auto shape = root->getShapeNamed("leg_root");
+
+        const auto shape = _root->getShapeNamed("leg_root");
         const auto appearance = shape->getAppearance();
         const auto legColor = ColorA(appearance->getFillColor(), appearance->getFillAlpha());
         
@@ -919,11 +904,10 @@ namespace game {
         _legBatchDrawer = make_shared<LegBatchDrawer>(tesselators, legColor);
         
         //
-        //  Find the "eye" shapes
+        //  Build particle system which draws thrust
         //
-        
-        const auto eyeGroup = _svgDoc->find("doc/player/Group/bulb/eyes");
-        _eyes = eyeGroup->getGroups();
+
+        buildThrustParticleSystem(stage);
     }
     
     cpBB PlayerDrawComponent::getBB() const {
@@ -935,19 +919,44 @@ namespace game {
     }
     
     void PlayerDrawComponent::update(const core::time_state &timeState) {
-        auto cycle = timeState.time * 0.5 * M_PI;
-        auto step = 1 / static_cast<double>(_eyes.size());
-        for (auto &eye : _eyes) {
-            auto phase = lrp<double>((cos(cycle) + 1) * 0.5, 0.25, 1.0);
-            cycle += M_PI * step;
-            eye->setOpacity(phase);
+        PlayerPhysicsComponentRef physics = _physics.lock();
+        CI_ASSERT_MSG(physics, "PlayerPhysicsComponentRef should be accessbile");
+        
+        {
+            auto cycle = timeState.time * 0.5 * M_PI;
+            auto step = 1 / static_cast<double>(_eyes.size());
+            for (auto &eye : _eyes) {
+                auto phase = lrp<double>((cos(cycle) + 1) * 0.5, 0.25, 1.0);
+                cycle += M_PI * step;
+                eye->setOpacity(phase);
+            }
+        }
+        
+        {
+            auto phase = timeState.time * M_PI + _perlin.fBm(timeState.time * 0.1);
+            auto v = (cos(phase) + 1) * 0.5;
+            _bulb->setScale(lrp(v, 0.9, 1.1), lrp(1-v, 0.9, 1.1));
+        }
+        
+        if (physics->isFlying()) {
+            const auto thrustDir = physics->getJetpackThrustDirection();
+            const PlayerPhysicsComponent::wheel footWheel = physics->getFootWheel();
+            const auto pos = footWheel.position;
+            if (_thrustEmissionId == 0) {
+                _thrustEmissionId = _thrustParticleEmitter->emit(pos, thrustDir, 120);
+            } else {
+                _thrustParticleEmitter->setEmissionPosition(_thrustEmissionId, pos, thrustDir);
+            }
+        } else {
+            _thrustParticleEmitter->cancel(_thrustEmissionId);
+            _thrustEmissionId = 0;
         }
     }
     
     void PlayerDrawComponent::draw(const render_state &renderState) {
         drawPlayer(renderState);
         
-        if (true || renderState.testGizmoBit(Gizmos::PHYSICS)) {
+        if (renderState.testGizmoBit(Gizmos::PHYSICS)) {
             drawPlayerPhysics(renderState);
         }
     }
@@ -956,7 +965,7 @@ namespace game {
         PlayerPhysicsComponentRef physics = _physics.lock();
         CI_ASSERT_MSG(physics, "PlayerPhysicsComponentRef should be accessbile");
 
-        _legBatchDrawer->draw(renderState);
+        _legBatchDrawer->draw(renderState, _perlin);
 
         _svgDoc->setPosition(physics->getPosition());
         _svgDoc->setRotation(v2(cpBodyGetRotation(physics->getBody())));
@@ -1006,6 +1015,58 @@ namespace game {
         }
     }
 
+    void PlayerDrawComponent::buildThrustParticleSystem(StageRef stage) {
+        PlayerPhysicsComponentRef physics = _physics.lock();
+        CI_ASSERT_MSG(physics, "PlayerPhysicsComponentRef should be accessbile");
+        
+        const auto footWheel = physics->getFootWheel();
+        const auto maxRadius = footWheel.radius * 1;
+
+        auto image = loadImage(app::loadAsset("kessler/textures/Explosion.png"));
+        gl::Texture2d::Format fmt = gl::Texture2d::Format().mipmap(false);
+        
+        using namespace elements;
+        
+        ParticleSystem::config config;
+        config.maxParticleCount = 500;
+        config.keepSorted = true;
+        config.drawConfig.drawLayer = getLayer() + 1;
+        config.drawConfig.textureAtlas = gl::Texture2d::create(image, fmt);
+        config.drawConfig.atlasType = Atlas::TwoByTwo;
+        
+        _thrustParticleSystem = ParticleSystem::create("PlayerDrawComponent::_thrustParticleSystem", config);
+        stage->addObject(_thrustParticleSystem);
+        
+        //
+        // build fire, smoke and spark templates
+        //
+        
+        particle_prototype fire;
+        fire.atlasIdx = 0;
+        fire.lifespan = 0.75;
+        fire.radius = {0, maxRadius, maxRadius * 0.5, 0};
+        fire.damping = { 0 };
+        fire.additivity = { 1, 0.7 };
+        fire.mass = {0};
+        fire.initialVelocity = 50;
+        fire.gravitationLayerMask = GravitationLayers::GLOBAL;
+        fire.color = {ColorA(0,0.5,1,0),ColorA(0,0.5,1,1),ColorA(1,0.5,0,1),ColorA(1,0,0,0)};
+        
+        particle_prototype smoke;
+        smoke.atlasIdx = 0;
+        smoke.lifespan = 0.75;
+        smoke.radius = {0, 0, maxRadius * 2, 0};
+        smoke.damping = {0,0,0,0.02};
+        smoke.additivity = 0;
+        smoke.mass = {0};
+        smoke.initialVelocity = 20;
+        smoke.gravitationLayerMask = GravitationLayers::GLOBAL;
+        smoke.color = ColorA(0.9, 0.9, 0.9, 0.2);
+        
+        _thrustParticleEmitter = _thrustParticleSystem->createEmitter();
+        _thrustParticleEmitter->add(fire, ParticleEmitter::Source(2, 0.2, 0.3), 2);
+        _thrustParticleEmitter->add(smoke, ParticleEmitter::Source(2, 0.3, 0.3), 1);
+    }
     
 #pragma mark - PlayerUIDrawComponent
     
@@ -1151,10 +1212,10 @@ namespace game {
         _physics = make_shared<PlayerPhysicsComponent>(c.physics);
         _health = make_shared<HealthComponent>(c.health);
         
-        addComponent(_input);
-        addComponent(_drawing);
         addComponent(_physics);
+        addComponent(_input);
         addComponent(_health);
+        addComponent(_drawing);
         addComponent(_uiDrawing);
     }
     
