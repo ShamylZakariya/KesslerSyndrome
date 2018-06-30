@@ -1230,10 +1230,13 @@ namespace game {
     /*
      PlayerWeakRef _player;
      dvec2 _planetPosition;
+     double _planetRadius;
      */
     
-    PlayerViewportController::PlayerViewportController(core::ViewportRef viewport):
-    ViewportController(viewport)
+    PlayerViewportController::PlayerViewportController(core::ViewportRef viewport, dvec2 planetPosition, double planetRadius):
+    ViewportController(viewport),
+    _planetPosition(planetPosition),
+    _planetRadius(planetRadius)
     {
         getTraumaConfig().shakeTranslation = dvec2(40,40);
         getTraumaConfig().shakeRotation = 10 * M_PI / 180;
@@ -1245,7 +1248,6 @@ namespace game {
         auto player = getObjectAs<Player>();
         _player = player;
         setTrackableTarget(player);
-        _planetPosition = player->getConfig().planetPosition;
     }
     
     void PlayerViewportController::firstUpdate(const core::time_state &time) {
@@ -1256,9 +1258,9 @@ namespace game {
         // compute a scale factor that allows the planet origin to be visible
         const auto player = _player.lock();
         const dvec2 playerPosition = player->getTrackingPosition();
-        const double distanceFromPlanet = length(playerPosition - _planetPosition);
+        const double distanceFromPlanet = max(length(playerPosition - _planetPosition) - (0.5*_planetRadius), 0.01 * _planetRadius);
         const double viewportSize = 0.5 * min(getViewport()->getWidth(), getViewport()->getHeight());
-        const double fudge = 1.25;
+        const double fudge = 1;
         const double scale = fudge * viewportSize / distanceFromPlanet;
 
         setTargetScale(scale);

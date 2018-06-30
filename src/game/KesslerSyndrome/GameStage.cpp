@@ -330,7 +330,7 @@ namespace game {
         //  Build the viewport controller for this player
         //
         
-        auto vc = make_shared<PlayerViewportController>(getMainViewport());
+        auto vc = make_shared<PlayerViewportController>(getMainViewport(), _planet->getOrigin(), _planet->getSurfaceConfig().radius);
         _viewportControllers.push_back(vc);
         _player->addComponent(vc);
         

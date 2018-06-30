@@ -420,7 +420,7 @@ namespace game {
     class PlayerViewportController : public elements::ViewportController {
     public:
 
-        PlayerViewportController(core::ViewportRef viewport);
+        PlayerViewportController(core::ViewportRef viewport, dvec2 planetPosition, double planetRadius);
         
         void onReady(core::ObjectRef parent, core::StageRef stage) override;
         void firstUpdate(const core::time_state &time) override;
@@ -430,6 +430,7 @@ namespace game {
         
         PlayerWeakRef _player;
         dvec2 _planetPosition;
+        double _planetRadius;
         
     };
     
