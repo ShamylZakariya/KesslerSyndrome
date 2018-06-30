@@ -381,6 +381,10 @@ namespace core {
     void Object::step(const time_state &timeState) {
         if (!_finished) {
             for (auto &component : _components) {
+                if (component->_firstStep) {
+                    component->firstStep(timeState);
+                    component->_firstStep = false;
+                }
                 component->step(timeState);
             }
         }
@@ -402,6 +406,10 @@ namespace core {
 
         if (!_finished) {
             for (auto &component : _components) {
+                if (component->_firstUpdate) {
+                    component->firstUpdate(timeState);
+                    component->_firstUpdate = false;
+                }
                 component->update(timeState);
             }
         }

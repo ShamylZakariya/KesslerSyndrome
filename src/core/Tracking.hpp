@@ -101,9 +101,7 @@ namespace core {
             setTarget(Viewport::look(_target.world, _target.up, scale));
         }
         
-        Viewport::look getTarget() const {
-            return _target;
-        }
+        virtual Viewport::look getTarget();
         
         virtual Viewport::look apply(Viewport::look look, const time_state &time);
         

@@ -58,7 +58,10 @@ namespace core {
     class Component : public enable_shared_from_this<Component>, public signals::receiver, public IChipmunkUserData {
     public:
 
-        Component() {
+        Component():
+                _firstStep(true),
+                _firstUpdate(true)
+        {
         }
 
         virtual ~Component() {
@@ -100,8 +103,14 @@ namespace core {
 
         virtual void onCleanup() {
         }
+        
+        virtual void firstStep(const time_state &timeState) {
+        }
 
         virtual void step(const time_state &timeState) {
+        }
+
+        virtual void firstUpdate(const time_state &timeState) {
         }
 
         virtual void update(const time_state &timeState) {
@@ -117,6 +126,7 @@ namespace core {
     private:
 
         ObjectWeakRef _object;
+        bool _firstStep, _firstUpdate;
 
     };
 

@@ -101,7 +101,7 @@ namespace game {
         core::RadialGravitationCalculatorRef _gravity;
         elements::ParticleEmitterRef _explosionEmitter;
         elements::ParticleEmitterRef _dustEmitter;
-        elements::ViewportControllerRef _viewportController;
+        vector<elements::ViewportControllerRef> _viewportControllers;
         
         double _planetRadius;
 

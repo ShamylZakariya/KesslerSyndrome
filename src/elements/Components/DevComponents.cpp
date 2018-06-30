@@ -268,7 +268,7 @@ namespace elements {
         _mouseWorld = getStage()->getMainViewport()->screenToWorld(_mouseScreen);
         
         if (isKeyDown(app::KeyEvent::KEY_SPACE)) {
-            dvec2 deltaWorld = _viewportController->getMainViewport()->screenToWorldDir(dvec2(delta));
+            dvec2 deltaWorld = _viewportController->getViewport()->screenToWorldDir(dvec2(delta));
             Viewport::look target = _viewportController->getTarget();
             target.world -= deltaWorld;
             _viewportController->setTarget(target);

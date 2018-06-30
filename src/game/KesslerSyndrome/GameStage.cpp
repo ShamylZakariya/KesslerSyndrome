@@ -63,7 +63,7 @@ namespace game {
      core::RadialGravitationCalculatorRef _gravity;
      elements::ParticleEmitterRef _explosionEmitter;
      elements::ParticleEmitterRef _dustEmitter;
-     elements::ViewportControllerRef _viewportController;
+     vector<elements::ViewportControllerRef> _viewportControllers;
      
      double _planetRadius;
      */
@@ -82,16 +82,6 @@ namespace game {
         auto stageNode = root.getChild("stage");
 
         setName(stageNode.getAttribute("name").getValue());
-        
-        //
-        //  Set up viewport trauma effects
-        //
-        
-        _viewportController = make_shared<ViewportController>(getMainViewport());
-        _viewportController->getTraumaConfig().shakeTranslation = dvec2(40,40);
-        _viewportController->getTraumaConfig().shakeRotation = 10 * M_PI / 180;
-        _viewportController->getTraumaConfig().shakeFrequency = 8;
-        addObject(Object::with("ViewportController", { _viewportController }));
 
         //
         //	Load some basic stage properties
@@ -173,12 +163,8 @@ namespace game {
         if (true) {
             
             //
-            // build camera controller, dragger, and cutter, with input dispatch indices 0,1,2 meaning CC gets input first
+            // dragger, and cutter, with input dispatch indices 0,1,2 meaning CC gets input first
             //
-            
-            addObject(Object::with("CameraController", {
-                make_shared<MouseViewportControlComponent>(_viewportController, 0)
-            }));
             
             addObject(Object::with("Dragger", {
                 make_shared<MousePickComponent>(ShapeFilters::GRABBABLE, 1),
@@ -338,7 +324,16 @@ namespace game {
         const string name = "player_" + str(idx);
         const ci::DataSourceRef playerTemplate = app::loadAsset(playerNode.getAttribute("template").getValue());
 
-        _player = Player::create(name, playerTemplate, position, localUp);
+        _player = Player::create(name, playerTemplate, position, localUp, _planet->getOrigin());
+        
+        //
+        //  Build the viewport controller for this player
+        //
+        
+        auto vc = make_shared<PlayerViewportController>(getMainViewport());
+        _viewportControllers.push_back(vc);
+        _player->addComponent(vc);
+        
         addObject(_player);
     }
 
@@ -477,20 +472,20 @@ namespace game {
         // create a radial crack and cut the world with it. note, to reduce tiny fragments
         // we set a fairly high min surface area for the cut.
 
-        double minSurfaceAreaThreshold = 64;
-        int numSpokes = 7;
-        int numRings = 3;
-        double radius = 75;
-        double thickness = 2;
-        double variance = 100;
+        const double minSurfaceAreaThreshold = 64;
+        const int numSpokes = 7;
+        const int numRings = 3;
+        const double radius = 75;
+        const double thickness = 2;
+        const double variance = 100;
 
-        auto crack = make_shared<RadialCrackGeometry>(world, numSpokes, numRings, radius, thickness, variance);
+        const auto crack = make_shared<RadialCrackGeometry>(world, numSpokes, numRings, radius, thickness, variance);
         _planet->getWorld()->cut(crack->getPolygon(), crack->getBB(), minSurfaceAreaThreshold);
 
         // get the closest point on terrain surface and use that to place explosive charge
         if (auto r = queryNearest(world, ShapeFilters::TERRAIN_PROBE)) {
 
-            dvec2 origin = world + radius * normalize(_planet->getOrigin() - r.point);
+            const dvec2 origin = world + radius * normalize(_planet->getOrigin() - r.point);
             auto gravity = ExplosionForceCalculator::create(origin, 4000, 0.5, 0.5);
             addGravity(gravity);
 
@@ -499,10 +494,12 @@ namespace game {
             }
         }
 
-        dvec2 emissionDir = normalize(world - _planet->getOrigin());
+        const dvec2 emissionDir = normalize(world - _planet->getOrigin());
         _explosionEmitter->emit(world, emissionDir, 1.0, 140, elements::ParticleEmitter::Sawtooth);
         
-        _viewportController->addTrauma(0.5);
+        for (const auto &vc : _viewportControllers) {
+            vc->addTrauma(0.5);
+        }
     }
     
     void GameStage::handleTerrainTerrainContact(cpArbiter *arbiter) {

@@ -10,9 +10,11 @@
 #define Player_hpp
 
 #include "Core.hpp"
-#include <cinder/Perlin.h>
 #include "Svg.hpp"
 #include "ParticleSystem.hpp"
+#include "ViewportController.hpp"
+
+#include <cinder/Perlin.h>
 
 namespace game {
     
@@ -25,6 +27,8 @@ namespace game {
     SMART_PTR(PlayerUIDrawComponent);
     SMART_PTR(PlayerPhysicsComponent);
     SMART_PTR(Player);
+    SMART_PTR(PlayerViewportController);
+    SMART_PTR(PlayerTracker);
     
 #pragma mark - LegPhysics
 
@@ -174,30 +178,30 @@ namespace game {
             return _config;
         }
         
-        virtual dvec2 getPosition() const;
+        dvec2 getPosition() const;
         
-        virtual dvec2 getUp() const;
+        dvec2 getUp() const;
         
-        virtual dvec2 getGroundNormal() const;
+        dvec2 getGroundNormal() const;
         
-        virtual bool isTouchingGround() const;
+        bool isTouchingGround() const;
         
-        virtual cpBody *getBody() const;
+        cpBody *getBody() const;
         
-        virtual cpBody *getFootBody() const;
+        cpBody *getFootBody() const;
         
-        virtual cpShape *getBodyShape() const;
+        cpShape *getBodyShape() const;
         
-        virtual cpShape *getFootShape() const;
+        cpShape *getFootShape() const;
         
-        virtual double getJetpackFuelLevel() const;
+        double getJetpackFuelLevel() const;
         
-        virtual double getJetpackFuelMax() const;
+        double getJetpackFuelMax() const;
         
-        virtual dvec2 getJetpackThrustDirection() const;
+        dvec2 getJetpackThrustDirection() const;
         
         // Control inputs, called by Player in Player::update
-        virtual void setSpeed(double vel) {
+        void setSpeed(double vel) {
             _speed = vel;
         }
         
@@ -205,7 +209,7 @@ namespace game {
             return _speed;
         }
         
-        virtual void setFlying(bool j) {
+        void setFlying(bool j) {
             _flying = j;
         }
         
@@ -334,7 +338,7 @@ namespace game {
         PlayerPhysicsComponentWeakRef _physics;
         
     };
-    
+
 #pragma mark - Player
     
     class Player : public core::Entity, public core::Trackable {
@@ -349,6 +353,8 @@ namespace game {
             double walkSpeed;
             double runMultiplier;
             
+            dvec2 planetPosition;
+            
             config() :
             walkSpeed(1), // 1mps
             runMultiplier(3) {
@@ -358,7 +364,7 @@ namespace game {
         /**
          Create a player configured via the XML in playerXmlFile, at a given position in world units
          */
-        static PlayerRef create(string name, ci::DataSourceRef playerXmlFile, dvec2 position, dvec2 localUp);
+        static PlayerRef create(string name, ci::DataSourceRef playerXmlFile, dvec2 position, dvec2 localUp, dvec2 planetPosition);
         
     public:
         Player(string name);
@@ -375,10 +381,15 @@ namespace game {
         void onDeath() override;
         
         // Object
+
         void update(const core::time_state &time) override;
         
         // Tracking
+
         dvec2 getTrackingPosition() const override;
+        dvec2 getTrackingUp() const override;
+
+        // Convenience accessors
         
         const PlayerPhysicsComponentRef &getPhysics() const {
             return _physics;
@@ -401,9 +412,31 @@ namespace game {
         PlayerInputComponentRef _input;
         core::HealthComponentRef _health;
         
+        
     };
     
+#pragma mark - PlayerViewportController
+    
+    class PlayerViewportController : public elements::ViewportController {
+    public:
+
+        PlayerViewportController(core::ViewportRef viewport);
+        
+        void onReady(core::ObjectRef parent, core::StageRef stage) override;
+        void firstUpdate(const core::time_state &time) override;
+        void update(const core::time_state &time) override;
+        
+    private:
+        
+        PlayerWeakRef _player;
+        dvec2 _planetPosition;
+        
+    };
     
 }
+
+
+
+
 
 #endif /* Player_hpp */

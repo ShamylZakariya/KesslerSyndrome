@@ -1118,12 +1118,14 @@ namespace game {
      PlayerDrawComponentRef _drawing;
      PlayerInputComponentRef _input;
      */
-    PlayerRef Player::create(string name, ci::DataSourceRef playerXmlFile, dvec2 position, dvec2 localUp) {
+    PlayerRef Player::create(string name, ci::DataSourceRef playerXmlFile, dvec2 position, dvec2 localUp, dvec2 planetPosition) {
         Player::config config;
         
         XmlTree playerNode = XmlTree(playerXmlFile).getChild("player");
         config.walkSpeed = util::xml::readNumericAttribute<double>(playerNode, "walkSpeed", 1);
         config.runMultiplier = util::xml::readNumericAttribute<double>(playerNode, "runMultiplier", 10);
+
+        config.planetPosition = planetPosition;
         
         //
         //    Physics
@@ -1204,6 +1206,10 @@ namespace game {
         return _physics->getPosition();
     }
     
+    dvec2 Player::getTrackingUp() const {
+        return normalize(_physics->getPosition() - _config.planetPosition);
+    }
+    
     void Player::build(config c) {
         _config = c;
         _input = make_shared<PlayerInputComponent>();
@@ -1217,6 +1223,47 @@ namespace game {
         addComponent(_health);
         addComponent(_drawing);
         addComponent(_uiDrawing);
+    }
+    
+#pragma mark - PlayerViewportController
+    
+    /*
+     PlayerWeakRef _player;
+     dvec2 _planetPosition;
+     */
+    
+    PlayerViewportController::PlayerViewportController(core::ViewportRef viewport):
+    ViewportController(viewport)
+    {
+        getTraumaConfig().shakeTranslation = dvec2(40,40);
+        getTraumaConfig().shakeRotation = 10 * M_PI / 180;
+        getTraumaConfig().shakeFrequency = 8;
+    }
+    
+    void PlayerViewportController::onReady(core::ObjectRef parent, core::StageRef stage) {
+        Component::onReady(parent, stage);
+        auto player = getObjectAs<Player>();
+        _player = player;
+        setTrackableTarget(player);
+        _planetPosition = player->getConfig().planetPosition;
+    }
+    
+    void PlayerViewportController::firstUpdate(const core::time_state &time) {
+        getViewport()->setLook(getTarget());
+    }
+    
+    void PlayerViewportController::update(const core::time_state &time) {
+        // compute a scale factor that allows the planet origin to be visible
+        const auto player = _player.lock();
+        const dvec2 playerPosition = player->getTrackingPosition();
+        const double distanceFromPlanet = length(playerPosition - _planetPosition);
+        const double viewportSize = 0.5 * min(getViewport()->getWidth(), getViewport()->getHeight());
+        const double fudge = 1.25;
+        const double scale = fudge * viewportSize / distanceFromPlanet;
+
+        setTargetScale(scale);
+        
+        ViewportController::update(time);
     }
     
 }
