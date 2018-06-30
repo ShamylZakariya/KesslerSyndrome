@@ -881,16 +881,16 @@ namespace game {
         //  Find various components that we animate
         //
 
-        _root = _svgDoc->find("doc/player/Group/root");
-        _eyes = _svgDoc->find("doc/player/Group/bulb/eyes")->getGroups();
-        _bulb = _svgDoc->find("doc/player/Group/bulb");
+        _root = _svgDoc->find("player/root");
+        _eyes = _svgDoc->find("player/bulb/eyes")->getGroups();
+        _bulb = _svgDoc->find("player/bulb");
 
         //
         //  Now determine leg color by examining the SVG
         //
 
-        const auto shape = _root->getShapeNamed("leg_root");
-        const auto appearance = shape->getAppearance();
+        const auto rootShape = _root->getGroupNamed("leg_root")->getShapes().front();
+        const auto appearance = rootShape->getAppearance();
         const auto legColor = ColorA(appearance->getFillColor(), appearance->getFillAlpha());
         
         //
@@ -923,7 +923,7 @@ namespace game {
         CI_ASSERT_MSG(physics, "PlayerPhysicsComponentRef should be accessbile");
         
         {
-            auto cycle = timeState.time * 0.5 * M_PI;
+            auto cycle = timeState.time * 1 * M_PI;
             auto step = 1 / static_cast<double>(_eyes.size());
             for (auto &eye : _eyes) {
                 auto phase = lrp<double>((cos(cycle) + 1) * 0.5, 0.25, 1.0);

@@ -2,15 +2,20 @@
 
 ## Presently
 
-- Player
-    - tesselate the legs
-    - needs SVG body
-    - needs "fronds" (?)
+- Player Features
     - needs weapon
-    
-Svg Group needs a "find element by Id", because the path thing works but is awful
+    - particle emitter needs a "velocity" value which is added to each emitted particle to accommodate moving emitters
 
+- Player Bugs
+    - group origin dot is being drawn! Why!?
+
+- need a viewport controller which follows Player.
+    - should "aim" camera somewhere between player and the planetoid center
+    - should manage an up vector
     
+- Make my #includes use paths, not just the filename
+
+- Svg Group needs a "find element by Id", because the path thing works but is awful
 
 - Kill XmlMultiTree - I'm not even using it, and it adds complexity.
 
