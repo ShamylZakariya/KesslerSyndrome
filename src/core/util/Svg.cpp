@@ -307,6 +307,14 @@ namespace core {
                 }
 
                 //
+                // any node with id containing string __origin__ is an origin node for group
+                //
+                
+                if (_id.find("__origin__") == 0) {
+                    _origin = true;
+                }
+
+                //
                 //	Cache all attributes, in case we want to query them later
                 //
 
@@ -328,34 +336,6 @@ namespace core {
                     _svgTransform = util::svg::parseTransform(shapeNode.getAttribute("transform").getValue());
                 }
 
-                //
-                //	determine if this shape is the origin shape for its parent Group
-                //
-
-                if (shapeNode.hasChild("title")) {
-                    string title = shapeNode.getChild("title").getValue();
-                    title = strings::strip(strings::lowercase(title));
-                    if (title == "__origin__") _origin = true;
-                }
-
-                if (shapeNode.hasAttribute("__origin__")) {
-                    _origin = true;
-                }
-
-                if (shapeNode.hasAttribute("class")) {
-                    string classes = strings::lowercase(shapeNode.getAttribute("class").getValue());
-                    if (classes.find("__origin__") != string::npos) {
-                        _origin = true;
-                    }
-                }
-
-                //
-                // any name starting with "origin" makes it an origin node
-                //
-
-                if (_id.find("__origin__") == 0) {
-                    _origin = true;
-                }
 
                 //
                 //	parse svg shape into a Shape2d, and then convert that to _svgMesh in document space.
