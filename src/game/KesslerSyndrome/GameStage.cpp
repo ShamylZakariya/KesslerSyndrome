@@ -10,7 +10,7 @@
 
 #include "DevComponents.hpp"
 #include "PlanetGreebling.hpp"
-
+#include "CrackGeometry.hpp"
 
 using namespace core;
 using namespace elements;
@@ -473,19 +473,28 @@ namespace game {
         // we set a fairly high min surface area for the cut.
 
         const double minSurfaceAreaThreshold = 64;
-        const int numSpokes = 7;
-        const int numRings = 3;
-        const double radius = 75;
-        const double thickness = 2;
-        const double variance = 100;
+        const double outerRadius = 75;
+        const double innerRadius = outerRadius * 0.5;
+        const int numInnerSlices = 27;
+        const int numOuterSlices = 13;
+        const double thickness = 16;
+        const double variance = 0.75;
+        auto crackGeometry = make_shared<ExplosionCrackGeometry>(world, innerRadius, outerRadius, numInnerSlices, numOuterSlices, thickness, variance);
 
-        const auto crack = make_shared<RadialCrackGeometry>(world, numSpokes, numRings, radius, thickness, variance);
-        _planet->getWorld()->cut(crack->getPolygon(), crack->getBB(), minSurfaceAreaThreshold);
+        if (getScenario()->getRenderState().testGizmoBit(Gizmos::WIREFRAME)) {
+            auto crackDrawer = Object::with("crack_drawer", {
+                make_shared<CrackGeometryDrawComponent>(crackGeometry)
+            });
+            crackDrawer->setFinished(true, 4);
+            addObject(crackDrawer);
+        }
+
+        _planet->getWorld()->cut(crackGeometry->getPolygons()[0], crackGeometry->getBB(), minSurfaceAreaThreshold);
 
         // get the closest point on terrain surface and use that to place explosive charge
         if (auto r = queryNearest(world, ShapeFilters::TERRAIN_PROBE)) {
 
-            const dvec2 origin = world + radius * normalize(_planet->getOrigin() - r.point);
+            const dvec2 origin = world + outerRadius * normalize(_planet->getOrigin() - r.point);
             auto gravity = ExplosionForceCalculator::create(origin, 4000, 0.5, 0.5);
             addGravity(gravity);
 

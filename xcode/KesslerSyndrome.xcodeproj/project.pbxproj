@@ -18,6 +18,8 @@
 		6332FF89202378C200279B7F /* PlanetGenerator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6332FF86202378C200279B7F /* PlanetGenerator.cpp */; };
 		63597BEC20766F8F00B65C2A /* GlslProgLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63597BE920766F7700B65C2A /* GlslProgLoader.cpp */; };
 		63597BED20766F9D00B65C2A /* GlslProgLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63597BE920766F7700B65C2A /* GlslProgLoader.cpp */; };
+		635CC37920EA6F37007AE2FE /* CrackGeometry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 635CC37720EA6F37007AE2FE /* CrackGeometry.cpp */; };
+		635CC37A20EA6F38007AE2FE /* CrackGeometry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 635CC37720EA6F37007AE2FE /* CrackGeometry.cpp */; };
 		63611A8D2087990C004EE731 /* Compositor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63611A8B2087990C004EE731 /* Compositor.cpp */; };
 		63611A8E2087990C004EE731 /* Compositor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63611A8B2087990C004EE731 /* Compositor.cpp */; };
 		63611A922088DF96004EE731 /* MultiViewportTestScenario.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63611A8F2088DC14004EE731 /* MultiViewportTestScenario.cpp */; };
@@ -156,6 +158,8 @@
 		6332FF87202378C200279B7F /* PlanetGenerator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PlanetGenerator.hpp; sourceTree = "<group>"; };
 		63597BE920766F7700B65C2A /* GlslProgLoader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = GlslProgLoader.cpp; sourceTree = "<group>"; };
 		63597BEA20766F7700B65C2A /* GlslProgLoader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = GlslProgLoader.hpp; sourceTree = "<group>"; };
+		635CC37720EA6F37007AE2FE /* CrackGeometry.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CrackGeometry.cpp; sourceTree = "<group>"; };
+		635CC37820EA6F37007AE2FE /* CrackGeometry.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CrackGeometry.hpp; sourceTree = "<group>"; };
 		63611A8B2087990C004EE731 /* Compositor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Compositor.cpp; sourceTree = "<group>"; };
 		63611A8C2087990C004EE731 /* Compositor.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Compositor.hpp; sourceTree = "<group>"; };
 		63611A8F2088DC14004EE731 /* MultiViewportTestScenario.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = MultiViewportTestScenario.cpp; sourceTree = "<group>"; };
@@ -444,6 +448,8 @@
 				6332FF87202378C200279B7F /* PlanetGenerator.hpp */,
 				630873562049A3FE000BCE27 /* PlanetGreebling.cpp */,
 				630873572049A3FE000BCE27 /* PlanetGreebling.hpp */,
+				635CC37720EA6F37007AE2FE /* CrackGeometry.cpp */,
+				635CC37820EA6F37007AE2FE /* CrackGeometry.hpp */,
 			);
 			path = elements;
 			sourceTree = "<group>";
@@ -677,6 +683,7 @@
 				6332FF852020C67700279B7F /* TerrainDetail_Svg.cpp in Sources */,
 				638F4DB61F8BCFCE004437E8 /* TerrainWorld.cpp in Sources */,
 				6332FF89202378C200279B7F /* PlanetGenerator.cpp in Sources */,
+				635CC37A20EA6F38007AE2FE /* CrackGeometry.cpp in Sources */,
 				63E29EFD1F9E3F5D00CAF39E /* ParticleSystem.cpp in Sources */,
 				636364062093743C00806152 /* Tracking.cpp in Sources */,
 				638F4DB71F8BCFCE004437E8 /* ViewportController.cpp in Sources */,
@@ -700,6 +707,7 @@
 				6363640A209756F500806152 /* VoronoiSplitView.cpp in Sources */,
 				63597BEC20766F8F00B65C2A /* GlslProgLoader.cpp in Sources */,
 				638F4DA21F898602004437E8 /* Background.cpp in Sources */,
+				635CC37920EA6F37007AE2FE /* CrackGeometry.cpp in Sources */,
 				638F4DA11F897FB7004437E8 /* GameConstants.cpp in Sources */,
 				638F4D991F895CE5004437E8 /* TerrainDetail.cpp in Sources */,
 				638F4D9A1F895CE5004437E8 /* Planet.cpp in Sources */,
