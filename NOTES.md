@@ -12,7 +12,6 @@
 
 - Kill XmlMultiTree - I'm not even using it, and it adds complexity.
 
-- Explosions need a "flash" because the instantaneous removal of material is visible
 
 ## Todo
 
