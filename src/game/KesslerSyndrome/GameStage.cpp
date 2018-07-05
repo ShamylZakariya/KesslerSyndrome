@@ -377,6 +377,17 @@ namespace game {
         //
         // build fire, smoke and spark templates
         //
+        
+        particle_prototype burst;
+        burst.atlasIdx = 2;
+        burst.lifespan = 0.5;
+        burst.radius = {32, 36, 40, 18};
+        burst.damping = {0, 0, 0.1};
+        burst.additivity = 0.75;
+        burst.mass = {0};
+        burst.initialVelocity = 0;
+        burst.gravitationLayerMask = GravitationLayers::GLOBAL;
+        burst.color = { ColorA(1, 0.8, 0.1, 0), ColorA(1, 0.5, 0.1, 1), ColorA(1, 0.2, 0.1, 0) };
 
         particle_prototype fire;
         fire.atlasIdx = 0;
@@ -415,9 +426,10 @@ namespace game {
         spark.kinematics = particle_prototype::kinematics_prototype(1, 1, 0.2, ShapeFilters::TERRAIN);
 
         _explosionEmitter = ps->createEmitter();
-        _explosionEmitter->add(fire, ParticleEmitter::Source(2, 1, 0.3), 1);
-        _explosionEmitter->add(smoke, ParticleEmitter::Source(2, 1, 0.3), 2);
-        _explosionEmitter->add(spark, ParticleEmitter::Source(1, 1, 0.15), 1);
+        _explosionEmitter->add(burst, ParticleEmitter::Source(36, 1, 0.6), 2);
+        _explosionEmitter->add(fire, ParticleEmitter::Source(2, 1, 0.3), 10);
+        _explosionEmitter->add(smoke, ParticleEmitter::Source(2, 1, 0.3), 20);
+        _explosionEmitter->add(spark, ParticleEmitter::Source(1, 1, 0.15), 10);
     }
     
     void GameStage::buildDustParticleSystem() {
@@ -489,8 +501,6 @@ namespace game {
             addObject(crackDrawer);
         }
 
-        _planet->getWorld()->cut(crackGeometry->getPolygons()[0], crackGeometry->getBB(), minSurfaceAreaThreshold);
-
         // get the closest point on terrain surface and use that to place explosive charge
         if (auto r = queryNearest(world, ShapeFilters::TERRAIN_PROBE)) {
 
@@ -507,8 +517,13 @@ namespace game {
         _explosionEmitter->emit(world, emissionDir, 1.0, 140, elements::ParticleEmitter::Sawtooth);
         
         for (const auto &vc : _viewportControllers) {
-            vc->addTrauma(0.5);
+            vc->addTrauma(0.75);
         }
+
+        const auto planet = _planet;
+        scheduleDelayedInvocation(0.3, [planet,crackGeometry,minSurfaceAreaThreshold](){
+            planet->getWorld()->cut(crackGeometry->getPolygons()[0], crackGeometry->getBB(), minSurfaceAreaThreshold);
+        });
     }
     
     void GameStage::handleTerrainTerrainContact(cpArbiter *arbiter) {
