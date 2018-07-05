@@ -351,6 +351,12 @@ namespace elements {
         void setSimulation(const ParticleSimulationRef simulation);
 
         ParticleSimulationRef getSimulation() const;
+        
+        /**
+         Set the velocity of the emitter - if non-zero, the velocity will be added to emitted particles
+         */
+        void setVelocity(dvec2 emitterVelocity) { _velocity = emitterVelocity; }
+        dvec2 getVelocity() const { return _velocity; }
 
         /**
          Seed the RNG that purturbs particle emission state
@@ -425,6 +431,7 @@ namespace elements {
         map <emission_id, emission> _emissions;
         vector <emission_prototype> _prototypes;
         vector <size_t> _prototypeLookup;
+        dvec2 _velocity;
 
     };
 

@@ -393,9 +393,11 @@ namespace elements {
 
     /*
      ParticleSimulationWeakRef _simulation;
-     vector<emission> _emissions;
-     vector<emission_prototype> _prototypes;
-     vector<int> _prototypeLookup;
+     Rand _rng;
+     map <emission_id, emission> _emissions;
+     vector <emission_prototype> _prototypes;
+     vector <size_t> _prototypeLookup;
+     dvec2 _velocity;
     */
 
     ParticleEmitter::ParticleEmitter(uint32_t seed) :
@@ -440,7 +442,7 @@ namespace elements {
                         dvec2 world, dir;
                         proto.source.apply(_rng, e.world, e.dir, world, dir);
 
-                        sim->emit(perturb(_rng, proto.prototype, proto.source.variance), world, dir);
+                        sim->emit(perturb(_rng, proto.prototype, proto.source.variance), world, dir + _velocity * time.deltaT);
 
                         // remove one particle's worth of seconds from accumulator
                         // accumulator will retain leftovers for next step
@@ -467,8 +469,6 @@ namespace elements {
             }
         }
     }
-
-    // ParticleEmitter
 
     void ParticleEmitter::setSimulation(const ParticleSimulationRef simulation) {
         _simulation = simulation;

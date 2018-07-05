@@ -707,6 +707,10 @@ namespace game {
         return _groundNormal;
     }
     
+    dvec2 PlayerPhysicsComponent::getLinearVelocity() const {
+        return v2(cpBodyGetVelocity(_body));
+    }
+    
     bool PlayerPhysicsComponent::isTouchingGround() const {
         return _touchingGroundAcc >= 0.5;
     }
@@ -937,6 +941,8 @@ namespace game {
             auto v = (cos(phase) + 1) * 0.5;
             _bulb->setScale(lrp(v, 0.9, 1.1), lrp(1-v, 0.9, 1.1));
         }
+        
+        _thrustParticleEmitter->setVelocity(physics->getLinearVelocity());
         
         if (physics->isFlying()) {
             const auto thrustDir = physics->getJetpackThrustDirection();

@@ -184,6 +184,8 @@ namespace game {
         
         dvec2 getGroundNormal() const;
         
+        dvec2 getLinearVelocity() const;
+        
         bool isTouchingGround() const;
         
         cpBody *getBody() const;
