@@ -402,6 +402,9 @@ namespace core {
      map<collision_type_pair, vector<LateCollisionCallback>> _collisionPostSolveHandlers, _collisionSeparateHandlers;
      map<collision_type_pair, vector<ContactCallback>> _contactHandlers;
      map<collision_type_pair, vector<pair<ObjectRef, ObjectRef>>> _syntheticContacts;
+
+     map<size_t, delayed_invocation> _delayedInvocations;
+     size_t _scheduledInvocationIdCounter;
      */
 
     Stage::Stage(string name) :
@@ -412,7 +415,9 @@ namespace core {
             _time(0, 0, 1, 0),
             _name(name),
             _drawDispatcher(make_shared<DrawDispatcher>()),
-            _bodyVelocityFunc(cpBodyUpdateVelocity) {
+            _bodyVelocityFunc(cpBodyUpdateVelocity),
+            _scheduledInvocationIdCounter(0)
+    {
         // some defaults
         cpSpaceSetGravity(_space, cpvzero);
         cpSpaceSetIterations(_space, 30);
@@ -495,7 +500,21 @@ namespace core {
         }
 
         if (!_paused) {
-
+            
+            {
+                // invoke any scheduled invocations
+                vector<size_t> expired;
+                for (const auto &invocation : _delayedInvocations) {
+                    if (invocation.second.invocationTime <= _time.time) {
+                        invocation.second.callback();
+                        expired.push_back(invocation.first);
+                    }
+                }
+                for (const auto &id : expired) {
+                    _delayedInvocations.erase(id);
+                }
+            }
+            
             {
                 // update gravitation calculators and dispose of finished
                 vector<GravitationCalculatorRef> moribund;
@@ -839,6 +858,16 @@ namespace core {
             result.object = cpShapeGetObject(shape);
         }
         return result;
+    }
+    
+    size_t Stage::scheduleDelayedInvocation(seconds_t secondsFromNow, DelayedInvocationCallback callback) {
+        size_t id = ++_scheduledInvocationIdCounter;
+        _delayedInvocations[id] = delayed_invocation { id, _time.time + max<seconds_t>(secondsFromNow,0), callback };
+        return id;
+    }
+    
+    void Stage::cancelDelayedInvocation(size_t id) {
+        _delayedInvocations.erase(id);
     }
 
     void Stage::setCpBodyVelocityUpdateFunc(cpBodyVelocityFunc f) {
