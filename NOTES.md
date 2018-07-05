@@ -6,21 +6,13 @@
     - needs weapon
     - particle emitter needs a "velocity" value which is added to each emitted particle to accommodate moving emitters
 
-- Player Bugs
-    - group origin dot is being drawn! Why!?
-
-- need a viewport controller which follows Player.
-    - should "aim" camera somewhere between player and the planetoid center
-    - should manage an up vector
-    
 - Make my #includes use paths, not just the filename
 
 - Svg Group needs a "find element by Id", because the path thing works but is awful
 
 - Kill XmlMultiTree - I'm not even using it, and it adds complexity.
 
-- Explosions should be re-done. 
-    - erase a "noisy" circle at impact point, and use spider webbing to make rubble around the noisy center.
+- Explosions need a "flash" because the instantaneous removal of material is visible
 
 ## Todo
 
