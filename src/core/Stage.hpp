@@ -615,7 +615,7 @@ namespace core {
         map<collision_type_pair, vector<ContactCallback>> _contactHandlers;
         map<collision_type_pair, vector<pair<ObjectRef, ObjectRef>>> _syntheticContacts;
         
-        map<size_t, delayed_invocation> _delayedInvocations;
+        vector<delayed_invocation> _delayedInvocations;
         size_t _scheduledInvocationIdCounter;
     };
 

@@ -501,17 +501,14 @@ namespace core {
 
         if (!_paused) {
             
-            {
-                // invoke any scheduled invocations
-                vector<size_t> expired;
-                for (const auto &invocation : _delayedInvocations) {
-                    if (invocation.second.invocationTime <= _time.time) {
-                        invocation.second.callback();
-                        expired.push_back(invocation.first);
-                    }
-                }
-                for (const auto &id : expired) {
-                    _delayedInvocations.erase(id);
+            while (!_delayedInvocations.empty()) {
+                // the soonest-to-execute invocation will be at end of vector
+                if (_delayedInvocations.back().invocationTime <= _time.time) {
+                    _delayedInvocations.back().callback();
+                    _delayedInvocations.pop_back();
+                } else {
+                    // nothing to invoke, yet
+                    break;
                 }
             }
             
@@ -862,12 +859,18 @@ namespace core {
     
     size_t Stage::scheduleDelayedInvocation(seconds_t secondsFromNow, DelayedInvocationCallback callback) {
         size_t id = ++_scheduledInvocationIdCounter;
-        _delayedInvocations[id] = delayed_invocation { id, _time.time + max<seconds_t>(secondsFromNow,0), callback };
+        _delayedInvocations.emplace_back(delayed_invocation { id, _time.time + max<seconds_t>(secondsFromNow,0), callback });
+        
+        // sort such that the invocations most distant from now are at front of list
+        sort(_delayedInvocations.begin(),_delayedInvocations.end(),[](const delayed_invocation &a, const delayed_invocation &b) {
+            return a.invocationTime > b.invocationTime;
+        });
+        
         return id;
     }
     
     void Stage::cancelDelayedInvocation(size_t id) {
-        _delayedInvocations.erase(id);
+        _delayedInvocations.erase(remove_if(_delayedInvocations.begin(), _delayedInvocations.end(), [id](const delayed_invocation &i){ return i.id == id; } ));
     }
 
     void Stage::setCpBodyVelocityUpdateFunc(cpBodyVelocityFunc f) {
