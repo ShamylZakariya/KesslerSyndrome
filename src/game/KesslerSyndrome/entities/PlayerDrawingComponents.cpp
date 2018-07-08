@@ -249,9 +249,9 @@ namespace game {
         //  Find various components that we animate
         //
         
-        _root = _svgDoc->find("player/root");
-        _eyes = _svgDoc->find("player/bulb/eyes")->getGroups();
-        _bulb = _svgDoc->find("player/bulb");
+        _root = _svgDoc->find("artboard/player/root");
+        _eyes = _svgDoc->find("artboard/player/bulb/eyes")->getGroups();
+        _bulb = _svgDoc->find("artboard/player/bulb");
         
         //
         //  Now determine leg color by examining the SVG
