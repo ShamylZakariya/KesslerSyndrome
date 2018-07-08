@@ -25,7 +25,7 @@ namespace game {
         virtual ~PlayerInputComponent();
         
         // actions
-        bool isRunning() const;
+        bool isRunning() const { return false; }
         
         bool isGoingRight() const;
         
@@ -35,9 +35,19 @@ namespace game {
         
         bool isCrouching() const;
         
+        bool isAimingCounterClockwise() const;
+        
+        bool isAimingClockwise() const;
+        
+        // true for the instant after the fire key is depressed
+        bool didFire() const;
+
+        // true while the fire key is pressed
+        bool isFiring() const;
+        
     private:
         
-        int _keyRun, _keyLeft, _keyRight, _keyJump, _keyCrouch;
+        int _keyLeft, _keyRight, _keyJump, _keyCrouch, _keyAimCCW, _keyAimCW, _keyFire;
         
     };
     

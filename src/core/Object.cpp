@@ -44,6 +44,28 @@ namespace core {
     void Component::notifyMoved() {
         getObject()->notifyMoved();
     }
+    
+    void Component::dispatchStep(const time_state &timeState) {
+        step(timeState);
+    }
+
+    void Component::dispatchPreUpdate(const time_state &timeState) {
+        preUpdate(timeState);
+    }
+
+    void Component::dispatchUpdate(const time_state &timeState) {
+        if (_firstUpdate) {
+            firstUpdate(timeState);
+            _firstUpdate = false;
+        } else {
+            update(timeState);
+        }
+    }
+
+    void Component::dispatchPostUpdate(const time_state &timeState) {
+        postUpdate(timeState);
+    }
+
 
 #pragma mark - DrawComponent
 
@@ -68,7 +90,8 @@ namespace core {
 
     /*
      bool _attached;
-     map< int, bool > _monitoredKeyStates;
+     bool _attached;
+     set<int> _monitoredKeyCodes, _pressedKeyCodes, _previousUpdatePressedKeyCodes;
      */
 
     InputComponent::InputComponent() :
@@ -86,16 +109,25 @@ namespace core {
         _attached = true;
     }
 
+    void InputComponent::preUpdate(const core::time_state &state) {
+        Component::preUpdate(state);
+    }
+
+    void InputComponent::postUpdate(const core::time_state &state) {
+        Component::postUpdate(state);
+        _previousUpdatePressedKeyCodes = _pressedKeyCodes;
+    }
+
     bool InputComponent::isListening() const {
         return _attached && InputListener::isListening();
     }
 
     void InputComponent::monitorKey(int keyCode) {
-        _monitoredKeyStates[keyCode] = false;
+        _monitoredKeyCodes.insert(keyCode);
     }
 
     void InputComponent::ignoreKey(int keyCode) {
-        _monitoredKeyStates.erase(keyCode);
+        _monitoredKeyCodes.erase(keyCode);
     }
 
     void InputComponent::monitorKeys(const initializer_list<int> &keyCodes) {
@@ -111,41 +143,44 @@ namespace core {
     }
 
     bool InputComponent::isMonitoredKeyDown(int keyCode) const {
-        auto pos = _monitoredKeyStates.find(keyCode);
-        if (pos != _monitoredKeyStates.end()) {
-            return pos->second;
-        }
-
-        return false;
+        return _pressedKeyCodes.count(keyCode) > 0;
+    }
+    
+    bool InputComponent::wasMonitoredKeyPressed(int keyCode) const {
+        bool previousState = _previousUpdatePressedKeyCodes.count(keyCode) > 0;
+        bool currentState = _pressedKeyCodes.count(keyCode) > 0;
+        return !previousState && currentState;
+    }
+    
+    bool InputComponent::wasMonitoredKeyReleased(int keyCode) const {
+        bool previousState = _previousUpdatePressedKeyCodes.count(keyCode) > 0;
+        bool currentState = _pressedKeyCodes.count(keyCode) > 0;
+        return previousState && !currentState;
     }
 
     bool InputComponent::keyDown(const app::KeyEvent &event) {
         // if this is a key code we're monitoring, consume the event
         int keyCode = event.getCode();
-        auto pos = _monitoredKeyStates.find(keyCode);
-        if (pos != _monitoredKeyStates.end()) {
-            if (!pos->second) {
-                pos->second = true;
+        if (_monitoredKeyCodes.count(keyCode)) {
+            if (_pressedKeyCodes.count(keyCode) == 0) {
+                _pressedKeyCodes.insert(keyCode);
                 monitoredKeyDown(keyCode);
             }
             return true;
         }
-
         return false;
     }
 
     bool InputComponent::keyUp(const app::KeyEvent &event) {
         // if this is a key code we're monitoring, consume the event
         int keyCode = event.getCode();
-        auto pos = _monitoredKeyStates.find(keyCode);
-        if (pos != _monitoredKeyStates.end()) {
-            if (pos->second) {
-                pos->second = false;
+        if (_monitoredKeyCodes.count(keyCode)) {
+            if (_pressedKeyCodes.count(keyCode)) {
+                _pressedKeyCodes.erase(keyCode);
                 monitoredKeyUp(keyCode);
             }
             return true;
         }
-
         return false;
     }
 
@@ -377,15 +412,19 @@ namespace core {
         _finished = false;
         _ready = false;
     }
-
+    
     void Object::step(const time_state &timeState) {
         if (!_finished) {
             for (auto &component : _components) {
-                if (component->_firstStep) {
-                    component->firstStep(timeState);
-                    component->_firstStep = false;
-                }
-                component->step(timeState);
+                component->dispatchStep(timeState);
+            }
+        }
+    }
+
+    void Object::preUpdate(const time_state &timeState) {
+        if (!_finished) {
+            for (auto &component : _components) {
+                component->dispatchPreUpdate(timeState);
             }
         }
     }
@@ -406,11 +445,15 @@ namespace core {
 
         if (!_finished) {
             for (auto &component : _components) {
-                if (component->_firstUpdate) {
-                    component->firstUpdate(timeState);
-                    component->_firstUpdate = false;
-                }
-                component->update(timeState);
+                component->dispatchUpdate(timeState);
+            }
+        }
+    }
+
+    void Object::postUpdate(const time_state &timeState) {
+        if (!_finished) {
+            for (auto &component : _components) {
+                component->dispatchPostUpdate(timeState);
             }
         }
     }

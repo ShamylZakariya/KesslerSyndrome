@@ -13,27 +13,28 @@ namespace game {
     
 #pragma mark - PlayerInputComponent
     
+    /**
+     int _keyLeft, _keyRight, _keyJump, _keyCrouch, _keyAimCCW, _keyAimCW, _keyFire;
+     */
+    
     PlayerInputComponent::PlayerInputComponent() {
-        _keyRun = app::KeyEvent::KEY_LSHIFT;
         _keyLeft = app::KeyEvent::KEY_a;
         _keyRight = app::KeyEvent::KEY_d;
         _keyJump = app::KeyEvent::KEY_w;
         _keyCrouch = app::KeyEvent::KEY_s;
+        _keyAimCCW = app::KeyEvent::KEY_q;
+        _keyAimCW = app::KeyEvent::KEY_e;
+        _keyFire = app::KeyEvent::KEY_SPACE;
         
-        monitorKey(_keyLeft);
-        monitorKey(_keyRight);
-        monitorKey(_keyJump);
-        monitorKey(_keyCrouch);
-        monitorKey(_keyRun);
+        monitorKeys({
+            _keyLeft, _keyRight, _keyJump, _keyCrouch, _keyAimCCW, _keyAimCW, _keyFire
+        });
+        
     }
     
     PlayerInputComponent::~PlayerInputComponent() {
     }
-    
-    bool PlayerInputComponent::isRunning() const {
-        return isMonitoredKeyDown(_keyRun);
-    }
-    
+        
     bool PlayerInputComponent::isGoingRight() const {
         return isMonitoredKeyDown(_keyRight);
     }
@@ -48,6 +49,22 @@ namespace game {
     
     bool PlayerInputComponent::isCrouching() const {
         return isMonitoredKeyDown(_keyCrouch);
+    }
+    
+    bool PlayerInputComponent::isAimingCounterClockwise() const {
+        return isMonitoredKeyDown(_keyAimCCW);
+    }
+    
+    bool PlayerInputComponent::isAimingClockwise() const {
+        return isMonitoredKeyDown(_keyAimCW);
+    }
+    
+    bool PlayerInputComponent::didFire() const {
+        return wasMonitoredKeyPressed(_keyFire);
+    }
+    
+    bool PlayerInputComponent::isFiring() const {
+        return isMonitoredKeyDown(_keyFire);
     }
     
 }

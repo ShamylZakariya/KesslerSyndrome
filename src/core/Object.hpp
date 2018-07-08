@@ -59,7 +59,6 @@ namespace core {
     public:
 
         Component():
-                _firstStep(true),
                 _firstUpdate(true)
         {
         }
@@ -104,16 +103,25 @@ namespace core {
         virtual void onCleanup() {
         }
         
-        virtual void firstStep(const time_state &timeState) {
-        }
-
+        // called for computing fixed-timestep physics
         virtual void step(const time_state &timeState) {
         }
 
+        // called immediately before the first time ::update is called on this Component
         virtual void firstUpdate(const time_state &timeState) {
         }
 
+        // called on all Components on the Stage before their ::update methods are called.
+        // The stage will dispatch pre-update on all Objects and their Components before moving on to calling update()
+        virtual void preUpdate(const time_state &timeState) {
+        }
+
+        // called for computing time-based logic, AI, etc. do your physics in step().
         virtual void update(const time_state &timeState) {
+        }
+
+        // called on all Components on the Stage after their ::update methods are called.
+        virtual void postUpdate(const time_state &timeState) {
         }
 
     protected:
@@ -122,11 +130,16 @@ namespace core {
         // call this if some change moved the represented object. it will be dispatched
         // up to object, and down to DrawComponents to notify the draw dispatch graph
         virtual void notifyMoved();
+        
+        void dispatchStep(const time_state &timeState);
+        void dispatchPreUpdate(const time_state &timeState);
+        void dispatchUpdate(const time_state &timeState);
+        void dispatchPostUpdate(const time_state &timeState);
 
     private:
 
         ObjectWeakRef _object;
-        bool _firstStep, _firstUpdate;
+        bool _firstUpdate;
 
     };
 
@@ -372,6 +385,8 @@ namespace core {
         }
 
         void onReady(ObjectRef parent, StageRef stage) override;
+        void preUpdate(const core::time_state &state) override;
+        void postUpdate(const core::time_state &state) override;
 
         bool isListening() const override;
 
@@ -400,7 +415,19 @@ namespace core {
             this ignores any keys that haven't been registered for monitoring by monitorKey()
          */
         bool isMonitoredKeyDown(int keyCode) const;
+        
+        /**
+            returns true iff the keycode was not pressed in the previous time step, and is pressed this time step.
+            This is useful for single-shot actions like firing a gun once per press.
+         */
+        bool wasMonitoredKeyPressed(int keyCode) const;
 
+        /**
+         returns true iff the keycode was pressed in the previous time step, and is not pressed this time step
+         */
+        bool wasMonitoredKeyReleased(int keyCode) const;
+
+        
         bool keyDown(const app::KeyEvent &event) override;
 
         bool keyUp(const app::KeyEvent &event) override;
@@ -408,7 +435,7 @@ namespace core {
     private:
 
         bool _attached;
-        map<int, bool> _monitoredKeyStates;
+        set<int> _monitoredKeyCodes, _pressedKeyCodes, _previousUpdatePressedKeyCodes;
 
     };
 
@@ -577,9 +604,17 @@ namespace core {
         // called after a Object is removed from a Stage (directly, or by calling setFinished(true)
         virtual void onCleanup();
 
+        // called for dispatching physics updates
         virtual void step(const time_state &timeState);
-
+        
+        // called on all Objects in Stage before ::update() is called
+        virtual void preUpdate(const time_state &timeState);
+        
+        // called for dispatching logic updates
         virtual void update(const time_state &timeState);
+
+        // called on all Objects in Stage after ::update() is called
+        virtual void postUpdate(const time_state &timeState);
 
         // if this Object has a PhysicsComponent, defers to PhysicsComponent::getGravitationLayerMask
         // otherwise default implementation returns ALL_GRAVITATION_LAYERS

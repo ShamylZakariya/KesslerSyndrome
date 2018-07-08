@@ -103,6 +103,11 @@ namespace game {
             _physics->setSpeed(direction * _config.walkSpeed * (_input->isRunning() ? _config.runMultiplier : 1.0));
             _physics->setFlying(_input->isJumping());
         }
+        
+        if (_input->didFire()) {
+            CI_LOG_D("Did Fire!");
+        }
+        
     }
     
     dvec2 Player::getTrackingPosition() const {

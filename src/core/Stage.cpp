@@ -535,7 +535,23 @@ namespace core {
                 vector<ObjectRef> moribund;
                 for (auto &obj : _objects) {
                     if (!obj->isFinished()) {
+                        obj->preUpdate(time);
+                    } else {
+                        moribund.push_back(obj);
+                    }
+                }
+
+                for (auto &obj : _objects) {
+                    if (!obj->isFinished()) {
                         obj->update(time);
+                    } else {
+                        moribund.push_back(obj);
+                    }
+                }
+
+                for (auto &obj : _objects) {
+                    if (!obj->isFinished()) {
+                        obj->postUpdate(time);
                     } else {
                         moribund.push_back(obj);
                     }
