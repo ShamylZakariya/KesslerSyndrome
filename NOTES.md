@@ -12,6 +12,8 @@
 
 - Kill XmlMultiTree - I'm not even using it, and it adds complexity.
 
+- use unowned_ptr<> for chipmunk pointers. https://github.com/coryshrmn/cgs/blob/master/include/cgs/unowned_ptr.hpp
+
 
 ## Todo
 

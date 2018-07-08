@@ -20,6 +20,9 @@
 		63597BED20766F9D00B65C2A /* GlslProgLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63597BE920766F7700B65C2A /* GlslProgLoader.cpp */; };
 		635CC37920EA6F37007AE2FE /* CrackGeometry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 635CC37720EA6F37007AE2FE /* CrackGeometry.cpp */; };
 		635CC37A20EA6F38007AE2FE /* CrackGeometry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 635CC37720EA6F37007AE2FE /* CrackGeometry.cpp */; };
+		635CC37D20F26E4D007AE2FE /* PlayerDrawingComponents.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 635CC37B20F26E4D007AE2FE /* PlayerDrawingComponents.cpp */; };
+		635CC38120F26F29007AE2FE /* PlayerPhysicsComponents.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 635CC37F20F26F29007AE2FE /* PlayerPhysicsComponents.cpp */; };
+		635CC38420F27045007AE2FE /* PlayerInputComponents.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 635CC38220F27045007AE2FE /* PlayerInputComponents.cpp */; };
 		63611A8D2087990C004EE731 /* Compositor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63611A8B2087990C004EE731 /* Compositor.cpp */; };
 		63611A8E2087990C004EE731 /* Compositor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63611A8B2087990C004EE731 /* Compositor.cpp */; };
 		63611A922088DF96004EE731 /* MultiViewportTestScenario.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63611A8F2088DC14004EE731 /* MultiViewportTestScenario.cpp */; };
@@ -160,6 +163,12 @@
 		63597BEA20766F7700B65C2A /* GlslProgLoader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = GlslProgLoader.hpp; sourceTree = "<group>"; };
 		635CC37720EA6F37007AE2FE /* CrackGeometry.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CrackGeometry.cpp; sourceTree = "<group>"; };
 		635CC37820EA6F37007AE2FE /* CrackGeometry.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CrackGeometry.hpp; sourceTree = "<group>"; };
+		635CC37B20F26E4D007AE2FE /* PlayerDrawingComponents.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PlayerDrawingComponents.cpp; sourceTree = "<group>"; };
+		635CC37C20F26E4D007AE2FE /* PlayerDrawingComponents.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PlayerDrawingComponents.hpp; sourceTree = "<group>"; };
+		635CC37F20F26F29007AE2FE /* PlayerPhysicsComponents.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PlayerPhysicsComponents.cpp; sourceTree = "<group>"; };
+		635CC38020F26F29007AE2FE /* PlayerPhysicsComponents.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PlayerPhysicsComponents.hpp; sourceTree = "<group>"; };
+		635CC38220F27045007AE2FE /* PlayerInputComponents.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PlayerInputComponents.cpp; sourceTree = "<group>"; };
+		635CC38320F27045007AE2FE /* PlayerInputComponents.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PlayerInputComponents.hpp; sourceTree = "<group>"; };
 		63611A8B2087990C004EE731 /* Compositor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Compositor.cpp; sourceTree = "<group>"; };
 		63611A8C2087990C004EE731 /* Compositor.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Compositor.hpp; sourceTree = "<group>"; };
 		63611A8F2088DC14004EE731 /* MultiViewportTestScenario.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = MultiViewportTestScenario.cpp; sourceTree = "<group>"; };
@@ -356,6 +365,12 @@
 			children = (
 				63017F97209CB031004ABFA3 /* Player.cpp */,
 				63017F98209CB031004ABFA3 /* Player.hpp */,
+				635CC37B20F26E4D007AE2FE /* PlayerDrawingComponents.cpp */,
+				635CC37C20F26E4D007AE2FE /* PlayerDrawingComponents.hpp */,
+				635CC37F20F26F29007AE2FE /* PlayerPhysicsComponents.cpp */,
+				635CC38020F26F29007AE2FE /* PlayerPhysicsComponents.hpp */,
+				635CC38220F27045007AE2FE /* PlayerInputComponents.cpp */,
+				635CC38320F27045007AE2FE /* PlayerInputComponents.hpp */,
 			);
 			path = entities;
 			sourceTree = "<group>";
@@ -707,6 +722,7 @@
 				6363640A209756F500806152 /* VoronoiSplitView.cpp in Sources */,
 				63597BEC20766F8F00B65C2A /* GlslProgLoader.cpp in Sources */,
 				638F4DA21F898602004437E8 /* Background.cpp in Sources */,
+				635CC38120F26F29007AE2FE /* PlayerPhysicsComponents.cpp in Sources */,
 				635CC37920EA6F37007AE2FE /* CrackGeometry.cpp in Sources */,
 				638F4DA11F897FB7004437E8 /* GameConstants.cpp in Sources */,
 				638F4D991F895CE5004437E8 /* TerrainDetail.cpp in Sources */,
@@ -726,7 +742,9 @@
 				63F93C4A1F8714B200F537CA /* TerrainWorld.cpp in Sources */,
 				63E29EF71F97A87300CAF39E /* CloudLayerParticleSystem.cpp in Sources */,
 				63F93C511F8714B200F537CA /* ViewportController.cpp in Sources */,
+				635CC38420F27045007AE2FE /* PlayerInputComponents.cpp in Sources */,
 				63F93C521F8714B200F537CA /* ChipmunkHelpers.cpp in Sources */,
+				635CC37D20F26E4D007AE2FE /* PlayerDrawingComponents.cpp in Sources */,
 				63F93C531F8714B200F537CA /* Object.cpp in Sources */,
 				636364052093743C00806152 /* Tracking.cpp in Sources */,
 				63F93C541F8714B200F537CA /* Viewport.cpp in Sources */,

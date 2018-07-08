@@ -521,7 +521,7 @@ namespace game {
         }
 
         const auto planet = _planet;
-        scheduleDelayedInvocation(0.3, [planet,crackGeometry,minSurfaceAreaThreshold](){
+        scheduleDelayedInvocation(0.2, [planet,crackGeometry,minSurfaceAreaThreshold](){
             planet->getWorld()->cut(crackGeometry->getPolygons()[0], crackGeometry->getBB(), minSurfaceAreaThreshold);
         });
     }
