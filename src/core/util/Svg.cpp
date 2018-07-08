@@ -12,6 +12,13 @@
 
 namespace core {
     namespace util {
+        
+        void BlendMode::bind() const {
+            glBlendFuncSeparate(_srcColor, _dstColor, _srcAlpha, _dstAlpha);
+            glBlendEquationSeparate(_blendEqColor, _blendEqAlpha);
+        }
+
+        
         namespace svg {
 
 #pragma mark - Parsing
@@ -341,13 +348,14 @@ namespace core {
                 //	parse svg shape into a Shape2d, and then convert that to _svgMesh in document space.
                 //	later, in Group::_normalize we'll project to world space, and then to local space.
                 //
-
-                Shape2d shape2d;
-                util::svg::parseShape(shapeNode, shape2d);
-                _build(shape2d);
+                Shape2d svgShape;
+                util::svg::parseShape(shapeNode, svgShape);
+                _build(svgShape);
             }
 
             void Shape::draw(const render_state &state, const GroupRef &owner, double opacity, const gl::GlslProgRef &shader) {
+                CI_ASSERT_MSG(doesDraw(), "Should never call draw() on a shape which doesn't draw");
+                
                 if (!isOrigin()) {
                     _drawGame(state, owner, opacity, _localMesh, _localStrokes, shader);
                 }
@@ -355,6 +363,10 @@ namespace core {
                 if (state.gizmoMask) {
                     _drawGizmos(state, owner, opacity, _localMesh, _localStrokes, shader);
                 }
+            }
+            
+            bool Shape::doesDraw() const {
+                return _appearance->isFilled() || _appearance->isStroked();
             }
 
             void Shape::_build(const Shape2d &shape) {
@@ -367,25 +379,17 @@ namespace core {
 
                 const double ApproximationScale = 0.5;
                 const AppearanceRef appearance = getAppearance();
-
+                
                 //
-                //	we only need to triangulate filled shapes
-                //
-
-                if (appearance->isFilled()) {
-                    _svgMesh = Triangulator(shape, ApproximationScale).createMesh(appearance->getFillRule());
-                }
-
-                //
-                // we only need to gather the perimeter vertices if our shape is stroked
+                //  Triangulate and subdivide perimeter.
                 //
 
-                if (appearance->isStroked()) {
-                    for (const Path2d &path : shape.getContours()) {
-                        _svgStrokes.push_back(stroke());
-                        _svgStrokes.back().closed = path.isClosed();
-                        _svgStrokes.back().vertices = path.subdivide(ApproximationScale);
-                    }
+                _svgMesh = Triangulator(shape, ApproximationScale).createMesh(appearance->getFillRule());
+
+                for (const Path2d &path : shape.getContours()) {
+                    _svgStrokes.push_back(stroke());
+                    _svgStrokes.back().closed = path.isClosed();
+                    _svgStrokes.back().vertices = path.subdivide(ApproximationScale);
                 }
             }
 
@@ -487,21 +491,23 @@ namespace core {
                 if (appearance->isStroked()) {
 
                     ColorA sc = appearance->getStrokeColor();
-                    shader->uniform("Color", ColorA(sc.r, sc.g, sc.b, sc.a * opacity));
-                    gl::lineWidth(1);
+                    if (sc.a * opacity > ALPHA_EPSILON) {
+                        shader->uniform("Color", ColorA(sc.r, sc.g, sc.b, sc.a * opacity));
+                        gl::lineWidth(1);
 
-                    for (auto &stroke : strokes) {
-                        if (!stroke.vboMesh) {
-                            gl::VboMesh::Layout layout;
-                            layout.usage(GL_STATIC_DRAW).attrib(geom::POSITION, 2);
+                        for (auto &stroke : strokes) {
+                            if (!stroke.vboMesh) {
+                                gl::VboMesh::Layout layout;
+                                layout.usage(GL_STATIC_DRAW).attrib(geom::POSITION, 2);
 
-                            const GLsizei count = static_cast<GLsizei>(stroke.vertices.size());
-                            const GLenum primitive = stroke.closed ? GL_LINE_LOOP : GL_LINE_STRIP;
-                            stroke.vboMesh = gl::VboMesh::create(count, primitive, {layout});
-                            stroke.vboMesh->bufferAttrib(geom::POSITION, count * sizeof(vec2), stroke.vertices.data());
+                                const GLsizei count = static_cast<GLsizei>(stroke.vertices.size());
+                                const GLenum primitive = stroke.closed ? GL_LINE_LOOP : GL_LINE_STRIP;
+                                stroke.vboMesh = gl::VboMesh::create(count, primitive, {layout});
+                                stroke.vboMesh->bufferAttrib(geom::POSITION, count * sizeof(vec2), stroke.vertices.data());
+                            }
+
+                            gl::draw(stroke.vboMesh);
                         }
-
-                        gl::draw(stroke.vboMesh);
                     }
                 }
             }
@@ -510,13 +516,15 @@ namespace core {
                 const AppearanceRef appearance = getAppearance();
                 if (appearance->isFilled()) {
                     ColorA fc = appearance->getFillColor();
-                    shader->uniform("Color", ColorA(fc.r, fc.g, fc.b, fc.a * opacity));
+                    if (fc.a * opacity > ALPHA_EPSILON) {
+                        shader->uniform("Color", ColorA(fc.r, fc.g, fc.b, fc.a * opacity));
 
-                    if (!_localVboMesh) {
-                        _localVboMesh = gl::VboMesh::create(*mesh);
+                        if (!_localVboMesh) {
+                            _localVboMesh = gl::VboMesh::create(*mesh);
+                        }
+
+                        gl::draw(_localVboMesh);
                     }
-
-                    gl::draw(_localVboMesh);
                 }
             }
 
@@ -779,7 +787,7 @@ namespace core {
                 double opacity = _opacity * parentOpacity;
                 BlendMode lastBlendMode = getBlendMode();
 
-                glEnable(GL_BLEND);
+                gl::enable(GL_BLEND);
                 lastBlendMode.bind();
 
                 _updateTransform();
@@ -789,22 +797,25 @@ namespace core {
 
                 for (auto c(_drawables.begin()), end(_drawables.end()); c != end; ++c) {
                     if (c->first) {
+
                         //
                         //	Draw child group
                         //
 
                         c->first->_draw(state, opacity, shader);
                     } else if (c->second) {
+                       
                         //
                         //	Draw child shape with its blend mode if one was set, or ours otherwise
                         //
 
-                        if (c->second->getAppearance()->getBlendMode() != lastBlendMode) {
-                            lastBlendMode = c->second->getAppearance()->getBlendMode();
-                            lastBlendMode.bind();
+                        if (c->second->doesDraw()) {
+                            if (c->second->getAppearance()->getBlendMode() != lastBlendMode) {
+                                lastBlendMode = c->second->getAppearance()->getBlendMode();
+                                lastBlendMode.bind();
+                            }
+                            c->second->draw(state, self, opacity, shader);
                         }
-
-                        c->second->draw(state, self, opacity, shader);
                     }
                 }
             }

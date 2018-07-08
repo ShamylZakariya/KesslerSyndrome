@@ -111,11 +111,7 @@ namespace core {
                 return *this;
             }
             
-            void bind() const {
-                glEnable(GL_BLEND);
-                glBlendFuncSeparate(_srcColor, _dstColor, _srcAlpha, _dstAlpha);
-                glBlendEquationSeparate(_blendEqColor, _blendEqAlpha);
-            }
+            void bind() const;
             
         private:
             
@@ -274,6 +270,9 @@ namespace core {
                 const map <string, string> &getAttributes() const {
                     return _attributes;
                 }
+                
+                // returns true iff the shape has a color and or stroke - some shapes emitted by SVG editors are non-drawing
+                bool doesDraw() const;
 
             private:
 

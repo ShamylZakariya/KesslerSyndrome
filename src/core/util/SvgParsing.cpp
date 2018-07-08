@@ -27,6 +27,7 @@ namespace core {
                 const map<string, ColorA> ColorsByName = {
                         {"black", ColorA(0, 0, 0, 1)},
                         {"white", ColorA(1, 1, 1, 1)},
+                        {"none", ColorA(0,0,0,0)},
                 };
 
                 double getNumericAttributeValue(const XmlTree &node, const string &attrName, double defaultValue) {
@@ -955,14 +956,30 @@ namespace core {
                         style.opacity = parseNumericAttribute(value);
                         style.hasOpacity = true;
                     } else if (name == "fill-opacity") {
-                        style.fillOpacity = parseNumericAttribute(value);
+                        style.fillOpacity *= parseNumericAttribute(value);
                         style.hasFillOpacity = true;
                     } else if (name == "fill") {
-                        style.hasFillColor = parseColor(value, style.fillColor);
+                        ColorA fillColor;
+                        style.hasFillColor = parseColor(value, fillColor);
+                        if (style.hasFillColor) {
+                            style.fillColor = fillColor;
+                            if (fillColor.a < 1) {
+                                style.hasFillOpacity = true;
+                                style.fillOpacity *= fillColor.a;
+                            }
+                        }
                     } else if (name == "stroke") {
-                        style.hasStrokeColor = parseColor(value, style.strokeColor);
+                        ColorA strokeColor;
+                        style.hasStrokeColor = parseColor(value, strokeColor);
+                        if (style.hasStrokeColor) {
+                            style.strokeColor = strokeColor;
+                            if (strokeColor.a < 1) {
+                                style.hasStrokeOpacity = true;
+                                style.strokeOpacity *= strokeColor.a;
+                            }
+                        }
                     } else if (name == "stroke-opacity") {
-                        style.strokeOpacity = parseNumericAttribute(value);
+                        style.strokeOpacity *= parseNumericAttribute(value);
                         style.hasStrokeOpacity = true;
                     } else if (name == "stroke-width") {
                         style.strokeWidth = parseNumericAttribute(value);
