@@ -486,7 +486,7 @@ namespace game {
 
         const double minSurfaceAreaThreshold = 64;
         const double outerRadius = 75;
-        const double innerRadius = outerRadius * 0.5;
+        const double innerRadius = outerRadius * 0.375;
         const int numInnerSlices = 27;
         const int numOuterSlices = 13;
         const double thickness = 16;
@@ -501,11 +501,9 @@ namespace game {
             addObject(crackDrawer);
         }
 
-        // get the closest point on terrain surface and use that to place explosive charge
-        if (auto r = queryNearest(world, ShapeFilters::TERRAIN_PROBE)) {
-
-            const dvec2 origin = world + outerRadius * normalize(_planet->getOrigin() - r.point);
-            auto gravity = ExplosionForceCalculator::create(origin, 4000, 0.5, 0.5);
+        {
+            // create explosive force
+            auto gravity = ExplosionForceCalculator::create(world, 4000, 0.5, 0.5);
             addGravity(gravity);
 
             for (auto &cls : _cloudLayers) {
@@ -513,17 +511,24 @@ namespace game {
             }
         }
 
-        const dvec2 emissionDir = normalize(world - _planet->getOrigin());
-        _explosionEmitter->emit(world, emissionDir, 1.0, 140, elements::ParticleEmitter::Sawtooth);
-        
+        {
+            // create an emission of particles
+            const dvec2 emissionDir = normalize(world - _planet->getOrigin());
+            _explosionEmitter->emit(world, emissionDir, 1.0, 140, elements::ParticleEmitter::RampDown);
+        }
+
+        // add trauma to view controllers
         for (const auto &vc : _viewportControllers) {
             vc->addTrauma(0.75);
         }
 
-        const auto planet = _planet;
-        scheduleDelayedInvocation(0.2, [planet,crackGeometry,minSurfaceAreaThreshold](){
-            planet->getWorld()->cut(crackGeometry->getPolygons()[0], crackGeometry->getBB(), minSurfaceAreaThreshold);
-        });
+        {
+            // perform a cut against the planet surface
+            const auto planet = _planet;
+            scheduleDelayedInvocation(0.1, [planet,crackGeometry,minSurfaceAreaThreshold](){
+                planet->getWorld()->cut(crackGeometry->getPolygons()[0], crackGeometry->getBB(), minSurfaceAreaThreshold);
+            });
+        }
     }
     
     void GameStage::handleTerrainTerrainContact(cpArbiter *arbiter) {

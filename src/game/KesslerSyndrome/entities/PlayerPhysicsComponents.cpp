@@ -250,19 +250,18 @@ namespace game {
         _jetpackFuelLevel = _jetpackFuelMax = config.jetpackFuelMax;
         
         const double
-        Width = getConfig().width,
-        Height = getConfig().height,
-        Density = getConfig().density,
-        HalfWidth = Width / 2,
-        HalfHeight = Height / 2,
-        Mass = Width * Height * Density,
-        Moment = cpMomentForBox(Mass, Width, Height),
-        WheelRadius = HalfWidth * 1.25,
-        WheelSensorRadius = WheelRadius * 1.1,
-        WheelMass = Density * M_PI * WheelRadius * WheelRadius;
+            Width = getConfig().width,
+            Height = getConfig().height,
+            Density = getConfig().density,
+            HalfWidth = Width / 2,
+            HalfHeight = Height / 2,
+            Mass = Width * Height * Density,
+            Moment = cpMomentForBox(Mass, Width, Height),
+            WheelRadius = Width,
+            WheelSensorRadius = WheelRadius * 1.1,
+            WheelMass = Density * M_PI * WheelRadius * WheelRadius;
         
-        const cpVect
-        WheelPositionOffset = cpv(0, -HalfHeight);
+        const cpVect WheelPositionOffset = cpv(0, -HalfHeight);
         
         _totalMass = Mass + WheelMass;
         _body = add(cpBodyNew(Mass, Moment));
@@ -331,7 +330,7 @@ namespace game {
                 
                 LegPhysics::config c;
                 c.unownedParentBody = _body;
-                c.localOrigin = dvec2(0, -HalfHeight) + (dvec2(dir.x,-dir.y) * WheelRadius * 0.75 + (rngContrib * dvec2(rng.nextVec2()) * WheelRadius * 0.1));
+                c.localOrigin = dvec2(0, - 0.75 * HalfHeight) + (dvec2(dir.x,-dir.y) * WheelRadius * 0.75 + (rngContrib * dvec2(rng.nextVec2()) * WheelRadius * 0.1));
                 c.localDir = normalize(dir + dvec2(0.1 * rngContrib * dvec2(rng.nextVec2())));
                 c.rotationExtent = radians(25 + abs(legDeflectionScale) * 65 + rngContrib * rng.nextFloat(-10, 10));
                 c.maxLength = Height * (1.5 +  rngContrib * rng.nextFloat(-0.3, 0.3));

@@ -390,7 +390,7 @@ namespace game {
         CI_ASSERT_MSG(physics, "PlayerPhysicsComponentRef should be accessbile");
         
         const auto footWheel = physics->getFootWheel();
-        const auto maxRadius = footWheel.radius * 1;
+        const auto maxRadius = footWheel.radius * 0.3;
         
         auto image = loadImage(app::loadAsset("kessler/textures/Explosion.png"));
         gl::Texture2d::Format fmt = gl::Texture2d::Format().mipmap(false);
@@ -414,7 +414,7 @@ namespace game {
         particle_prototype fire;
         fire.atlasIdx = 0;
         fire.lifespan = 0.75;
-        fire.radius = {0, maxRadius, maxRadius * 0.5, 0};
+        fire.radius = {0, maxRadius * 1.5, maxRadius, maxRadius * 0.1, 0};
         fire.damping = { 0 };
         fire.additivity = { 1, 0.7 };
         fire.mass = {0};
@@ -425,13 +425,13 @@ namespace game {
         particle_prototype smoke;
         smoke.atlasIdx = 0;
         smoke.lifespan = 0.75;
-        smoke.radius = {0, 0, maxRadius * 2, 0};
+        smoke.radius = {0, maxRadius, maxRadius * 2, maxRadius * 0};
         smoke.damping = {0,0,0,0.02};
         smoke.additivity = 0;
         smoke.mass = {0};
         smoke.initialVelocity = 20;
         smoke.gravitationLayerMask = GravitationLayers::GLOBAL;
-        smoke.color = ColorA(0.9, 0.9, 0.9, 0.2);
+        smoke.color = ColorA(0.9, 0.9, 0.9, 0.5);
         
         _thrustParticleEmitter = _thrustParticleSystem->createEmitter();
         _thrustParticleEmitter->add(fire, ParticleEmitter::Source(2, 0.2, 0.3), 2);
