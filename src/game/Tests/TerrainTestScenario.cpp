@@ -12,7 +12,7 @@
 #include <cinder/Rand.h>
 
 #include "DevComponents.hpp"
-
+#include "SpatialIndex.hpp"
 
 using namespace core;
 using namespace elements;
@@ -563,6 +563,7 @@ terrain::WorldRef TerrainTestScenario::testFail() {
 void TerrainTestScenario::timeSpatialIndex() {
 
     Rand rng;
+    using util::SpatialIndex;
 
     auto generator = [&rng](cpBB bounds, int count) -> vector<cpBB> {
         vector<cpBB> out;

@@ -132,8 +132,8 @@ namespace elements {
     }
 
     void BaseParticleSystem::onReady(StageRef stage) {
-        CI_ASSERT_MSG(_simulation, "Expect a BaseParticleSimulation to be among installed components at time of onReady()");
         Object::onReady(stage);
+        CI_ASSERT_MSG(_simulation, "Expect a BaseParticleSimulation to be among installed components at time of onReady()");
         for (auto dc : getDrawComponents()) {
             if (BaseParticleSystemDrawComponentRef psdc = dynamic_pointer_cast<BaseParticleSystemDrawComponent>(dc)) {
                 psdc->setSimulation(_simulation);

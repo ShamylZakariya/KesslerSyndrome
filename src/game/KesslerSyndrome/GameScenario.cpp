@@ -28,32 +28,14 @@ namespace game {
         setStage(stage);
 
         stage->load(app::loadAsset(_stageXmlFile));
+        
+        getStage()->addObject(Object::with("Screen UI", {
+            make_shared<elements::PerformanceDisplayComponent>(0, dvec2(10,10), ColorA(1,1,1,1))
+        }));
     }
 
     void GameScenario::cleanup() {
         setStage(nullptr);
-    }
-
-    void GameScenario::drawScreen(const render_state &state) {
-
-        //
-        // NOTE: we're in screen space, with coordinate system origin at top left
-        //
-
-        float fps = core::App::get()->getAverageFps();
-        float sps = core::App::get()->getAverageSps();
-        string info = core::strings::format("%.1f %.1f", fps, sps);
-        gl::drawString(info, vec2(10, 10), Color(1, 1, 1));
-
-
-        auto vp = getMainViewport<Viewport>();
-        Viewport::look look = vp->getLook();
-        double scale = vp->getScale();
-
-        stringstream ss;
-        ss << std::setprecision(3) << "world (" << look.world.x << ", " << look.world.y << ") scale: " << scale
-           << " up: (" << look.up.x << ", " << look.up.y << ")";
-        gl::drawString(ss.str(), vec2(10, 40), Color(1, 1, 1));
     }
 
     bool GameScenario::keyDown(const app::KeyEvent &event) {

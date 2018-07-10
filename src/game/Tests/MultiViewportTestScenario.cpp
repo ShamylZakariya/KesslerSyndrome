@@ -48,6 +48,44 @@ namespace {
         
     };
     
+    class ScreenBlendingTestComponent : public core::ScreenDrawComponent {
+    public:
+        
+        ScreenBlendingTestComponent(int layer, dvec2 topLeft):
+                ScreenDrawComponent(layer),
+                _topLeft(topLeft)
+        {}
+        
+        void drawScreen(const render_state &renderState) override {
+            
+            gl::ScopedModelMatrix smm;
+            gl::translate(_topLeft);
+            
+            int count = 8;
+            double radius = 20;
+
+            {
+                gl::ScopedBlendAlpha sb;
+                
+                for (int i = 0; i < count; i++) {
+                    double hue = static_cast<double>(i) / static_cast<double>(count);
+                    ColorA color = ColorA(ColorModel::CM_HSV, hue, 1, 1, 0.5);
+                    double x = i * radius * 1.5;
+                    
+                    gl::ScopedColor sc(color);
+                    gl::drawSolidCircle(vec2(_topLeft.x + x + radius, _topLeft.y + radius), radius);
+                }
+            }
+        }
+        
+    private:
+        
+        dvec2 _topLeft;
+        
+    };
+    
+#pragma mark - Character
+    
     class CharacterState : public core::Component, public core::Trackable {
     public:
         CharacterState(ColorA color, dvec2 startPosition, double radius, double speed = 4 ):
@@ -58,7 +96,7 @@ namespace {
         {}
         
         void setPosition(dvec2 position) { _position = position; notifyMoved(); }
-        dvec2 getPosition() const override { return _position; }
+        dvec2 getPosition() const { return _position; }
         
         void setRadius(double r) { _radius = r; notifyMoved(); }
         double getRadius() const { return _radius; }
@@ -68,6 +106,9 @@ namespace {
         
         void setSpeed(double s) { _speed = s; }
         double getSpeed() const { return _speed; }
+        
+        // Trackable
+        dvec2 getTrackingPosition() const override { return _position; }
         
     private:
         dvec2 _position;
@@ -176,6 +217,8 @@ namespace {
     
 }
 
+#pragma mark - MultiViewportTestScenario
+
 /*
  double _scale;
 */
@@ -225,6 +268,11 @@ void MultiViewportTestScenario::setup()
             return true;
         })
     }));
+    
+    getStage()->addObject(Object::with("Screen UI", {
+        make_shared<elements::PerformanceDisplayComponent>(0, dvec2(10,10), ColorA(1,1,1,1)),
+        make_shared<ScreenBlendingTestComponent>(1, dvec2(10,25))
+    }));
 }
 
 void MultiViewportTestScenario::cleanup()
@@ -239,74 +287,6 @@ void MultiViewportTestScenario::update(const time_state &time) {
     double scale = svc->getScale();
     scale = lrp<double>(0.25, scale, _scale);
     svc->setScale(scale);
-}
-
-void MultiViewportTestScenario::draw(const render_state &state) {
-    Scenario::draw(state);
-}
-
-void MultiViewportTestScenario::drawScreen(const render_state &state)
-{
-    stringstream ss;
-    ss
-    << setprecision(2)
-    << "fps: " << core::App::get()->getAverageFps()
-    << " sps: " << core::App::get()->getAverageSps()
-    << " visible: (" << getStage()->getDrawDispatcher()->visible().size() << "/" << getStage()->getDrawDispatcher()->all().size() << ")";
-    
-    gl::drawString(ss.str(), vec2(10, 10), Color(1, 1, 1));
-    
-
-    // we're demonstrating screen blending correctness here
-
-    
-    {
-        gl::ScopedBlendAlpha sb;
-        {
-            gl::ScopedColor sc(ColorA(0,0,0,0.75));
-            gl::drawSolidCircle(vec2(25,45), 20);
-        }
-
-        {
-            gl::ScopedColor sc(ColorA(1,0,1,0.75));
-            gl::drawSolidCircle(vec2(55,45), 20);
-        }
-
-        {
-            gl::ScopedColor sc(ColorA(0,1,1,0.75));
-            gl::drawSolidCircle(vec2(85,45), 20);
-        }
-
-        {
-            gl::ScopedColor sc(ColorA(1,1,0,0.75));
-            gl::drawSolidCircle(vec2(115,45), 20);
-        }
-    }
-
-    {
-        gl::ScopedBlendAdditive sb;
-        {
-            gl::ScopedColor sc(ColorA(0,0,0,0.75));
-            gl::drawSolidCircle(vec2(25,105), 20);
-        }
-        
-        {
-            gl::ScopedColor sc(ColorA(1,0,1,0.75));
-            gl::drawSolidCircle(vec2(55,105), 20);
-        }
-        
-        {
-            gl::ScopedColor sc(ColorA(0,1,1,0.75));
-            gl::drawSolidCircle(vec2(85,105), 20);
-        }
-
-        {
-            gl::ScopedColor sc(ColorA(1,1,0,0.75));
-            gl::drawSolidCircle(vec2(115,105), 20);
-        }
-
-    }
-
 }
 
 void MultiViewportTestScenario::reset()

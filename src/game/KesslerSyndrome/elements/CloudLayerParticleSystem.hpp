@@ -10,9 +10,10 @@
 
 #include "BaseParticleSystem.hpp"
 #include "ParticleSystem.hpp"
-#include "PerlinNoise.hpp"
 
 #include "GameConstants.hpp"
+
+#include <cinder/Perlin.h>
 
 namespace game {
 
@@ -25,30 +26,45 @@ namespace game {
     class CloudLayerParticleSimulation : public elements::BaseParticleSimulation {
     public:
 
-        struct particle_prototype {
+        struct particle_config {
             double minRadius;
             double maxRadius;
             double minRadiusNoiseValue;
             ColorA color;
 
-            particle_prototype() :
+            particle_config() :
                     minRadius(0),
                     maxRadius(100),
                     minRadiusNoiseValue(0.5),
                     color(1, 1, 1, 1) {
             }
 
-            static particle_prototype parse(const core::util::xml::XmlMultiTree &node);
+            static particle_config parse(const core::util::xml::XmlMultiTree &node);
 
+        };
+        
+        struct noise_config {
+            int octaves;
+            int seed;
+            
+            noise_config():
+                    octaves(4),
+                    seed(12345)
+            {}
+            
+            static noise_config parse(const core::util::xml::XmlMultiTree &node);
         };
 
 
         struct config {
-            core::util::PerlinNoise::config generator;
-            particle_prototype particle;
+            noise_config noise;
+            particle_config particle;
             dvec2 origin;
             double radius;
+            // the lower the period, the more rapidly cloud formations change
             core::seconds_t period;
+            // the lower the turbulence, the smoother the cloud chape, the higher, the rougher
+            double turbulence;
             size_t count;
             double displacementForce;
             double returnForce;
@@ -57,6 +73,7 @@ namespace game {
                     origin(0, 0),
                     radius(500),
                     period(1),
+                    turbulence(4),
                     count(100),
                     displacementForce(10),
                     returnForce(32) {
@@ -114,7 +131,7 @@ namespace game {
         };
 
         config _config;
-        core::util::PerlinNoise _generator;
+        ci::Perlin _noise;
         core::seconds_t _time;
         cpBB _bb;
         vector<core::RadialGravitationCalculatorRef> _displacements;

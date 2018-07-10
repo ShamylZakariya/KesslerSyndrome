@@ -277,7 +277,7 @@ namespace elements {
         }
 
     protected:
-
+        
         virtual void _prepareForSimulation(const core::time_state &time);
 
         virtual void _simulate(const core::time_state &time);
@@ -301,7 +301,7 @@ namespace elements {
             // a circular volume of this radius
             double radius;
 
-            // max spread in radians from the emission direction. A value of zero
+            // max spread from the emission direction. A value of zero
             // results in a laser-like emission, a value of 0.25 is a cone with 90° tip.
             // A value of 1 is a full circular emission regardless of direction.
             double spread;
@@ -351,6 +351,12 @@ namespace elements {
         void setSimulation(const ParticleSimulationRef simulation);
 
         ParticleSimulationRef getSimulation() const;
+        
+        /**
+         Set the velocity of the emitter - if non-zero, the velocity will be added to emitted particles
+         */
+        void setVelocity(dvec2 emitterVelocity) { _velocity = emitterVelocity; }
+        dvec2 getVelocity() const { return _velocity; }
 
         /**
          Seed the RNG that purturbs particle emission state
@@ -425,6 +431,7 @@ namespace elements {
         map <emission_id, emission> _emissions;
         vector <emission_prototype> _prototypes;
         vector <size_t> _prototypeLookup;
+        dvec2 _velocity;
 
     };
 

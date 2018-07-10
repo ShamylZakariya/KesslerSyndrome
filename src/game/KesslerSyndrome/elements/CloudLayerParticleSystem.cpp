@@ -11,9 +11,17 @@ using namespace core;
 using namespace elements;
 
 namespace game {
+    
+    CloudLayerParticleSimulation::noise_config CloudLayerParticleSimulation::noise_config::parse(const core::util::xml::XmlMultiTree &node) {
+        noise_config n;
+        n.octaves = util::xml::readNumericAttribute<int>(node, "noise", n.octaves);
+        n.seed = util::xml::readNumericAttribute<int>(node, "seed", n.seed);
+        return n;
+    }
 
-    CloudLayerParticleSimulation::particle_prototype CloudLayerParticleSimulation::particle_prototype::parse(const util::xml::XmlMultiTree &node) {
-        particle_prototype pt;
+
+    CloudLayerParticleSimulation::particle_config CloudLayerParticleSimulation::particle_config::parse(const util::xml::XmlMultiTree &node) {
+        particle_config pt;
         pt.minRadius = util::xml::readNumericAttribute<double>(node, "minRadius", pt.minRadius);
         pt.maxRadius = util::xml::readNumericAttribute<double>(node, "maxRadius", pt.maxRadius);
         pt.minRadiusNoiseValue = util::xml::readNumericAttribute<double>(node, "minRadiusNoiseValue", pt.minRadiusNoiseValue);
@@ -26,12 +34,13 @@ namespace game {
     CloudLayerParticleSimulation::config CloudLayerParticleSimulation::config::parse(const util::xml::XmlMultiTree &node) {
         config c;
 
-        c.generator = util::PerlinNoise::config::parse(node.getChild("generator"));
-        c.particle = particle_prototype::parse(node.getChild("particle"));
+        c.noise = noise_config::parse(node.getChild("noise"));
+        c.particle = particle_config::parse(node.getChild("particle"));
         c.origin = util::xml::readPointAttribute(node, "origin", c.origin);
         c.radius = util::xml::readNumericAttribute<double>(node, "radius", c.radius);
         c.count = util::xml::readNumericAttribute<size_t>(node, "count", c.count);
         c.period = util::xml::readNumericAttribute<seconds_t>(node, "period", c.period);
+        c.turbulence = util::xml::readNumericAttribute<double>(node, "turbulence", c.turbulence);
         c.displacementForce = util::xml::readNumericAttribute<double>(node, "displacementForce", c.displacementForce);
         c.returnForce = util::xml::readNumericAttribute<double>(node, "returnForce", c.returnForce);
 
@@ -40,19 +49,20 @@ namespace game {
 
     /*
      config _config;
-     util::PerlinNoise _generator;
-     seconds_t _time;
+     ci::Perlin _noise;
+     core::seconds_t _time;
      cpBB _bb;
+     vector<core::RadialGravitationCalculatorRef> _displacements;
+     vector<particle_physics> _physics;
      */
 
     CloudLayerParticleSimulation::CloudLayerParticleSimulation(const config &c) :
             _config(c),
-            _generator(util::PerlinNoise(c.generator)),
+            _noise(c.noise.octaves, c.noise.seed),
             _time(0) {
     }
 
     void CloudLayerParticleSimulation::onReady(ObjectRef parent, StageRef stage) {
-        _generator.setScale(2 * M_PI);
 
         //
         // create store, set defult state, and run simulate() once to populate
@@ -103,13 +113,15 @@ namespace game {
         }
 
         double a = 0;
-        const double da = 2 * M_PI / getActiveCount();
+        const double TwoPi = 2 * M_PI;
+        const double da = TwoPi / getActiveCount();
         const double cloudLayerRadius = _config.radius;
         const double cloudLayerRadius2 = cloudLayerRadius * cloudLayerRadius;
         const double particleRadiusDelta = _config.particle.maxRadius - _config.particle.minRadius;
         const double particleMinRadius = _config.particle.minRadius;
         const double noiseYAxis = _time / _config.period;
         const double noiseMin = _config.particle.minRadiusNoiseValue;
+        const double noiseTurbulence = _config.turbulence;
         const double rNoiseRange = 1.0 / (1.0 - noiseMin);
         const double returnForce = _config.returnForce;
         const double deltaT2 = timeState.deltaT * timeState.deltaT;
@@ -155,7 +167,8 @@ namespace game {
                 angle = a - M_PI_2;
             }
 
-            double noise = _generator.noiseUnit(a, noiseYAxis);
+            double fbm = _noise.fBm(a * noiseTurbulence, noiseYAxis);
+            double noise = (fbm + 1.0) * 0.5;
             double radius = 0;
             if (noise > noiseMin) {
                 double remappedNoiseVale = (noise - noiseMin) * rNoiseRange;

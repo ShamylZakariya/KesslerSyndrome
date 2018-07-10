@@ -10,7 +10,6 @@
 #include <cinder/Rand.h>
 #include <cinder/Perlin.h>
 
-#include "PerlinNoise.hpp"
 #include "MarchingSquares.hpp"
 #include "ContourSimplification.hpp"
 #include "ImageProcessing.hpp"

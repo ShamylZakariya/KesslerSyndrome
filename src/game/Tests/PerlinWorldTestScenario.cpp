@@ -12,7 +12,6 @@
 #include "App.hpp"
 #include "ParticleSystem.hpp"
 #include "DevComponents.hpp"
-#include "PerlinNoise.hpp"
 #include "MarchingSquares.hpp"
 #include "ContourSimplification.hpp"
 #include "Terrain.hpp"

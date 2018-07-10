@@ -18,6 +18,7 @@
 #include "CloudLayerParticleSystem.hpp"
 #include "ParticleSystem.hpp"
 #include "ViewportController.hpp"
+#include "Player.hpp"
 
 namespace game {
 
@@ -44,8 +45,11 @@ namespace game {
         PlanetRef getPlanet() const {
             return _planet;
         }
-
-
+        
+        PlayerRef getPlayer() const {
+            return _player;
+        }
+        
     protected:
 
         // Stage
@@ -62,15 +66,17 @@ namespace game {
         void onCollisionSeparate(cpArbiter *arb) override;
 
         // GameStage
-        void applySpaceAttributes(XmlTree spaceNode);
+        void applySpaceAttributes(const XmlTree &spaceNode);
+        
+        void buildGravity(const XmlTree &gravityNode);
 
-        void buildGravity(XmlTree gravityNode);
+        void loadBackground(const XmlTree &planetNode);
 
-        void loadBackground(XmlTree planetNode);
+        void loadPlanet(const XmlTree &planetNode);
+        
+        void loadPlayer(const XmlTree &playerNode);
 
-        void loadPlanet(XmlTree planetNode);
-
-        CloudLayerParticleSystemRef loadCloudLayer(XmlTree cloudLayer, int drawLayer);
+        CloudLayerParticleSystemRef loadCloudLayer(const XmlTree &cloudLayer, int drawLayer);
         
         void loadGreebleSystem(const core::util::xml::XmlMultiTree &greebleNode);
 
@@ -90,11 +96,14 @@ namespace game {
 
         BackgroundRef _background;
         PlanetRef _planet;
+        PlayerRef _player;
         vector <CloudLayerParticleSystemRef> _cloudLayers;
         core::RadialGravitationCalculatorRef _gravity;
         elements::ParticleEmitterRef _explosionEmitter;
         elements::ParticleEmitterRef _dustEmitter;
-        elements::ViewportControllerRef _viewportController;
+        vector<elements::ViewportControllerRef> _viewportControllers;
+        
+        double _planetRadius;
 
     };
 

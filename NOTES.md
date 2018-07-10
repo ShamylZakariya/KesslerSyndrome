@@ -2,9 +2,26 @@
 
 ## Presently
 
+This player sucks. What about a blob player like the Shoggoths in Surfacer?
+1) Get house in order - do the yak shaving below
+2) Read up Surfacer code for Shoggoths
+3) Make ParticleSystem have option to render to texture, with a composite pass
+
+- Player Features
+    - needs weapon
+    - particle emitter needs a "velocity" value which is added to each emitted particle to accommodate moving emitters
+
+- Make my #includes use paths, not just the filename
+
+- Svg Group needs a "find element by Id", because the path thing works but is awful
+
+- Kill XmlMultiTree - I'm not even using it, and it adds complexity.
+
+- use unowned_ptr<> for chipmunk pointers. https://github.com/coryshrmn/cgs/blob/master/include/cgs/unowned_ptr.hpp
+
+
 ## Todo
 
-- Make some kind of component which simplifies toggling of Gizmo masks at runtime
 
 ## Optimization 
 - observe TerrainWorld::417 cpSpaceBBQuery - I might be able to use cpSPace queries to test if attachments are inside the cut volume. might be a lot faster than my approach, since chipmunk is pretty optimized.

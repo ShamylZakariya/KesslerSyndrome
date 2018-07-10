@@ -50,7 +50,7 @@ namespace elements {
         _shader->uniform("ColorTex1", 1);
         _shader->uniform("Tint0", ColorA(1,1,1,1));
         _shader->uniform("Tint1", ColorA(1,1,1,1));
-        _shader->uniform("ShadowWidth", _shadowWidth);
+        _shader->uniform("ShadowWidth", _shadowWidth * _shadowIntensity);
         _shader->uniform("ShadowColor", ColorA(_shadowColor, _shadowColor.a * _shadowIntensity));
         _shader->uniform("Side", _side);
         _batch->draw();
@@ -99,12 +99,11 @@ namespace elements {
         
         // first compute the split, in world space
         const dvec2 screenCenter(_width/2, _height/2);
-        const dvec2 a = _firstTarget->getPosition();
-        const dvec2 b = _secondTarget->getPosition();
-        const double worldDistance = length(b-a);
-        const dvec2 dir = (b-a) / worldDistance;
-        
-        
+        const dvec2 firstTargetPositionWorld = _firstTarget->getTrackingPosition();
+        const dvec2 secondTargetPositionWorld = _secondTarget->getTrackingPosition();
+        const double worldDistance = length(secondTargetPositionWorld-firstTargetPositionWorld);
+        const dvec2 dir = (secondTargetPositionWorld-firstTargetPositionWorld) / worldDistance;
+                
         // compute the voronoi mix component. when:
         // voronoiMix == 0, then both characters can be rendered on screen without a split
         // voronoiMix == 1, we have full separation
@@ -117,8 +116,6 @@ namespace elements {
         // compute the tracking targets. when:
         // voronoiMix == 0, viewports both track the midpoint of the two targets
         // voronoiMix == 1, viewports track the targets directly
-        const dvec2 firstTargetPositionWorld = _firstTarget->getPosition();
-        const dvec2 secondTargetPositionWorld = _secondTarget->getPosition();
         const dvec2 targetMidpointWorld = (firstTargetPositionWorld + secondTargetPositionWorld) * 0.5;
         const dvec2 firstLookWorld = lrp(curvedVoronoiMix, targetMidpointWorld, firstTargetPositionWorld);
         const dvec2 secondLookWorld = lrp(curvedVoronoiMix, targetMidpointWorld, secondTargetPositionWorld);
@@ -143,7 +140,7 @@ namespace elements {
         // update the shader
         // shadow effect fased in as voronoi mix goes to 1
         _vspc->setSplitSideDir(dir);
-        _vspc->setShadowIntensity(curvedVoronoiMix);
+        _vspc->setShadowIntensity(util::easing::quad_ease_out(voronoiMix));
     }
     
 } // end namespace elements

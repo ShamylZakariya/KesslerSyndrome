@@ -188,6 +188,10 @@ namespace core {
 
             return a->getObject()->getId() < b->getObject()->getId();
         }
+        
+        bool ScreenDrawComponentSorter(const ScreenDrawComponentRef &a, const ScreenDrawComponentRef &b) {
+            return a->getLayer() < b->getLayer();
+        }
 
     }
 
@@ -382,13 +386,14 @@ namespace core {
     /*
      cpSpace *_space;
      SpaceAccessRef _spaceAccess;
-     bool _ready, _paused;
+     bool _ready, _paused, _screenDrawComponentsChanged;
      ScenarioWeakRef _scenario;
      set<ObjectRef> _objects;
      map<size_t, ObjectRef> _objectsById;
      time_state _time;
      string _name;
      DrawDispatcherRef _drawDispatcher;
+     vector<ScreenDrawComponentRef> _screenDrawComponents;
      cpBodyVelocityFunc _bodyVelocityFunc;
      vector<GravitationCalculatorRef> _gravities;
      
@@ -396,16 +401,23 @@ namespace core {
      map<collision_type_pair, vector<EarlyCollisionCallback>> _collisionBeginHandlers, _collisionPreSolveHandlers;
      map<collision_type_pair, vector<LateCollisionCallback>> _collisionPostSolveHandlers, _collisionSeparateHandlers;
      map<collision_type_pair, vector<ContactCallback>> _contactHandlers;
-     map<collision_type_pair, vector<pair<ObjectRef, ObjectRef>>> _syntheticContacts;     */
+     map<collision_type_pair, vector<pair<ObjectRef, ObjectRef>>> _syntheticContacts;
+
+     map<size_t, delayed_invocation> _delayedInvocations;
+     size_t _scheduledInvocationIdCounter;
+     */
 
     Stage::Stage(string name) :
             _space(cpSpaceNew()),
             _ready(false),
             _paused(false),
+            _screenDrawComponentsChanged(false),
             _time(0, 0, 1, 0),
             _name(name),
             _drawDispatcher(make_shared<DrawDispatcher>()),
-            _bodyVelocityFunc(cpBodyUpdateVelocity) {
+            _bodyVelocityFunc(cpBodyUpdateVelocity),
+            _scheduledInvocationIdCounter(0)
+    {
         // some defaults
         cpSpaceSetGravity(_space, cpvzero);
         cpSpaceSetIterations(_space, 30);
@@ -488,7 +500,18 @@ namespace core {
         }
 
         if (!_paused) {
-
+            
+            while (!_delayedInvocations.empty()) {
+                // the soonest-to-execute invocation will be at end of vector
+                if (_delayedInvocations.back().invocationTime <= _time.time) {
+                    _delayedInvocations.back().callback();
+                    _delayedInvocations.pop_back();
+                } else {
+                    // nothing to invoke, yet
+                    break;
+                }
+            }
+            
             {
                 // update gravitation calculators and dispose of finished
                 vector<GravitationCalculatorRef> moribund;
@@ -512,7 +535,23 @@ namespace core {
                 vector<ObjectRef> moribund;
                 for (auto &obj : _objects) {
                     if (!obj->isFinished()) {
+                        obj->preUpdate(time);
+                    } else {
+                        moribund.push_back(obj);
+                    }
+                }
+
+                for (auto &obj : _objects) {
+                    if (!obj->isFinished()) {
                         obj->update(time);
+                    } else {
+                        moribund.push_back(obj);
+                    }
+                }
+
+                for (auto &obj : _objects) {
+                    if (!obj->isFinished()) {
+                        obj->postUpdate(time);
                     } else {
                         moribund.push_back(obj);
                     }
@@ -548,8 +587,13 @@ namespace core {
     }
 
     void Stage::drawScreen(const render_state &state) {
-        for (const auto &dc : _drawDispatcher->all()) {
-            dc->drawScreen(state);
+        if (_screenDrawComponentsChanged) {
+            std::sort(_screenDrawComponents.begin(), _screenDrawComponents.end(), ScreenDrawComponentSorter);
+            _screenDrawComponentsChanged = false;
+        }
+        
+        for (const auto &sdc : _screenDrawComponents) {
+            sdc->drawScreen(state);
         }
     }
 
@@ -563,6 +607,11 @@ namespace core {
 
         for (auto &dc : obj->getDrawComponents()) {
             _drawDispatcher->add(id, dc);
+        }
+        
+        for (const auto &sdc : obj->getScreenDrawComponents()) {
+            _screenDrawComponents.push_back(sdc);
+            _screenDrawComponentsChanged = true;
         }
 
         obj->onAddedToStage(shared_from_this_as<Stage>());
@@ -823,6 +872,22 @@ namespace core {
         }
         return result;
     }
+    
+    size_t Stage::scheduleDelayedInvocation(seconds_t secondsFromNow, DelayedInvocationCallback callback) {
+        size_t id = ++_scheduledInvocationIdCounter;
+        _delayedInvocations.emplace_back(delayed_invocation { id, _time.time + max<seconds_t>(secondsFromNow,0), callback });
+        
+        // sort such that the invocations most distant from now are at front of list
+        sort(_delayedInvocations.begin(),_delayedInvocations.end(),[](const delayed_invocation &a, const delayed_invocation &b) {
+            return a.invocationTime > b.invocationTime;
+        });
+        
+        return id;
+    }
+    
+    void Stage::cancelDelayedInvocation(size_t id) {
+        _delayedInvocations.erase(remove_if(_delayedInvocations.begin(), _delayedInvocations.end(), [id](const delayed_invocation &i){ return i.id == id; } ));
+    }
 
     void Stage::setCpBodyVelocityUpdateFunc(cpBodyVelocityFunc f) {
         _bodyVelocityFunc = f ? f : cpBodyUpdateVelocity;
@@ -844,12 +909,12 @@ namespace core {
 
     void Stage::onReady() {
         CI_ASSERT_MSG(!_ready, "Can't call onReady() on Stage that is already ready");
+        _ready = true;
 
         const auto self = shared_from_this_as<Stage>();
         for (auto &obj : _objects) {
             obj->onReady(self);
         }
-        _ready = true;
     }
 
     void Stage::onBodyAddedToSpace(cpBody *body) {

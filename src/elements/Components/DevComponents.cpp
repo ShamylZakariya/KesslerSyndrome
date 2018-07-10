@@ -268,7 +268,7 @@ namespace elements {
         _mouseWorld = getStage()->getMainViewport()->screenToWorld(_mouseScreen);
         
         if (isKeyDown(app::KeyEvent::KEY_SPACE)) {
-            dvec2 deltaWorld = _viewportController->getMainViewport()->screenToWorldDir(dvec2(delta));
+            dvec2 deltaWorld = _viewportController->getViewport()->screenToWorldDir(dvec2(delta));
             Viewport::look target = _viewportController->getTarget();
             target.world -= deltaWorld;
             _viewportController->setTarget(target);
@@ -635,6 +635,18 @@ namespace elements {
         
         _linearVel = (position - _lastPosition) / timeState.deltaT;
         _angularVel = (_svgDoc->getAngle() - _lastAngle) / timeState.deltaT;
+    }
+    
+#pragma mark - PerformanceDrawComponent
+    
+    void PerformanceDisplayComponent::drawScreen(const render_state &renderState) {
+        stringstream ss;
+        ss << setprecision(2)
+           << "fps: " << core::App::get()->getAverageFps()
+           << " sps: " << core::App::get()->getAverageSps();
+        
+        gl::ScopedBlendAlpha sba;
+        gl::drawString(ss.str(), _topLeft, _color);
     }
     
 } // end namespace elements

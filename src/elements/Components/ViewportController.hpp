@@ -74,7 +74,7 @@ namespace elements {
         ///////////////////////////////////////////////////////////////////////////
         // ViewportController
         
-        core::ViewportRef getMainViewport() const {
+        core::ViewportRef getViewport() const {
             return _viewport;
         }
         

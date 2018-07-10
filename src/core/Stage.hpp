@@ -362,6 +362,11 @@ namespace core {
          */
         typedef std::function<void(const collision_type_pair &ctp, const ObjectRef &a, const ObjectRef &b)> ContactCallback;
 
+        /**
+         Callback for delayed invocations
+        */
+        typedef std::function<void()> DelayedInvocationCallback;
+
     public:
 
         Stage(string name);
@@ -498,7 +503,7 @@ namespace core {
             }
         };
 
-        query_nearest_result queryNearest(dvec2 point, cpShapeFilter filter, double maxDistance = INFINITY);
+        query_nearest_result queryNearest(dvec2 point, cpShapeFilter filter = CP_SHAPE_FILTER_ALL, double maxDistance = INFINITY);
 
         struct query_segment_result {
             dvec2 point;
@@ -517,9 +522,27 @@ namespace core {
             }
         };
 
-        query_segment_result querySegment(dvec2 a, dvec2 b, double radius, cpShapeFilter filter);
+        query_segment_result querySegment(dvec2 a, dvec2 b, double radius, cpShapeFilter filter = CP_SHAPE_FILTER_ALL);
+        
 
+        /**
+         Schedule `callback` to be called in this Stage's update() loop after `secondsFromNow` seconds have elapsed.
+         Returns a scheduling ID which can be used to cancel the invocation, via Stage::cancelDelayedInvocation
+        */
+        size_t scheduleDelayedInvocation(seconds_t secondsFromNow, DelayedInvocationCallback callback);
+        
+        /**
+         Cancel a scheduled callback
+        */
+        void cancelDelayedInvocation(size_t id);
+        
     protected:
+        
+        struct delayed_invocation {
+            size_t id;
+            seconds_t invocationTime;
+            DelayedInvocationCallback callback;
+        };
 
         // friend functions for chipmunk collision dispatch - these will call onCollision* methods below
         friend cpBool detail::Stage_collisionBeginHandler(cpArbiter *arb, struct cpSpace *space, cpDataPointer data);
@@ -575,13 +598,14 @@ namespace core {
 
         cpSpace *_space;
         SpaceAccessRef _spaceAccess;
-        bool _ready, _paused;
+        bool _ready, _paused, _screenDrawComponentsChanged;
         ScenarioWeakRef _scenario;
         set<ObjectRef> _objects;
         map<size_t, ObjectRef> _objectsById;
         time_state _time;
         string _name;
         DrawDispatcherRef _drawDispatcher;
+        vector<ScreenDrawComponentRef> _screenDrawComponents;
         cpBodyVelocityFunc _bodyVelocityFunc;
         vector<GravitationCalculatorRef> _gravities;
 
@@ -590,7 +614,9 @@ namespace core {
         map<collision_type_pair, vector<LateCollisionCallback>> _collisionPostSolveHandlers, _collisionSeparateHandlers;
         map<collision_type_pair, vector<ContactCallback>> _contactHandlers;
         map<collision_type_pair, vector<pair<ObjectRef, ObjectRef>>> _syntheticContacts;
-
+        
+        vector<delayed_invocation> _delayedInvocations;
+        size_t _scheduledInvocationIdCounter;
     };
 
 }

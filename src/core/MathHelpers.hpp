@@ -621,5 +621,7 @@ using glm::normalize;
 using glm::translate;
 using glm::rotate;
 using glm::scale;
+using glm::radians;
+using glm::degrees;
 
 #endif /* MathHelpers_h */

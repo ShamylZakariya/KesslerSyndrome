@@ -19,8 +19,8 @@ namespace core {
     class Trackable {
     public:
         virtual ~Trackable(){}
-        virtual dvec2 getPosition() const = 0;
-        virtual dvec2 getUp() const { return dvec2(0,1); };
+        virtual dvec2 getTrackingPosition() const = 0;
+        virtual dvec2 getTrackingUp() const { return dvec2(0,1); };
     };
 
     
@@ -101,9 +101,7 @@ namespace core {
             setTarget(Viewport::look(_target.world, _target.up, scale));
         }
         
-        Viewport::look getTarget() const {
-            return _target;
-        }
+        virtual Viewport::look getTarget();
         
         virtual Viewport::look apply(Viewport::look look, const time_state &time);
         

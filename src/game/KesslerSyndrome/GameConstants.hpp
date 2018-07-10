@@ -68,6 +68,14 @@ namespace game {
             EFFECTS = 4000
         };
     }
+    
+    namespace ScreenDrawLayers {
+        enum Layer {
+            BACKGROUND = 0,
+            PLAYER = 1000,
+            MENU = 2000
+        };
+    }
 
     namespace GravitationLayers {
         enum Layer {

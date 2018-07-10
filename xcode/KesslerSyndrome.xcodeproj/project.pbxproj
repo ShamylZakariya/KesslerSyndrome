@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		63017F99209CB031004ABFA3 /* Player.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63017F97209CB031004ABFA3 /* Player.cpp */; };
 		630873582049A3FE000BCE27 /* PlanetGreebling.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 630873562049A3FE000BCE27 /* PlanetGreebling.cpp */; };
 		630873592049A3FE000BCE27 /* PlanetGreebling.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 630873562049A3FE000BCE27 /* PlanetGreebling.cpp */; };
 		631171361FAB72A50098069F /* ParticleSystemTestScenario.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 631171341FAB72A50098069F /* ParticleSystemTestScenario.cpp */; };
@@ -17,6 +18,11 @@
 		6332FF89202378C200279B7F /* PlanetGenerator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6332FF86202378C200279B7F /* PlanetGenerator.cpp */; };
 		63597BEC20766F8F00B65C2A /* GlslProgLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63597BE920766F7700B65C2A /* GlslProgLoader.cpp */; };
 		63597BED20766F9D00B65C2A /* GlslProgLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63597BE920766F7700B65C2A /* GlslProgLoader.cpp */; };
+		635CC37920EA6F37007AE2FE /* CrackGeometry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 635CC37720EA6F37007AE2FE /* CrackGeometry.cpp */; };
+		635CC37A20EA6F38007AE2FE /* CrackGeometry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 635CC37720EA6F37007AE2FE /* CrackGeometry.cpp */; };
+		635CC37D20F26E4D007AE2FE /* PlayerDrawingComponents.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 635CC37B20F26E4D007AE2FE /* PlayerDrawingComponents.cpp */; };
+		635CC38120F26F29007AE2FE /* PlayerPhysicsComponents.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 635CC37F20F26F29007AE2FE /* PlayerPhysicsComponents.cpp */; };
+		635CC38420F27045007AE2FE /* PlayerInputComponents.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 635CC38220F27045007AE2FE /* PlayerInputComponents.cpp */; };
 		63611A8D2087990C004EE731 /* Compositor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63611A8B2087990C004EE731 /* Compositor.cpp */; };
 		63611A8E2087990C004EE731 /* Compositor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63611A8B2087990C004EE731 /* Compositor.cpp */; };
 		63611A922088DF96004EE731 /* MultiViewportTestScenario.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63611A8F2088DC14004EE731 /* MultiViewportTestScenario.cpp */; };
@@ -25,7 +31,6 @@
 		6363640A209756F500806152 /* VoronoiSplitView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63636408209756F500806152 /* VoronoiSplitView.cpp */; };
 		6363640B209756F500806152 /* VoronoiSplitView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63636408209756F500806152 /* VoronoiSplitView.cpp */; };
 		638BFB1D203F28DE004163A9 /* IPTestsScenario.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 638BFB1B203F28DE004163A9 /* IPTestsScenario.cpp */; };
-		638F4D951F87D7BC004437E8 /* PerlinNoise.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 638F4D931F87D7BC004437E8 /* PerlinNoise.cpp */; };
 		638F4D991F895CE5004437E8 /* TerrainDetail.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 638F4D971F8957F8004437E8 /* TerrainDetail.cpp */; };
 		638F4D9A1F895CE5004437E8 /* Planet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 638F4D901F87D4F3004437E8 /* Planet.cpp */; };
 		638F4DA11F897FB7004437E8 /* GameConstants.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 638F4D9E1F897F60004437E8 /* GameConstants.cpp */; };
@@ -46,7 +51,6 @@
 		638F4DBB1F8BCFCE004437E8 /* InputDispatcher.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 632622F31E7D9A630051ABE2 /* InputDispatcher.cpp */; };
 		638F4DBC1F8BCFCE004437E8 /* Scenario.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 632622F81E7D9A630051ABE2 /* Scenario.cpp */; };
 		638F4DBE1F8BCFCE004437E8 /* Stage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63BFD8181E89ED2A00D821E4 /* Stage.cpp */; };
-		638F4DBF1F8BCFCE004437E8 /* PerlinNoise.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 638F4D931F87D7BC004437E8 /* PerlinNoise.cpp */; };
 		638F4DC01F8BCFCE004437E8 /* Entity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63F93C081F8681E100F537CA /* Entity.cpp */; };
 		638F4DC11F8BCFCE004437E8 /* App.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63F93C061F86804900F537CA /* App.cpp */; };
 		638F4DC31F8BCFCE004437E8 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 006D720219952D00008149E2 /* AVFoundation.framework */; };
@@ -121,6 +125,8 @@
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		5323E6B10EAFCA74003A9687 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = /System/Library/Frameworks/CoreVideo.framework; sourceTree = "<absolute>"; };
+		63017F97209CB031004ABFA3 /* Player.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Player.cpp; sourceTree = "<group>"; };
+		63017F98209CB031004ABFA3 /* Player.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Player.hpp; sourceTree = "<group>"; };
 		630873562049A3FE000BCE27 /* PlanetGreebling.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PlanetGreebling.cpp; sourceTree = "<group>"; };
 		630873572049A3FE000BCE27 /* PlanetGreebling.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PlanetGreebling.hpp; sourceTree = "<group>"; };
 		631171341FAB72A50098069F /* ParticleSystemTestScenario.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ParticleSystemTestScenario.cpp; sourceTree = "<group>"; };
@@ -155,6 +161,14 @@
 		6332FF87202378C200279B7F /* PlanetGenerator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PlanetGenerator.hpp; sourceTree = "<group>"; };
 		63597BE920766F7700B65C2A /* GlslProgLoader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = GlslProgLoader.cpp; sourceTree = "<group>"; };
 		63597BEA20766F7700B65C2A /* GlslProgLoader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = GlslProgLoader.hpp; sourceTree = "<group>"; };
+		635CC37720EA6F37007AE2FE /* CrackGeometry.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CrackGeometry.cpp; sourceTree = "<group>"; };
+		635CC37820EA6F37007AE2FE /* CrackGeometry.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CrackGeometry.hpp; sourceTree = "<group>"; };
+		635CC37B20F26E4D007AE2FE /* PlayerDrawingComponents.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PlayerDrawingComponents.cpp; sourceTree = "<group>"; };
+		635CC37C20F26E4D007AE2FE /* PlayerDrawingComponents.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PlayerDrawingComponents.hpp; sourceTree = "<group>"; };
+		635CC37F20F26F29007AE2FE /* PlayerPhysicsComponents.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PlayerPhysicsComponents.cpp; sourceTree = "<group>"; };
+		635CC38020F26F29007AE2FE /* PlayerPhysicsComponents.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PlayerPhysicsComponents.hpp; sourceTree = "<group>"; };
+		635CC38220F27045007AE2FE /* PlayerInputComponents.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PlayerInputComponents.cpp; sourceTree = "<group>"; };
+		635CC38320F27045007AE2FE /* PlayerInputComponents.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PlayerInputComponents.hpp; sourceTree = "<group>"; };
 		63611A8B2087990C004EE731 /* Compositor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Compositor.cpp; sourceTree = "<group>"; };
 		63611A8C2087990C004EE731 /* Compositor.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Compositor.hpp; sourceTree = "<group>"; };
 		63611A8F2088DC14004EE731 /* MultiViewportTestScenario.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = MultiViewportTestScenario.cpp; sourceTree = "<group>"; };
@@ -167,8 +181,6 @@
 		638BFB1C203F28DE004163A9 /* IPTestsScenario.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IPTestsScenario.hpp; sourceTree = "<group>"; };
 		638F4D901F87D4F3004437E8 /* Planet.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Planet.cpp; sourceTree = "<group>"; };
 		638F4D911F87D4F3004437E8 /* Planet.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Planet.hpp; sourceTree = "<group>"; };
-		638F4D931F87D7BC004437E8 /* PerlinNoise.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PerlinNoise.cpp; sourceTree = "<group>"; };
-		638F4D941F87D7BC004437E8 /* PerlinNoise.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PerlinNoise.hpp; sourceTree = "<group>"; };
 		638F4D971F8957F8004437E8 /* TerrainDetail.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TerrainDetail.cpp; sourceTree = "<group>"; };
 		638F4D9B1F897BD5004437E8 /* Background.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Background.cpp; sourceTree = "<group>"; };
 		638F4D9C1F897BD5004437E8 /* Background.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Background.hpp; sourceTree = "<group>"; };
@@ -185,6 +197,7 @@
 		63A282721FD067E400962F8E /* ImageProcessing.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ImageProcessing.hpp; sourceTree = "<group>"; };
 		63A5ED11204C9432001BD62E /* EasingTestScenario.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = EasingTestScenario.cpp; sourceTree = "<group>"; };
 		63A5ED12204C9432001BD62E /* EasingTestScenario.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = EasingTestScenario.hpp; sourceTree = "<group>"; };
+		63A9967020D807E000EF3785 /* Bezier.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Bezier.hpp; sourceTree = "<group>"; };
 		63B8AF05202CA1A70021AC63 /* TerrainAttachmentsTestScenario.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TerrainAttachmentsTestScenario.cpp; sourceTree = "<group>"; };
 		63B8AF06202CA1A70021AC63 /* TerrainAttachmentsTestScenario.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TerrainAttachmentsTestScenario.hpp; sourceTree = "<group>"; };
 		63BFD8141E89565600D821E4 /* Object.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Object.cpp; sourceTree = "<group>"; };
@@ -347,6 +360,14 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		63017F96209CB018004ABFA3 /* entities */ = {
+			isa = PBXGroup;
+			children = (
+				6397368920F5083200A83814 /* player */,
+			);
+			path = entities;
+			sourceTree = "<group>";
+		};
 		631CBB6D2066FAB3006D3E31 /* util */ = {
 			isa = PBXGroup;
 			children = (
@@ -375,15 +396,14 @@
 				632622EE1E7D9A630051ABE2 /* ChipmunkHelpers.cpp */,
 				632622EF1E7D9A630051ABE2 /* ChipmunkHelpers.hpp */,
 				63BFD8171E895D6900D821E4 /* Common.hpp */,
+				63611A8B2087990C004EE731 /* Compositor.cpp */,
+				63611A8C2087990C004EE731 /* Compositor.hpp */,
 				632622F01E7D9A630051ABE2 /* Core.hpp */,
 				63F93C081F8681E100F537CA /* Entity.cpp */,
 				63F93C091F8681E100F537CA /* Entity.hpp */,
 				632622F21E7D9A630051ABE2 /* Exception.hpp */,
 				632622F31E7D9A630051ABE2 /* InputDispatcher.cpp */,
 				632622F41E7D9A630051ABE2 /* InputDispatcher.hpp */,
-				63BFD8181E89ED2A00D821E4 /* Stage.cpp */,
-				63BFD8191E89ED2A00D821E4 /* Stage.hpp */,
-				632622F51E7D9A630051ABE2 /* LineSegment.hpp */,
 				632622F61E7D9A630051ABE2 /* MathHelpers.hpp */,
 				63BFD8141E89565600D821E4 /* Object.cpp */,
 				63BFD8151E89565600D821E4 /* Object.hpp */,
@@ -391,17 +411,16 @@
 				632622F81E7D9A630051ABE2 /* Scenario.cpp */,
 				632622F91E7D9A630051ABE2 /* Scenario.hpp */,
 				632622FA1E7D9A630051ABE2 /* Signals.hpp */,
-				632622FB1E7D9A630051ABE2 /* SpatialIndex.hpp */,
+				63BFD8181E89ED2A00D821E4 /* Stage.cpp */,
+				63BFD8191E89ED2A00D821E4 /* Stage.hpp */,
 				632622FC1E7D9A630051ABE2 /* StopWatch.hpp */,
 				632622FD1E7D9A630051ABE2 /* Strings.hpp */,
 				632622FE1E7D9A630051ABE2 /* TimeState.hpp */,
+				636364032093743C00806152 /* Tracking.cpp */,
+				636364042093743C00806152 /* Tracking.hpp */,
 				63F93C321F86F96A00F537CA /* util */,
 				632622FF1E7D9A630051ABE2 /* Viewport.cpp */,
 				632623001E7D9A630051ABE2 /* Viewport.hpp */,
-				63611A8B2087990C004EE731 /* Compositor.cpp */,
-				63611A8C2087990C004EE731 /* Compositor.hpp */,
-				636364032093743C00806152 /* Tracking.cpp */,
-				636364042093743C00806152 /* Tracking.hpp */,
 			);
 			path = core;
 			sourceTree = "<group>";
@@ -437,8 +456,25 @@
 				6332FF87202378C200279B7F /* PlanetGenerator.hpp */,
 				630873562049A3FE000BCE27 /* PlanetGreebling.cpp */,
 				630873572049A3FE000BCE27 /* PlanetGreebling.hpp */,
+				635CC37720EA6F37007AE2FE /* CrackGeometry.cpp */,
+				635CC37820EA6F37007AE2FE /* CrackGeometry.hpp */,
 			);
 			path = elements;
+			sourceTree = "<group>";
+		};
+		6397368920F5083200A83814 /* player */ = {
+			isa = PBXGroup;
+			children = (
+				63017F97209CB031004ABFA3 /* Player.cpp */,
+				63017F98209CB031004ABFA3 /* Player.hpp */,
+				635CC37B20F26E4D007AE2FE /* PlayerDrawingComponents.cpp */,
+				635CC37C20F26E4D007AE2FE /* PlayerDrawingComponents.hpp */,
+				635CC37F20F26F29007AE2FE /* PlayerPhysicsComponents.cpp */,
+				635CC38020F26F29007AE2FE /* PlayerPhysicsComponents.hpp */,
+				635CC38220F27045007AE2FE /* PlayerInputComponents.cpp */,
+				635CC38320F27045007AE2FE /* PlayerInputComponents.hpp */,
+			);
+			path = player;
 			sourceTree = "<group>";
 		};
 		63E29EEF1F97A4B400CAF39E /* ParticleSystem */ = {
@@ -519,9 +555,9 @@
 		63F93C321F86F96A00F537CA /* util */ = {
 			isa = PBXGroup;
 			children = (
+				632622F51E7D9A630051ABE2 /* LineSegment.hpp */,
+				632622FB1E7D9A630051ABE2 /* SpatialIndex.hpp */,
 				63F93C331F86F96A00F537CA /* ContourSimplification.hpp */,
-				638F4D931F87D7BC004437E8 /* PerlinNoise.cpp */,
-				638F4D941F87D7BC004437E8 /* PerlinNoise.hpp */,
 				63F93C341F86F96A00F537CA /* Svg.cpp */,
 				63F93C3B1F86F96A00F537CA /* Svg.hpp */,
 				63F93C381F86F96A00F537CA /* SvgParsing.cpp */,
@@ -533,6 +569,7 @@
 				632CBA21204B181B0008B94D /* Easing.hpp */,
 				63597BE920766F7700B65C2A /* GlslProgLoader.cpp */,
 				63597BEA20766F7700B65C2A /* GlslProgLoader.hpp */,
+				63A9967020D807E000EF3785 /* Bezier.hpp */,
 			);
 			path = util;
 			sourceTree = "<group>";
@@ -540,6 +577,7 @@
 		63F93C711F87185A00F537CA /* KesslerSyndrome */ = {
 			isa = PBXGroup;
 			children = (
+				63017F96209CB018004ABFA3 /* entities */,
 				638F4D8F1F87D4E8004437E8 /* elements */,
 				63F93C741F87185A00F537CA /* GameApp.cpp */,
 				638F4D9E1F897F60004437E8 /* GameConstants.cpp */,
@@ -668,6 +706,7 @@
 				6332FF852020C67700279B7F /* TerrainDetail_Svg.cpp in Sources */,
 				638F4DB61F8BCFCE004437E8 /* TerrainWorld.cpp in Sources */,
 				6332FF89202378C200279B7F /* PlanetGenerator.cpp in Sources */,
+				635CC37A20EA6F38007AE2FE /* CrackGeometry.cpp in Sources */,
 				63E29EFD1F9E3F5D00CAF39E /* ParticleSystem.cpp in Sources */,
 				636364062093743C00806152 /* Tracking.cpp in Sources */,
 				638F4DB71F8BCFCE004437E8 /* ViewportController.cpp in Sources */,
@@ -679,7 +718,6 @@
 				638F4DBC1F8BCFCE004437E8 /* Scenario.cpp in Sources */,
 				638F4DBE1F8BCFCE004437E8 /* Stage.cpp in Sources */,
 				63E29EF41F97A4C300CAF39E /* BaseParticleSystem.cpp in Sources */,
-				638F4DBF1F8BCFCE004437E8 /* PerlinNoise.cpp in Sources */,
 				638F4DC01F8BCFCE004437E8 /* Entity.cpp in Sources */,
 				638F4DC11F8BCFCE004437E8 /* App.cpp in Sources */,
 			);
@@ -692,6 +730,8 @@
 				6363640A209756F500806152 /* VoronoiSplitView.cpp in Sources */,
 				63597BEC20766F8F00B65C2A /* GlslProgLoader.cpp in Sources */,
 				638F4DA21F898602004437E8 /* Background.cpp in Sources */,
+				635CC38120F26F29007AE2FE /* PlayerPhysicsComponents.cpp in Sources */,
+				635CC37920EA6F37007AE2FE /* CrackGeometry.cpp in Sources */,
 				638F4DA11F897FB7004437E8 /* GameConstants.cpp in Sources */,
 				638F4D991F895CE5004437E8 /* TerrainDetail.cpp in Sources */,
 				638F4D9A1F895CE5004437E8 /* Planet.cpp in Sources */,
@@ -710,7 +750,9 @@
 				63F93C4A1F8714B200F537CA /* TerrainWorld.cpp in Sources */,
 				63E29EF71F97A87300CAF39E /* CloudLayerParticleSystem.cpp in Sources */,
 				63F93C511F8714B200F537CA /* ViewportController.cpp in Sources */,
+				635CC38420F27045007AE2FE /* PlayerInputComponents.cpp in Sources */,
 				63F93C521F8714B200F537CA /* ChipmunkHelpers.cpp in Sources */,
+				635CC37D20F26E4D007AE2FE /* PlayerDrawingComponents.cpp in Sources */,
 				63F93C531F8714B200F537CA /* Object.cpp in Sources */,
 				636364052093743C00806152 /* Tracking.cpp in Sources */,
 				63F93C541F8714B200F537CA /* Viewport.cpp in Sources */,
@@ -718,8 +760,8 @@
 				63F93C551F8714B200F537CA /* InputDispatcher.cpp in Sources */,
 				63F93C561F8714B200F537CA /* Scenario.cpp in Sources */,
 				63611A8D2087990C004EE731 /* Compositor.cpp in Sources */,
+				63017F99209CB031004ABFA3 /* Player.cpp in Sources */,
 				63F93C581F8714B200F537CA /* Stage.cpp in Sources */,
-				638F4D951F87D7BC004437E8 /* PerlinNoise.cpp in Sources */,
 				6332FF88202378C200279B7F /* PlanetGenerator.cpp in Sources */,
 				63F93C591F8714B200F537CA /* Entity.cpp in Sources */,
 				63F93C5A1F8714B200F537CA /* App.cpp in Sources */,

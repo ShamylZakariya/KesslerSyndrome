@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<player walkSpeed="50" runMultiplier="1">
+
+	<health max_health="100" regeneration_rate="0"/>
+
+	<physics width="10" height="30" density="1" footFriction="2" bodyFriction="0.2" footElasticity="2">
+		<jetpack antigravity="2" fuelMax="1" consumption="0.3" regeneration="0.3"/>
+	</physics>
+
+</player>

@@ -58,7 +58,9 @@ namespace core {
     class Component : public enable_shared_from_this<Component>, public signals::receiver, public IChipmunkUserData {
     public:
 
-        Component() {
+        Component():
+                _firstUpdate(true)
+        {
         }
 
         virtual ~Component() {
@@ -92,40 +94,52 @@ namespace core {
         shared_ptr<T> getSibling() const;
 
         // called when the owning Object has been added to a stage
+        // each Component has onReady called in the order in which it was added to its
+        // parent object. So, if component B's onReady depends on component A's onReady being complete,
+        // add component A to the parent Object before component B.
         virtual void onReady(ObjectRef parent, StageRef stage) {
         }
 
         virtual void onCleanup() {
         }
-
+        
+        // called for computing fixed-timestep physics
         virtual void step(const time_state &timeState) {
         }
 
+        // called immediately before the first time ::update is called on this Component
+        virtual void firstUpdate(const time_state &timeState) {
+        }
+
+        // called on all Components on the Stage before their ::update methods are called.
+        // The stage will dispatch pre-update on all Objects and their Components before moving on to calling update()
+        virtual void preUpdate(const time_state &timeState) {
+        }
+
+        // called for computing time-based logic, AI, etc. do your physics in step().
         virtual void update(const time_state &timeState) {
+        }
+
+        // called on all Components on the Stage after their ::update methods are called.
+        virtual void postUpdate(const time_state &timeState) {
         }
 
     protected:
         friend class Object;
 
-        // called on Components immediately after being added to a Object
-        // a component at this point can access its Object owne, but does not
-        // necessarily have access to its neighbors, or to a Stage. Wait for onReady
-        // for these types of actions.
-        virtual void attachedToObject(ObjectRef object) {
-            _object = object;
-        }
-
-        virtual void detachedFromObject() {
-            _object.reset();
-        }
-
         // call this if some change moved the represented object. it will be dispatched
         // up to object, and down to DrawComponents to notify the draw dispatch graph
         virtual void notifyMoved();
+        
+        void dispatchStep(const time_state &timeState);
+        void dispatchPreUpdate(const time_state &timeState);
+        void dispatchUpdate(const time_state &timeState);
+        void dispatchPostUpdate(const time_state &timeState);
 
     private:
 
         ObjectWeakRef _object;
+        bool _firstUpdate;
 
     };
 
@@ -302,10 +316,6 @@ namespace core {
         // draw to stage
         virtual void draw(const render_state &renderState) = 0;
 
-        // draw to screen
-        virtual void drawScreen(const render_state &state) {
-        };
-
         // returns the visibility determination type for this component.
         VisibilityDetermination::style getVisibilityDetermination() const { return _visibilityDetermination; }
 
@@ -331,6 +341,36 @@ namespace core {
 
     };
 
+#pragma mark - ScreenDrawComponent
+    
+    SMART_PTR(ScreenDrawComponent);
+    
+    /**
+     ScreenDrawComponent is a component for drawing during the Stage's drawScreen pass.
+     During this pass, we have  standard 1-1 unity to pixel top-left coordinate system.
+     Objects that want to draw UI, text balloons, etc, should consider use of ScreenDrawComponent.
+     */
+    class ScreenDrawComponent : public Component {
+    public:
+        
+        ScreenDrawComponent(int drawLayer):_drawLayer(drawLayer) {}
+        virtual ~ScreenDrawComponent(){}
+        
+        // draw to screen
+        virtual void drawScreen(const render_state &renderState) = 0;
+        
+        // set the draw layer for this component. Lower values draw earlier, higher draw layer
+        virtual void setLayer(int drawLayer) { _drawLayer = drawLayer; }
+        
+        // get the draw layer for this component
+        int getLayer() const { return _drawLayer; }
+
+    private:
+        
+        int _drawLayer;
+        
+    };
+
 #pragma mark - InputComponent
 
     SMART_PTR(InputComponent);
@@ -345,6 +385,8 @@ namespace core {
         }
 
         void onReady(ObjectRef parent, StageRef stage) override;
+        void preUpdate(const core::time_state &state) override;
+        void postUpdate(const core::time_state &state) override;
 
         bool isListening() const override;
 
@@ -373,7 +415,19 @@ namespace core {
             this ignores any keys that haven't been registered for monitoring by monitorKey()
          */
         bool isMonitoredKeyDown(int keyCode) const;
+        
+        /**
+            returns true iff the keycode was not pressed in the previous time step, and is pressed this time step.
+            This is useful for single-shot actions like firing a gun once per press.
+         */
+        bool wasMonitoredKeyPressed(int keyCode) const;
 
+        /**
+         returns true iff the keycode was pressed in the previous time step, and is not pressed this time step
+         */
+        bool wasMonitoredKeyReleased(int keyCode) const;
+
+        
         bool keyDown(const app::KeyEvent &event) override;
 
         bool keyUp(const app::KeyEvent &event) override;
@@ -381,7 +435,7 @@ namespace core {
     private:
 
         bool _attached;
-        map<int, bool> _monitoredKeyStates;
+        set<int> _monitoredKeyCodes, _pressedKeyCodes, _previousUpdatePressedKeyCodes;
 
     };
 
@@ -524,6 +578,11 @@ namespace core {
         const set<DrawComponentRef> &getDrawComponents() const {
             return _drawComponents;
         }
+        
+        // get all screen draw components attached to this object
+        const set<ScreenDrawComponentRef> &getScreenDrawComponents() const {
+            return _screenDrawComponents;
+        }
 
         // get the PhysicsComponent attached to this Object
         PhysicsComponentRef getPhysicsComponent() const {
@@ -545,9 +604,17 @@ namespace core {
         // called after a Object is removed from a Stage (directly, or by calling setFinished(true)
         virtual void onCleanup();
 
+        // called for dispatching physics updates
         virtual void step(const time_state &timeState);
-
+        
+        // called on all Objects in Stage before ::update() is called
+        virtual void preUpdate(const time_state &timeState);
+        
+        // called for dispatching logic updates
         virtual void update(const time_state &timeState);
+
+        // called on all Objects in Stage after ::update() is called
+        virtual void postUpdate(const time_state &timeState);
 
         // if this Object has a PhysicsComponent, defers to PhysicsComponent::getGravitationLayerMask
         // otherwise default implementation returns ALL_GRAVITATION_LAYERS
@@ -559,7 +626,7 @@ namespace core {
 
         friend class Component;
 
-        virtual void onAddedToStage(StageRef stage) {
+        void onAddedToStage(StageRef stage) {
             _stage = stage;
         }
 
@@ -577,8 +644,9 @@ namespace core {
         bool _finished, _finishingAfterDelay;
         seconds_t _finishingDelay, _finishedAfterTime;
         bool _ready;
-        set<ComponentRef> _components;
+        vector<ComponentRef> _components;
         set<DrawComponentRef> _drawComponents;
+        set<ScreenDrawComponentRef> _screenDrawComponents;
         PhysicsComponentRef _physicsComponent;
         StageWeakRef _stage;
 

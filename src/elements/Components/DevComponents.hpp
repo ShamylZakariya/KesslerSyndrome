@@ -296,6 +296,28 @@ namespace elements {
         
     };
     
+    class PerformanceDisplayComponent : public core::ScreenDrawComponent {
+    public:
+        
+        PerformanceDisplayComponent(int layer, dvec2 topLeft, ColorA color):
+        ScreenDrawComponent(layer),
+        _topLeft(topLeft),
+        _color(color)
+        {}
+        
+        void setTopLeft(dvec2 topLeft) { _topLeft = topLeft; }
+        dvec2 getTopLeft() const { return _topLeft; }
+        
+        void setColor(ColorA color) { _color = color; }
+        ColorA getColor() const { return _color; }
+        
+        void drawScreen(const core::render_state &renderState) override;
+        
+    private:
+        dvec2 _topLeft;
+        ColorA _color;
+    };
+    
 } // end namespace elements
 
 #endif /* DevComponents_hpp */

@@ -10,7 +10,7 @@
 
 #include "DevComponents.hpp"
 #include "PlanetGreebling.hpp"
-
+#include "CrackGeometry.hpp"
 
 using namespace core;
 using namespace elements;
@@ -58,14 +58,19 @@ namespace game {
     /*
      BackgroundRef _background;
      PlanetRef _planet;
+     PlayerRef _player;
      vector <CloudLayerParticleSystemRef> _cloudLayers;
      core::RadialGravitationCalculatorRef _gravity;
      elements::ParticleEmitterRef _explosionEmitter;
      elements::ParticleEmitterRef _dustEmitter;
+     vector<elements::ViewportControllerRef> _viewportControllers;
+     
+     double _planetRadius;
      */
 
     GameStage::GameStage() :
-            Stage("Unnamed") {
+            Stage("Unnamed"),
+            _planetRadius(0) {
     }
 
     GameStage::~GameStage() {
@@ -77,16 +82,6 @@ namespace game {
         auto stageNode = root.getChild("stage");
 
         setName(stageNode.getAttribute("name").getValue());
-        
-        //
-        //  Set up viewport trauma effects
-        //
-        
-        _viewportController = make_shared<ViewportController>(getMainViewport());
-        _viewportController->getTraumaConfig().shakeTranslation = dvec2(40,40);
-        _viewportController->getTraumaConfig().shakeRotation = 10 * M_PI / 180;
-        _viewportController->getTraumaConfig().shakeFrequency = 8;
-        addObject(Object::with("ViewportController", { _viewportController }));
 
         //
         //	Load some basic stage properties
@@ -152,18 +147,24 @@ namespace game {
         buildDustParticleSystem();
         
         //
+        //    Load the player
+        //
+        auto playersNode = util::xml::findElement(stageNode, "players");
+        if (playersNode) {
+            for (const auto &child : playersNode->getChildren()) {
+                loadPlayer(*child);
+            }
+        }
+        
+        //
         //  Build development control components
         //
 
         if (true) {
             
             //
-            // build camera controller, dragger, and cutter, with input dispatch indices 0,1,2 meaning CC gets input first
+            // dragger, and cutter, with input dispatch indices 0,1,2 meaning CC gets input first
             //
-            
-            addObject(Object::with("CameraController", {
-                make_shared<MouseViewportControlComponent>(_viewportController, 0)
-            }));
             
             addObject(Object::with("Dragger", {
                 make_shared<MousePickComponent>(ShapeFilters::GRABBABLE, 1),
@@ -217,7 +218,7 @@ namespace game {
     void GameStage::onCollisionSeparate(cpArbiter *arb) {
     }
 
-    void GameStage::applySpaceAttributes(XmlTree spaceNode) {
+    void GameStage::applySpaceAttributes(const XmlTree &spaceNode) {
         if (spaceNode.hasAttribute("damping")) {
             double damping = util::xml::readNumericAttribute<double>(spaceNode, "damping", 0.95);
             damping = clamp(damping, 0.0, 1.0);
@@ -225,7 +226,7 @@ namespace game {
         }
     }
 
-    void GameStage::buildGravity(XmlTree gravityNode) {
+    void GameStage::buildGravity(const XmlTree &gravityNode) {
         string type = gravityNode.getAttribute("type").getValue();
         if (type == "radial") {
             dvec2 origin = util::xml::readPointAttribute(gravityNode, "origin", dvec2(0, 0));
@@ -245,12 +246,12 @@ namespace game {
         }
     }
 
-    void GameStage::loadBackground(XmlTree backgroundNode) {
+    void GameStage::loadBackground(const XmlTree &backgroundNode) {
         _background = Background::create(backgroundNode);
         addObject(_background);
     }
 
-    void GameStage::loadPlanet(XmlTree planetNode) {
+    void GameStage::loadPlanet(const XmlTree &planetNode) {
         double friction = util::xml::readNumericAttribute<double>(planetNode, "friction", 1);
         double density = util::xml::readNumericAttribute<double>(planetNode, "density", 1);
         double collisionShapeRadius = 0.1;
@@ -278,8 +279,65 @@ namespace game {
             _gravity->setCenterOfMass(_planet->getOrigin());
         }
     }
+    
+    void GameStage::loadPlayer(const XmlTree &playerNode) {
+        dvec2 position(0,0);
+        dvec2 localUp(1,0);
 
-    CloudLayerParticleSystemRef GameStage::loadCloudLayer(XmlTree cloudLayer, int drawLayer) {
+        const string positionDescription = playerNode.getAttribute("position");
+        const bool isRadians = positionDescription.find("radians") != string::npos;
+        const bool isDegrees = positionDescription.find("degrees") != string::npos;
+
+        if (isRadians || isDegrees) {
+            size_t leftParen = positionDescription.find("(");
+            size_t rightParen = positionDescription.find(")");
+            if (leftParen == string::npos || rightParen == string::npos) {
+                CI_ASSERT_MSG(false, "Missing left or right paren. Expected form of \"radians(NUMBER)\" for <player> position attribute value.");
+            }
+            string value = positionDescription.substr(leftParen+1, rightParen - (leftParen+1));
+            double radians = 0;
+            if (isRadians) {
+                radians = strtod(value.c_str(), nullptr);
+            } else {
+                radians = ::radians(strtod(value.c_str(), nullptr));
+            }
+            
+            // perform raycast to find a start position
+            dvec2 origin = getPlanet()->getOrigin();
+            double raycastDistance = getPlanet()->getSurfaceConfig().radius * 4;
+            dvec2 raycastOrigin = origin + (raycastDistance * dvec2(cos(M_PI_2+radians), sin(M_PI_2+radians)));
+            
+            auto result = querySegment(raycastOrigin, origin, 1, CP_SHAPE_FILTER_ALL);
+            if (result) {
+                localUp = normalize(raycastOrigin - origin);
+                position = result.point;
+            } else {
+                CI_ASSERT_MSG(false, "Unable to find a start position for player given position");
+                return;
+            }
+        } else {
+            CI_ASSERT_MSG(false, "Only radial positioning supported for <player> valid position attribute value is \"radians(...)\"");
+            return;
+        }
+        
+        const int idx = util::xml::readNumericAttribute<int>(playerNode, "id", 0);
+        const string name = "player_" + str(idx);
+        const ci::DataSourceRef playerTemplate = app::loadAsset(playerNode.getAttribute("template").getValue());
+
+        _player = Player::create(name, playerTemplate, position, localUp, _planet->getOrigin());
+        
+        //
+        //  Build the viewport controller for this player
+        //
+        
+        auto vc = make_shared<PlayerViewportController>(getMainViewport(), _planet->getOrigin(), _planet->getSurfaceConfig().radius);
+        _viewportControllers.push_back(vc);
+        _player->addComponent(vc);
+        
+        addObject(_player);
+    }
+
+    CloudLayerParticleSystemRef GameStage::loadCloudLayer(const XmlTree &cloudLayer, int drawLayer) {
         CloudLayerParticleSystem::config config = CloudLayerParticleSystem::config::parse(cloudLayer);
         config.drawConfig.drawLayer = drawLayer;
         auto cl = CloudLayerParticleSystem::create(config);
@@ -319,6 +377,17 @@ namespace game {
         //
         // build fire, smoke and spark templates
         //
+        
+        particle_prototype burst;
+        burst.atlasIdx = 2;
+        burst.lifespan = 0.5;
+        burst.radius = {32, 36, 40, 18};
+        burst.damping = {0, 0, 0.1};
+        burst.additivity = 0.75;
+        burst.mass = {0};
+        burst.initialVelocity = 0;
+        burst.gravitationLayerMask = GravitationLayers::GLOBAL;
+        burst.color = { ColorA(1, 0.8, 0.1, 0), ColorA(1, 0.5, 0.1, 1), ColorA(1, 0.2, 0.1, 0) };
 
         particle_prototype fire;
         fire.atlasIdx = 0;
@@ -357,9 +426,10 @@ namespace game {
         spark.kinematics = particle_prototype::kinematics_prototype(1, 1, 0.2, ShapeFilters::TERRAIN);
 
         _explosionEmitter = ps->createEmitter();
-        _explosionEmitter->add(fire, ParticleEmitter::Source(2, 1, 0.3), 1);
-        _explosionEmitter->add(smoke, ParticleEmitter::Source(2, 1, 0.3), 2);
-        _explosionEmitter->add(spark, ParticleEmitter::Source(1, 1, 0.15), 1);
+        _explosionEmitter->add(burst, ParticleEmitter::Source(36, 1, 0.6), 2);
+        _explosionEmitter->add(fire, ParticleEmitter::Source(2, 1, 0.3), 10);
+        _explosionEmitter->add(smoke, ParticleEmitter::Source(2, 1, 0.3), 20);
+        _explosionEmitter->add(spark, ParticleEmitter::Source(1, 1, 0.15), 10);
     }
     
     void GameStage::buildDustParticleSystem() {
@@ -414,21 +484,26 @@ namespace game {
         // create a radial crack and cut the world with it. note, to reduce tiny fragments
         // we set a fairly high min surface area for the cut.
 
-        double minSurfaceAreaThreshold = 64;
-        int numSpokes = 7;
-        int numRings = 3;
-        double radius = 75;
-        double thickness = 2;
-        double variance = 100;
+        const double minSurfaceAreaThreshold = 64;
+        const double outerRadius = 75;
+        const double innerRadius = outerRadius * 0.375;
+        const int numInnerSlices = 27;
+        const int numOuterSlices = 13;
+        const double thickness = 16;
+        const double variance = 0.75;
+        auto crackGeometry = make_shared<ExplosionCrackGeometry>(world, innerRadius, outerRadius, numInnerSlices, numOuterSlices, thickness, variance);
 
-        auto crack = make_shared<RadialCrackGeometry>(world, numSpokes, numRings, radius, thickness, variance);
-        _planet->getWorld()->cut(crack->getPolygon(), crack->getBB(), minSurfaceAreaThreshold);
+        if (getScenario()->getRenderState().testGizmoBit(Gizmos::WIREFRAME)) {
+            auto crackDrawer = Object::with("crack_drawer", {
+                make_shared<CrackGeometryDrawComponent>(crackGeometry)
+            });
+            crackDrawer->setFinished(true, 4);
+            addObject(crackDrawer);
+        }
 
-        // get the closest point on terrain surface and use that to place explosive charge
-        if (auto r = queryNearest(world, ShapeFilters::TERRAIN_PROBE)) {
-
-            dvec2 origin = world + radius * normalize(_planet->getOrigin() - r.point);
-            auto gravity = ExplosionForceCalculator::create(origin, 4000, 0.5, 0.5);
+        {
+            // create explosive force
+            auto gravity = ExplosionForceCalculator::create(world, 4000, 0.5, 0.5);
             addGravity(gravity);
 
             for (auto &cls : _cloudLayers) {
@@ -436,10 +511,24 @@ namespace game {
             }
         }
 
-        dvec2 emissionDir = normalize(world - _planet->getOrigin());
-        _explosionEmitter->emit(world, emissionDir, 1.0, 140, elements::ParticleEmitter::Sawtooth);
-        
-        _viewportController->addTrauma(0.5);
+        {
+            // create an emission of particles
+            const dvec2 emissionDir = normalize(world - _planet->getOrigin());
+            _explosionEmitter->emit(world, emissionDir, 1.0, 140, elements::ParticleEmitter::RampDown);
+        }
+
+        // add trauma to view controllers
+        for (const auto &vc : _viewportControllers) {
+            vc->addTrauma(0.75);
+        }
+
+        {
+            // perform a cut against the planet surface
+            const auto planet = _planet;
+            scheduleDelayedInvocation(0.1, [planet,crackGeometry,minSurfaceAreaThreshold](){
+                planet->getWorld()->cut(crackGeometry->getPolygons()[0], crackGeometry->getBB(), minSurfaceAreaThreshold);
+            });
+        }
     }
     
     void GameStage::handleTerrainTerrainContact(cpArbiter *arbiter) {

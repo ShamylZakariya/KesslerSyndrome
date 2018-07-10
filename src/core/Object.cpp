@@ -44,6 +44,28 @@ namespace core {
     void Component::notifyMoved() {
         getObject()->notifyMoved();
     }
+    
+    void Component::dispatchStep(const time_state &timeState) {
+        step(timeState);
+    }
+
+    void Component::dispatchPreUpdate(const time_state &timeState) {
+        preUpdate(timeState);
+    }
+
+    void Component::dispatchUpdate(const time_state &timeState) {
+        if (_firstUpdate) {
+            firstUpdate(timeState);
+            _firstUpdate = false;
+        } else {
+            update(timeState);
+        }
+    }
+
+    void Component::dispatchPostUpdate(const time_state &timeState) {
+        postUpdate(timeState);
+    }
+
 
 #pragma mark - DrawComponent
 
@@ -68,7 +90,8 @@ namespace core {
 
     /*
      bool _attached;
-     map< int, bool > _monitoredKeyStates;
+     bool _attached;
+     set<int> _monitoredKeyCodes, _pressedKeyCodes, _previousUpdatePressedKeyCodes;
      */
 
     InputComponent::InputComponent() :
@@ -86,16 +109,25 @@ namespace core {
         _attached = true;
     }
 
+    void InputComponent::preUpdate(const core::time_state &state) {
+        Component::preUpdate(state);
+    }
+
+    void InputComponent::postUpdate(const core::time_state &state) {
+        Component::postUpdate(state);
+        _previousUpdatePressedKeyCodes = _pressedKeyCodes;
+    }
+
     bool InputComponent::isListening() const {
         return _attached && InputListener::isListening();
     }
 
     void InputComponent::monitorKey(int keyCode) {
-        _monitoredKeyStates[keyCode] = false;
+        _monitoredKeyCodes.insert(keyCode);
     }
 
     void InputComponent::ignoreKey(int keyCode) {
-        _monitoredKeyStates.erase(keyCode);
+        _monitoredKeyCodes.erase(keyCode);
     }
 
     void InputComponent::monitorKeys(const initializer_list<int> &keyCodes) {
@@ -111,41 +143,44 @@ namespace core {
     }
 
     bool InputComponent::isMonitoredKeyDown(int keyCode) const {
-        auto pos = _monitoredKeyStates.find(keyCode);
-        if (pos != _monitoredKeyStates.end()) {
-            return pos->second;
-        }
-
-        return false;
+        return _pressedKeyCodes.count(keyCode) > 0;
+    }
+    
+    bool InputComponent::wasMonitoredKeyPressed(int keyCode) const {
+        bool previousState = _previousUpdatePressedKeyCodes.count(keyCode) > 0;
+        bool currentState = _pressedKeyCodes.count(keyCode) > 0;
+        return !previousState && currentState;
+    }
+    
+    bool InputComponent::wasMonitoredKeyReleased(int keyCode) const {
+        bool previousState = _previousUpdatePressedKeyCodes.count(keyCode) > 0;
+        bool currentState = _pressedKeyCodes.count(keyCode) > 0;
+        return previousState && !currentState;
     }
 
     bool InputComponent::keyDown(const app::KeyEvent &event) {
         // if this is a key code we're monitoring, consume the event
         int keyCode = event.getCode();
-        auto pos = _monitoredKeyStates.find(keyCode);
-        if (pos != _monitoredKeyStates.end()) {
-            if (!pos->second) {
-                pos->second = true;
+        if (_monitoredKeyCodes.count(keyCode)) {
+            if (_pressedKeyCodes.count(keyCode) == 0) {
+                _pressedKeyCodes.insert(keyCode);
                 monitoredKeyDown(keyCode);
             }
             return true;
         }
-
         return false;
     }
 
     bool InputComponent::keyUp(const app::KeyEvent &event) {
         // if this is a key code we're monitoring, consume the event
         int keyCode = event.getCode();
-        auto pos = _monitoredKeyStates.find(keyCode);
-        if (pos != _monitoredKeyStates.end()) {
-            if (pos->second) {
-                pos->second = false;
+        if (_monitoredKeyCodes.count(keyCode)) {
+            if (_pressedKeyCodes.count(keyCode)) {
+                _pressedKeyCodes.erase(keyCode);
                 monitoredKeyUp(keyCode);
             }
             return true;
         }
-
         return false;
     }
 
@@ -261,7 +296,7 @@ namespace core {
      bool _finished, _finishingAfterDelay;
      seconds_t _finishingDelay, _finishedAfterTime;
      bool _ready;
-     set<ComponentRef> _components;
+     vector<ComponentRef> _components;
      set<DrawComponentRef> _drawComponents;
      PhysicsComponentRef _physicsComponent;
      StageWeakRef _stage;
@@ -292,7 +327,7 @@ namespace core {
     void Object::addComponent(ComponentRef component) {
         CI_ASSERT_MSG(component->getObject() == nullptr, "Cannot add a component that already has been added to another Object");
 
-        _components.insert(component);
+        _components.push_back(component);
 
         if (DrawComponentRef dc = dynamic_pointer_cast<DrawComponent>(component)) {
             _drawComponents.insert(dc);
@@ -302,22 +337,34 @@ namespace core {
             CI_ASSERT_MSG(!_physicsComponent, "Can't assign more than one PhysicsComponent");
             _physicsComponent = pc;
         }
+        
+        if (ScreenDrawComponentRef sdc = dynamic_pointer_cast<ScreenDrawComponent>(component)) {
+            _screenDrawComponents.insert(sdc);
+        }
 
         if (_ready) {
             const auto self = shared_from_this();
-            component->attachedToObject(self);
+            component->_object = self;
             component->onReady(self, getStage());
         }
     }
 
     void Object::removeComponent(ComponentRef component) {
-        if (component->getObject() && component->getObject().get() == this) {
-            _components.erase(component);
-            component->detachedFromObject();
+        CI_ASSERT_MSG(component->getObject() && component->getObject().get() == this, "Cannot remove a component from an object which it is not attached to");
 
-            if (DrawComponentRef dc = dynamic_pointer_cast<DrawComponent>(component)) {
-                _drawComponents.erase(dc);
-            }
+        _components.erase(remove(begin(_components), end(_components), component), end(_components));
+        component->_object.reset();
+
+        if (DrawComponentRef dc = dynamic_pointer_cast<DrawComponent>(component)) {
+            _drawComponents.erase(dc);
+        }
+        
+        if (ScreenDrawComponentRef dc = dynamic_pointer_cast<ScreenDrawComponent>(component)) {
+            _screenDrawComponents.erase(dc);
+        }
+        
+        if (_physicsComponent == component) {
+            _physicsComponent = nullptr;
         }
     }
 
@@ -342,17 +389,17 @@ namespace core {
         }
     }
 
-
     void Object::onReady(StageRef stage) {
         if (!_ready) {
+            _ready = true;
+
             const auto self = shared_from_this();
             for (auto &component : _components) {
-                component->attachedToObject(self);
+                component->_object = self;
             }
             for (auto &component : _components) {
                 component->onReady(self, stage);
             }
-            _ready = true;
         }
     }
 
@@ -365,11 +412,19 @@ namespace core {
         _finished = false;
         _ready = false;
     }
-
+    
     void Object::step(const time_state &timeState) {
         if (!_finished) {
             for (auto &component : _components) {
-                component->step(timeState);
+                component->dispatchStep(timeState);
+            }
+        }
+    }
+
+    void Object::preUpdate(const time_state &timeState) {
+        if (!_finished) {
+            for (auto &component : _components) {
+                component->dispatchPreUpdate(timeState);
             }
         }
     }
@@ -390,7 +445,15 @@ namespace core {
 
         if (!_finished) {
             for (auto &component : _components) {
-                component->update(timeState);
+                component->dispatchUpdate(timeState);
+            }
+        }
+    }
+
+    void Object::postUpdate(const time_state &timeState) {
+        if (!_finished) {
+            for (auto &component : _components) {
+                component->dispatchPostUpdate(timeState);
             }
         }
     }
