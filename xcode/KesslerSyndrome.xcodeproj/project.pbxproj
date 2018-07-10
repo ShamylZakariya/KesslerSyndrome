@@ -363,14 +363,7 @@
 		63017F96209CB018004ABFA3 /* entities */ = {
 			isa = PBXGroup;
 			children = (
-				63017F97209CB031004ABFA3 /* Player.cpp */,
-				63017F98209CB031004ABFA3 /* Player.hpp */,
-				635CC37B20F26E4D007AE2FE /* PlayerDrawingComponents.cpp */,
-				635CC37C20F26E4D007AE2FE /* PlayerDrawingComponents.hpp */,
-				635CC37F20F26F29007AE2FE /* PlayerPhysicsComponents.cpp */,
-				635CC38020F26F29007AE2FE /* PlayerPhysicsComponents.hpp */,
-				635CC38220F27045007AE2FE /* PlayerInputComponents.cpp */,
-				635CC38320F27045007AE2FE /* PlayerInputComponents.hpp */,
+				6397368920F5083200A83814 /* player */,
 			);
 			path = entities;
 			sourceTree = "<group>";
@@ -467,6 +460,21 @@
 				635CC37820EA6F37007AE2FE /* CrackGeometry.hpp */,
 			);
 			path = elements;
+			sourceTree = "<group>";
+		};
+		6397368920F5083200A83814 /* player */ = {
+			isa = PBXGroup;
+			children = (
+				63017F97209CB031004ABFA3 /* Player.cpp */,
+				63017F98209CB031004ABFA3 /* Player.hpp */,
+				635CC37B20F26E4D007AE2FE /* PlayerDrawingComponents.cpp */,
+				635CC37C20F26E4D007AE2FE /* PlayerDrawingComponents.hpp */,
+				635CC37F20F26F29007AE2FE /* PlayerPhysicsComponents.cpp */,
+				635CC38020F26F29007AE2FE /* PlayerPhysicsComponents.hpp */,
+				635CC38220F27045007AE2FE /* PlayerInputComponents.cpp */,
+				635CC38320F27045007AE2FE /* PlayerInputComponents.hpp */,
+			);
+			path = player;
 			sourceTree = "<group>";
 		};
 		63E29EEF1F97A4B400CAF39E /* ParticleSystem */ = {

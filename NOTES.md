@@ -2,6 +2,11 @@
 
 ## Presently
 
+This player sucks. What about a blob player like the Shoggoths in Surfacer?
+1) Get house in order - do the yak shaving below
+2) Read up Surfacer code for Shoggoths
+3) Make ParticleSystem have option to render to texture, with a composite pass
+
 - Player Features
     - needs weapon
     - particle emitter needs a "velocity" value which is added to each emitted particle to accommodate moving emitters
