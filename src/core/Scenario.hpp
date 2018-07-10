@@ -9,11 +9,11 @@
 #ifndef Scenario_hpp
 #define Scenario_hpp
 
-#include "InputDispatcher.hpp"
-#include "Viewport.hpp"
-#include "RenderState.hpp"
-#include "TimeState.hpp"
-#include "Compositor.hpp"
+#include "core/InputDispatcher.hpp"
+#include "core/Viewport.hpp"
+#include "core/RenderState.hpp"
+#include "core/TimeState.hpp"
+#include "core/Compositor.hpp"
 
 namespace core {
 

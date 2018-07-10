@@ -6,9 +6,8 @@
 //
 //
 
-#include "Xml.hpp"
-
-#include "Strings.hpp"
+#include "core/util/Xml.hpp"
+#include "core/Strings.hpp"
 
 using namespace std;
 

@@ -14,11 +14,10 @@
 #include <cinder/gl/scoped.h>
 #include <cinder/gl/Fbo.h>
 
-#include "Common.hpp"
-#include "ChipmunkHelpers.hpp"
-#include "MathHelpers.hpp"
-#include "Signals.hpp"
-#include "TimeState.hpp"
+#include "core/Common.hpp"
+#include "core/MathHelpers.hpp"
+#include "core/Signals.hpp"
+#include "core/TimeState.hpp"
 
 namespace core {
 

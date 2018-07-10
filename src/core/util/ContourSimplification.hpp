@@ -11,8 +11,8 @@
 
 #include <cinder/PolyLine.h>
 
-#include "MathHelpers.hpp"
-#include "LineSegment.hpp"
+#include "core/MathHelpers.hpp"
+#include "core/util/LineSegment.hpp"
 
 namespace core {
     namespace util {

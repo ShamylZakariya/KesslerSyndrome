@@ -9,7 +9,7 @@
 #ifndef LineSegment_h
 #define LineSegment_h
 
-#include "MathHelpers.hpp"
+#include "core/MathHelpers.hpp"
 
 namespace core {
     namespace util {

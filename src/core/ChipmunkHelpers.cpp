@@ -6,7 +6,7 @@
 //
 //
 
-#include "ChipmunkHelpers.hpp"
+#include "core/ChipmunkHelpers.hpp"
 
 bool cpBBIntersection(const cpBB &bb1, const cpBB &bb2, cpBB &intersection) {
     if (!cpBBIntersects(bb1, bb2)) return false;

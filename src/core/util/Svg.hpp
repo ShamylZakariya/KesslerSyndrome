@@ -13,12 +13,12 @@
 #include <cinder/Xml.h>
 #include <cinder/gl/VboMesh.h>
 
-#include "Common.hpp"
-#include "Object.hpp"
-#include "Exception.hpp"
-#include "MathHelpers.hpp"
-#include "RenderState.hpp"
-#include "SvgParsing.hpp"
+#include "core/Common.hpp"
+#include "core/Object.hpp"
+#include "core/Exception.hpp"
+#include "core/MathHelpers.hpp"
+#include "core/RenderState.hpp"
+#include "core/util/SvgParsing.hpp"
 
 namespace core {
     namespace util {

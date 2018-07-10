@@ -6,10 +6,10 @@
 //  Copyright © 2018 Shamyl Zakariya. All rights reserved.
 //
 
-#include "Compositor.hpp"
-#include "GlslProgLoader.hpp"
-
 #include <cinder/gl/scoped.h>
+
+#include "core/Compositor.hpp"
+#include "core/util/GlslProgLoader.hpp"
 
 namespace core {
     

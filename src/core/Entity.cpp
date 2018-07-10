@@ -6,7 +6,7 @@
 //
 //
 
-#include "Entity.hpp"
+#include "core/Entity.hpp"
 
 namespace core {
 

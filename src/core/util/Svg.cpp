@@ -6,9 +6,10 @@
 //
 //
 
-#include "Svg.hpp"
+#include "core/util/Svg.hpp"
 
-#include "Strings.hpp"
+#include "core/Strings.hpp"
+#include "core/ChipmunkHelpers.hpp"
 
 namespace core {
     namespace util {

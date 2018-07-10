@@ -9,14 +9,14 @@
 #ifndef Compositor_hpp
 #define Compositor_hpp
 
-#include "Common.hpp"
-#include "Viewport.hpp"
-
 #include <cinder/Area.h>
 #include <cinder/gl/scoped.h>
 #include <cinder/gl/Fbo.h>
 #include <cinder/gl/GlslProg.h>
 #include <cinder/gl/Batch.h>
+
+#include "core/Common.hpp"
+#include "core/Viewport.hpp"
 
 namespace core {
 

@@ -6,7 +6,8 @@
 //
 //
 
-#include "Viewport.hpp"
+#include "core/Viewport.hpp"
+#include "core/ChipmunkHelpers.hpp"
 
 namespace core {
     

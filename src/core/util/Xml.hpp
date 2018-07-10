@@ -12,7 +12,7 @@
 #include <cinder/Color.h>
 #include <cinder/Xml.h>
 
-#include "MathHelpers.hpp"
+#include "core/MathHelpers.hpp"
 
 namespace core {
     namespace util {

@@ -5,9 +5,13 @@
 //  Created by Shamyl Zakariya on 4/5/18.
 //
 
-#include "GlslProgLoader.hpp"
+#include <cinder/app/App.h>
 
-#include "Core.hpp"
+#include "core/util/GlslProgLoader.hpp"
+#include "core/Strings.hpp"
+
+using namespace cinder;
+using namespace std;
 
 namespace core {
     namespace util {

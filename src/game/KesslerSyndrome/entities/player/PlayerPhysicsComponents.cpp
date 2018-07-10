@@ -253,7 +253,6 @@ namespace game {
             Width = getConfig().width,
             Height = getConfig().height,
             Density = getConfig().density,
-            HalfWidth = Width / 2,
             HalfHeight = Height / 2,
             Mass = Width * Height * Density,
             Moment = cpMomentForBox(Mass, Width, Height),

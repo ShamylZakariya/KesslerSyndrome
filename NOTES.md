@@ -3,21 +3,16 @@
 ## Presently
 
 This player sucks. What about a blob player like the Shoggoths in Surfacer?
-1) Get house in order - do the yak shaving below
-2) Read up Surfacer code for Shoggoths
-3) Make ParticleSystem have option to render to texture, with a composite pass
+    1) Get house in order - do the yak shaving below
+    2) Read up Surfacer code for Shoggoths
+    3) Make ParticleSystem have option to render to texture, with a composite pass
 
-- Player Features
-    - needs weapon
-    - particle emitter needs a "velocity" value which is added to each emitted particle to accommodate moving emitters
-
-- Make my #includes use paths, not just the filename
-
-- Svg Group needs a "find element by Id", because the path thing works but is awful
-
-- Kill XmlMultiTree - I'm not even using it, and it adds complexity.
-
-- use unowned_ptr<> for chipmunk pointers. https://github.com/coryshrmn/cgs/blob/master/include/cgs/unowned_ptr.hpp
+### TODO:
+    - Make my #includes use paths, not just the filename
+    - Switch to c++ 14? 17? right now we'r eusing c++ 11
+    - Svg Group needs a "find element by Id", because the path thing works but is awful
+    - Kill XmlMultiTree - I'm not even using it, and it adds complexity.
+    - use unowned_ptr<> for chipmunk pointers. https://github.com/coryshrmn/cgs/blob/master/include/cgs/unowned_ptr.hpp
 
 
 ## Todo

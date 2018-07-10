@@ -8,8 +8,8 @@
 #ifndef Easing_hpp
 #define Easing_hpp
 
-#include "Common.hpp"
-#include "MathHelpers.hpp"
+#include "core/Common.hpp"
+#include "core/MathHelpers.hpp"
 
 namespace core {
     namespace util {

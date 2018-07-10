@@ -6,7 +6,7 @@
 //
 //
 
-#include "InputDispatcher.hpp"
+#include "core/InputDispatcher.hpp"
 
 namespace core {
     
