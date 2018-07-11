@@ -9,7 +9,7 @@
 #ifndef PlayerInputComponents_hpp
 #define PlayerInputComponents_hpp
 
-#include "Core.hpp"
+#include "core/Core.hpp"
 
 namespace game {
     

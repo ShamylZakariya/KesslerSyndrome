@@ -9,9 +9,9 @@
 #ifndef IslandTestScenario_hpp
 #define IslandTestScenario_hpp
 
-#include "Terrain.hpp"
-#include "Scenario.hpp"
-#include "ViewportController.hpp"
+#include "core/Core.hpp"
+#include "elements/Terrain/Terrain.hpp"
+#include "elements/Components/ViewportController.hpp"
 
 class TerrainTestScenario : public core::Scenario {
 public:

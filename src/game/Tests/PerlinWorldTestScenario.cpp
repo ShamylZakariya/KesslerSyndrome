@@ -5,22 +5,19 @@
 //  Created by Shamyl Zakariya on 11/25/17.
 //
 
-#include "PerlinWorldTestScenario.hpp"
 
 #include <cinder/Perlin.h>
 
-#include "App.hpp"
-#include "ParticleSystem.hpp"
-#include "DevComponents.hpp"
-#include "MarchingSquares.hpp"
-#include "ContourSimplification.hpp"
-#include "Terrain.hpp"
-#include "TerrainDetail.hpp"
-#include "TerrainDetail_MarchingSquares.hpp"
-#include "ImageProcessing.hpp"
-
-#include "PlanetGenerator.hpp"
-#include "PlanetGreebling.hpp"
+#include "game/Tests/PerlinWorldTestScenario.hpp"
+#include "core/util/ImageProcessing.hpp"
+#include "core/util/ContourSimplification.hpp"
+#include "elements/ParticleSystem/ParticleSystem.hpp"
+#include "elements/Components/DevComponents.hpp"
+#include "elements/Terrain/Terrain.hpp"
+#include "elements/Terrain/TerrainDetail.hpp"
+#include "elements/Terrain/TerrainDetail_MarchingSquares.hpp"
+#include "game/KesslerSyndrome/elements/PlanetGenerator.hpp"
+#include "game/KesslerSyndrome/elements/PlanetGreebling.hpp"
 
 using namespace core;
 using namespace elements;

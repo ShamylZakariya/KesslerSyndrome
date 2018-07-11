@@ -5,7 +5,7 @@
 //  Created by Shamyl Zakariya on 3/24/18.
 //
 
-#include "TerrainCutRecorder.hpp"
+#include "game/Tests/util/TerrainCutRecorder.hpp"
 
 using namespace core;
 

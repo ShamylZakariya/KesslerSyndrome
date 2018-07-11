@@ -8,12 +8,10 @@
 #ifndef CloudLayerParticleSystem_hpp
 #define CloudLayerParticleSystem_hpp
 
-#include "BaseParticleSystem.hpp"
-#include "ParticleSystem.hpp"
-
-#include "GameConstants.hpp"
-
 #include <cinder/Perlin.h>
+
+#include "elements/ParticleSystem/ParticleSystem.hpp"
+#include "game/KesslerSyndrome/GameConstants.hpp"
 
 namespace game {
 

@@ -6,9 +6,11 @@
 //  Copyright © 2018 Shamyl Zakariya. All rights reserved.
 //
 
-#include "VoronoiSplitView.hpp"
-#include "GlslProgLoader.hpp"
-#include "Easing.hpp"
+#include <cinder/gl/scoped.h>
+
+#include "elements/SplitView/VoronoiSplitView.hpp"
+#include "core/util/GlslProgLoader.hpp"
+#include "core/util/Easing.hpp"
 
 using namespace core;
 namespace elements {

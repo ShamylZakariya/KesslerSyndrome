@@ -9,8 +9,8 @@
 #ifndef Terrain_hpp
 #define Terrain_hpp
 
-#include "Core.hpp"
-#include "TerrainWorld.hpp"
+#include "core/Core.hpp"
+#include "elements/Terrain/TerrainWorld.hpp"
 
 namespace elements {
     namespace terrain {

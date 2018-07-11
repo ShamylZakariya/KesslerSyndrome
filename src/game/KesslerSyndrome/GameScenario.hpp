@@ -8,8 +8,8 @@
 #ifndef GameStageScenario_hpp
 #define GameStageScenario_hpp
 
-#include "Core.hpp"
-#include "Terrain.hpp"
+#include "core/Core.hpp"
+#include "elements/Terrain/Terrain.hpp"
 
 namespace game {
 

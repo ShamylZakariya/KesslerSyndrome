@@ -5,12 +5,11 @@
 //  Created by Shamyl Zakariya on 10/5/17.
 //
 
-#include "GameScenario.hpp"
+#include "game/KesslerSyndrome/GameScenario.hpp"
 
-#include "App.hpp"
-#include "GameStage.hpp"
+#include "elements/Components/DevComponents.hpp"
+#include "game/KesslerSyndrome/GameStage.hpp"
 
-#include "DevComponents.hpp"
 
 
 using namespace core;

@@ -7,10 +7,9 @@
 
 #include <cinder/Rand.h>
 
-#include "TerrainAttachmentsTestScenario.hpp"
-#include "App.hpp"
-#include "DevComponents.hpp"
-#include "Svg.hpp"
+#include "game/Tests/TerrainAttachmentsTestScenario.hpp"
+#include "elements/Components/DevComponents.hpp"
+#include "core/util/Svg.hpp"
 
 using namespace core;
 using namespace elements;

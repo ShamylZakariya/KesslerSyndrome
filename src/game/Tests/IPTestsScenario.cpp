@@ -5,19 +5,12 @@
 //  Created by Shamyl Zakariya on 2/22/18.
 //
 
-#include "IPTestsScenario.hpp"
-
-#include "App.hpp"
-#include "DevComponents.hpp"
-#include "ImageProcessing.hpp"
+#include "game/Tests/IPTestsScenario.hpp"
+#include "core/util/ImageProcessing.hpp"
+#include "elements/Components/DevComponents.hpp"
 
 using namespace core;
 using namespace elements;
-
-namespace {
-    
-
-}
 
 IPTestsScenario::IPTestsScenario() :
         _seed(12345)

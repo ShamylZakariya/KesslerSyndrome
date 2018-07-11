@@ -8,8 +8,8 @@
 #ifndef BaseParticleSystem_hpp
 #define BaseParticleSystem_hpp
 
-#include "Core.hpp"
-#include "Xml.hpp"
+#include "core/Core.hpp"
+#include "core/util/Xml.hpp"
 
 namespace elements {
 

@@ -10,7 +10,7 @@
 
 #include <cinder/Rand.h>
 
-#include "BaseParticleSystem.hpp"
+#include "elements/ParticleSystem/BaseParticleSystem.hpp"
 
 namespace elements {
 

@@ -9,8 +9,8 @@
 #ifndef CrackGeometry_hpp
 #define CrackGeometry_hpp
 
-#include "Core.hpp"
-#include "Terrain.hpp"
+#include "core/Core.hpp"
+#include "elements/Terrain/Terrain.hpp"
 
 namespace game {
     

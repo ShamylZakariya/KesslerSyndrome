@@ -8,10 +8,10 @@
 #ifndef Background_hpp
 #define Background_hpp
 
-#include "Core.hpp"
-#include "Xml.hpp"
+#include "core/Core.hpp"
+#include "core/util/Xml.hpp"
 
-#include "GameConstants.hpp"
+#include "game/KesslerSyndrome/GameConstants.hpp"
 
 namespace game {
 

@@ -5,9 +5,9 @@
 //  Created by Shamyl Zakariya on 3/2/18.
 //
 
-#include "PlanetGreebling.hpp"
+#include "game/KesslerSyndrome/elements/PlanetGreebling.hpp"
 
-#include "GlslProgLoader.hpp"
+#include "core/util/GlslProgLoader.hpp"
 
 using namespace core;
 using namespace elements;

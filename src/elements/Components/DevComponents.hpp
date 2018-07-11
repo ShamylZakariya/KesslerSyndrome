@@ -9,10 +9,10 @@
 #ifndef DevComponents_hpp
 #define DevComponents_hpp
 
-#include "Core.hpp"
-#include "Terrain.hpp"
-#include "Svg.hpp"
-#include "ViewportController.hpp"
+#include "core/Core.hpp"
+#include "core/util/Svg.hpp"
+#include "elements/Terrain/Terrain.hpp"
+#include "elements/Components/ViewportController.hpp"
 
 namespace elements {
     

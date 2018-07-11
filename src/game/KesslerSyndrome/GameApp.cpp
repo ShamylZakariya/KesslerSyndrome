@@ -6,10 +6,10 @@
 //
 //
 
-#include "cinder/app/RendererGl.h"
-#include "App.hpp"
+#include <cinder/app/RendererGl.h>
 
-#include "GameScenario.hpp"
+#include "core/App.hpp"
+#include "game/KesslerSyndrome/GameScenario.hpp"
 
 class KesslerSyndromeApp : public core::App {
 public:

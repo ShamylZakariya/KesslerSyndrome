@@ -5,7 +5,7 @@
 //  Created by Shamyl Zakariya on 10/7/17.
 //
 
-#include "GameConstants.hpp"
+#include "game/KesslerSyndrome/GameConstants.hpp"
 
 namespace game {
 

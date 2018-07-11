@@ -9,8 +9,8 @@
 #define PlanetGenerator_hpp
 
 
-#include "Core.hpp"
-#include "TerrainWorld.hpp"
+#include "core/Core.hpp"
+#include "elements/Terrain/TerrainWorld.hpp"
 
 namespace game { namespace planet_generation {
     

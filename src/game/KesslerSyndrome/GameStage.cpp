@@ -6,11 +6,11 @@
 //
 //
 
-#include "GameStage.hpp"
+#include "game/KesslerSyndrome/GameStage.hpp"
 
-#include "DevComponents.hpp"
-#include "PlanetGreebling.hpp"
-#include "CrackGeometry.hpp"
+#include "elements/Components/DevComponents.hpp"
+#include "game/KesslerSyndrome/elements/PlanetGreebling.hpp"
+#include "game/KesslerSyndrome/elements/CrackGeometry.hpp"
 
 using namespace core;
 using namespace elements;

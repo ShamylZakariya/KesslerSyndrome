@@ -6,10 +6,8 @@
 //
 //
 
-#include "SvgTestScenario.hpp"
-#include "App.hpp"
-
-#include "DevComponents.hpp"
+#include "game/Tests/SvgTestScenario.hpp"
+#include "elements/Components/DevComponents.hpp"
 
 SvgTestScenario::SvgTestScenario() {
 }

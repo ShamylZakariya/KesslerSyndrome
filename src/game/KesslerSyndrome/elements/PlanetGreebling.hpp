@@ -8,9 +8,9 @@
 #ifndef PlanetGreebling_hpp
 #define PlanetGreebling_hpp
 
-#include "Planet.hpp"
-#include "ParticleSystem.hpp"
-#include "GameConstants.hpp"
+#include "elements/ParticleSystem/ParticleSystem.hpp"
+#include "game/KesslerSyndrome/elements/Planet.hpp"
+#include "game/KesslerSyndrome/GameConstants.hpp"
 
 namespace game {
     

@@ -5,10 +5,12 @@
 //  Created by Shamyl Zakariya on 10/23/17.
 //
 
-#include "ParticleSystem.hpp"
-
+#include <chipmunk/chipmunk.h>
 #include <chipmunk/chipmunk_unsafe.h>
-#include "GlslProgLoader.hpp"
+
+#include "elements/ParticleSystem/ParticleSystem.hpp"
+#include "core/util/GlslProgLoader.hpp"
+
 
 using namespace core;
 namespace elements {

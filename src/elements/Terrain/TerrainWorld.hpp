@@ -13,8 +13,8 @@
 #include <boost/functional/hash.hpp>
 #include <unordered_set>
 
-#include "Core.hpp"
-#include "Signals.hpp"
+#include "core/Core.hpp"
+#include "core/Signals.hpp"
 
 namespace elements {
     namespace terrain {

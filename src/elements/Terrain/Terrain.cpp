@@ -6,7 +6,7 @@
 //
 //
 
-#include "Terrain.hpp"
+#include "elements/Terrain/Terrain.hpp"
 
 using namespace core;
 

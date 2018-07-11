@@ -9,8 +9,8 @@
 #ifndef SvgTestScenario_hpp
 #define SvgTestScenario_hpp
 
-#include "Core.hpp"
-#include "Svg.hpp"
+#include "core/Core.hpp"
+#include "core/util/Svg.hpp"
 
 using namespace core;
 

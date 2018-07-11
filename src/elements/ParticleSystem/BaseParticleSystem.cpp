@@ -5,7 +5,7 @@
 //  Created by Shamyl Zakariya on 10/18/17.
 //
 
-#include "BaseParticleSystem.hpp"
+#include "elements/ParticleSystem/BaseParticleSystem.hpp"
 
 using namespace core;
 namespace elements {

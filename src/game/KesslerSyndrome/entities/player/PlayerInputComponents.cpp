@@ -6,7 +6,7 @@
 //  Copyright © 2018 Shamyl Zakariya. All rights reserved.
 //
 
-#include "PlayerInputComponents.hpp"
+#include "game/KesslerSyndrome/entities/player/PlayerInputComponents.hpp"
 
 using namespace core;
 namespace game {

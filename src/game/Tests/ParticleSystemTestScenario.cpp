@@ -5,11 +5,8 @@
 //  Created by Shamyl Zakariya on 11/2/17.
 //
 
-#include "ParticleSystemTestScenario.hpp"
-
-#include "App.hpp"
-
-#include "DevComponents.hpp"
+#include "game/Tests/ParticleSystemTestScenario.hpp"
+#include "elements/Components/DevComponents.hpp"
 
 using namespace core;
 using namespace elements;

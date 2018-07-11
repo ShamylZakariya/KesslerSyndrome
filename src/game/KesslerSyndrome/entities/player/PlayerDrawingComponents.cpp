@@ -6,11 +6,11 @@
 //  Copyright © 2018 Shamyl Zakariya. All rights reserved.
 //
 
-#include "PlayerDrawingComponents.hpp"
+#include "game/KesslerSyndrome/entities/player/PlayerDrawingComponents.hpp"
 
-#include "Bezier.hpp"
-#include "GameConstants.hpp"
-#include "GlslProgLoader.hpp"
+#include "core/util/Bezier.hpp"
+#include "core/util/GlslProgLoader.hpp"
+#include "game/KesslerSyndrome/GameConstants.hpp"
 
 
 using namespace core;

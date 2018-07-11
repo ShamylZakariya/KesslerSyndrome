@@ -8,9 +8,9 @@
 #ifndef Planet_hpp
 #define Planet_hpp
 
-#include "Terrain.hpp"
-#include "Xml.hpp"
-#include "PlanetGenerator.hpp"
+#include "core/util/Xml.hpp"
+#include "elements/Terrain/Terrain.hpp"
+#include "game/KesslerSyndrome/elements/PlanetGenerator.hpp"
 
 namespace game {
 

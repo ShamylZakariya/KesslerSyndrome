@@ -5,7 +5,7 @@
 //  Created by Shamyl Zakariya on 10/6/17.
 //
 
-#include "Planet.hpp"
+#include "game/KesslerSyndrome/elements/Planet.hpp"
 
 #include "TerrainDetail.hpp"
 #include "GameConstants.hpp"

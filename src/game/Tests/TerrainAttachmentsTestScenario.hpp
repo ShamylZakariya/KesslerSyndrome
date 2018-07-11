@@ -8,8 +8,8 @@
 #ifndef TerrainAttachmentsTestScenario_hpp
 #define TerrainAttachmentsTestScenario_hpp
 
-#include "Terrain.hpp"
-#include "Scenario.hpp"
+#include "core/Core.hpp"
+#include "elements/Terrain/Terrain.hpp"
 
 class TerrainAttachmentsTestScenario : public core::Scenario {
 public:

@@ -5,7 +5,7 @@
 //  Created by Shamyl Zakariya on 10/18/17.
 //
 
-#include "CloudLayerParticleSystem.hpp"
+#include "game/KesslerSyndrome/elements/CloudLayerParticleSystem.hpp"
 
 using namespace core;
 using namespace elements;

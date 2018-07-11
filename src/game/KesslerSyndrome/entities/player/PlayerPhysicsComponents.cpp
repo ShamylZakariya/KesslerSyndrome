@@ -8,8 +8,8 @@
 
 #include "PlayerPhysicsComponents.hpp"
 
-#include "GameConstants.hpp"
-#include "Player.hpp"
+#include "game/KesslerSyndrome/GameConstants.hpp"
+#include "game/KesslerSyndrome/entities/player/Player.hpp"
 
 using namespace core;
 namespace game {
