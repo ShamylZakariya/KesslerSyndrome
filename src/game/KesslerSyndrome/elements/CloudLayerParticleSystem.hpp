@@ -37,7 +37,7 @@ namespace game {
                     color(1, 1, 1, 1) {
             }
 
-            static particle_config parse(const core::util::xml::XmlMultiTree &node);
+            static particle_config parse(const XmlTree &node);
 
         };
         
@@ -50,7 +50,7 @@ namespace game {
                     seed(12345)
             {}
             
-            static noise_config parse(const core::util::xml::XmlMultiTree &node);
+            static noise_config parse(const XmlTree &node);
         };
 
 
@@ -77,7 +77,7 @@ namespace game {
                     returnForce(32) {
             }
 
-            static config parse(const core::util::xml::XmlMultiTree &node);
+            static config parse(const XmlTree &node);
         };
 
 
@@ -143,7 +143,7 @@ namespace game {
             elements::ParticleSystemDrawComponent::config drawConfig;
             CloudLayerParticleSimulation::config simulationConfig;
 
-            static config parse(const core::util::xml::XmlMultiTree &node);
+            static config parse(const XmlTree &node);
         };
 
         static CloudLayerParticleSystemRef create(const config &c);

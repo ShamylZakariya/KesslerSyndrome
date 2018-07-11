@@ -78,7 +78,7 @@ namespace game {
 
         CloudLayerParticleSystemRef loadCloudLayer(const XmlTree &cloudLayer, int drawLayer);
         
-        void loadGreebleSystem(const core::util::xml::XmlMultiTree &greebleNode);
+        void loadGreebleSystem(const XmlTree &greebleNode);
 
         void buildExplosionParticleSystem();
 

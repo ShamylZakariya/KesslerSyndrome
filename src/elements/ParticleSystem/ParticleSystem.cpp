@@ -588,17 +588,16 @@ namespace elements {
      GLsizei _batchDrawStart, _batchDrawCount;
      */
 
-    ParticleSystemDrawComponent::config ParticleSystemDrawComponent::config::parse(const util::xml::XmlMultiTree &node) {
+    ParticleSystemDrawComponent::config ParticleSystemDrawComponent::config::parse(const XmlTree &node) {
         config c = BaseParticleSystemDrawComponent::config::parse(node);
 
-        auto textureName = node.getAttribute("textureAtlas");
-        if (textureName) {
+        if (node.hasAttribute("textureAtlas")) {
 
-            auto image = loadImage(app::loadAsset(*textureName));
+            auto image = loadImage(app::loadAsset(node.getAttributeValue<string>("textureAtlas")));
             gl::Texture2d::Format fmt = gl::Texture2d::Format().mipmap(false);
 
             c.textureAtlas = gl::Texture2d::create(image, fmt);
-            c.atlasType = Atlas::fromString(node.getAttribute("atlasType", "None"));
+            c.atlasType = Atlas::fromString(node.getAttributeValue<string>("atlasType", "None"));
         }
 
         return c;
@@ -821,7 +820,7 @@ namespace elements {
 
 #pragma mark - System
 
-    ParticleSystem::config ParticleSystem::config::parse(const util::xml::XmlMultiTree &node) {
+    ParticleSystem::config ParticleSystem::config::parse(const XmlTree &node) {
         config c;
         c.maxParticleCount = util::xml::readNumericAttribute<size_t>(node, "count", c.maxParticleCount);
         c.keepSorted = util::xml::readBoolAttribute(node, "sorted", c.keepSorted);

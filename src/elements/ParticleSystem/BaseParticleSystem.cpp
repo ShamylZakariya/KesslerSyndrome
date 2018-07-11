@@ -106,7 +106,7 @@ namespace elements {
 
 #pragma mark - BaseParticleSystemDrawComponent
 
-    BaseParticleSystemDrawComponent::config BaseParticleSystemDrawComponent::config::parse(const core::util::xml::XmlMultiTree &node) {
+    BaseParticleSystemDrawComponent::config BaseParticleSystemDrawComponent::config::parse(const XmlTree &node) {
         config c;
         c.drawLayer = util::xml::readNumericAttribute<int>(node, "drawLayer", c.drawLayer);
         return c;

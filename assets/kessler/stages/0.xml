@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<prefabs>
-</prefabs>
-
 <stage name="Hello Precariously Level 0">
 	<space damping="0.99"/>
 	<gravity type="radial" strength="2000" falloff_power="0.5" primary="true"/>

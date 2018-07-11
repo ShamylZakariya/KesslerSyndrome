@@ -144,35 +144,32 @@ namespace game {
     
 #pragma mark - GreeblingParticleSystem
     
-    boost::optional<GreeblingParticleSystem::config> GreeblingParticleSystem::config::parse(const util::xml::XmlMultiTree &node) {
+    boost::optional<GreeblingParticleSystem::config> GreeblingParticleSystem::config::parse(const XmlTree &node) {
         config c;
         c.attachmentBatchId = util::xml::readNumericAttribute<int>(node, "attachmentBatchId", c.attachmentBatchId);
         c.drawLayer = util::xml::readNumericAttribute<int>(node, "drawLayer", c.drawLayer);
 
-        auto atlasPath = node.getAttribute("textureAtlas");
-        auto image = loadImage(app::loadAsset(*atlasPath));
+        auto atlasPath = node.getAttributeValue<string>("textureAtlas");
+        auto image = loadImage(app::loadAsset(atlasPath));
         gl::Texture2d::Format fmt = gl::Texture2d::Format().mipmap(false);
         c.textureAtlas = gl::Texture2d::create(image, fmt);
         
-        c.atlasType = elements::Atlas::fromString(node.getAttribute("atlasType").value_or("None"));
+        c.atlasType = elements::Atlas::fromString(node.getAttributeValue<string>("atlasType", "None"));
 
         // now load <greeble> children until exhausted
-        for(size_t i = 0;; i++) {
-            auto greeble = node.getChild("greeble", i);
-            if (!greeble) {
-                break;
+        for (const auto &child : node.getChildren()) {
+            if (child->getTag() == "greeble") {
+                greeble_descriptor gd;
+                gd.color = util::xml::readColorAttribute(*child, "color", gd.color);
+                gd.radius = util::xml::readNumericAttribute<double>(*child, "radius", gd.radius);
+                gd.upOffset = util::xml::readNumericAttribute<double>(*child, "upOffset", gd.upOffset);
+                gd.swayFactor = util::xml::readNumericAttribute<double>(*child, "swayFactor", gd.swayFactor);
+                gd.swayPeriod = util::xml::readNumericAttribute<double>(*child, "swayPeriod", gd.swayPeriod);
+                gd.probability = util::xml::readNumericAttribute<size_t>(*child, "probability", gd.probability);
+                c.greebleDescriptors.push_back(gd);
             }
-            
-            greeble_descriptor gd;
-            gd.color = util::xml::readColorAttribute(greeble, "color", gd.color);
-            gd.radius = util::xml::readNumericAttribute<double>(greeble, "radius", gd.radius);
-            gd.upOffset = util::xml::readNumericAttribute<double>(greeble, "upOffset", gd.upOffset);
-            gd.swayFactor = util::xml::readNumericAttribute<double>(greeble, "swayFactor", gd.swayFactor);
-            gd.swayPeriod = util::xml::readNumericAttribute<double>(greeble, "swayPeriod", gd.swayPeriod);
-            gd.probability = util::xml::readNumericAttribute<size_t>(greeble, "probability", gd.probability);
-            c.greebleDescriptors.push_back(gd);
         }
-        
+                
         if (c.sanityCheck()) {
             return c;
         }

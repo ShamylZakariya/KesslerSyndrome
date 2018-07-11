@@ -31,7 +31,7 @@ namespace core {
             double regenerationRate;
         };
 
-        static config loadConfig(util::xml::XmlMultiTree node);
+        static config loadConfig(const XmlTree &node);
 
         signals::signal<void()> onDeath;
         signals::signal<void(double, double)> onHealthChanged; // passes previous health, new health

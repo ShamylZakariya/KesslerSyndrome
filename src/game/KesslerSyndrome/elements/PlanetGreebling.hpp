@@ -165,7 +165,7 @@ namespace game {
             atlasType(elements::Atlas::None)
             {}
             
-            static boost::optional<config> parse(const core::util::xml::XmlMultiTree &node);
+            static boost::optional<config> parse(const XmlTree &node);
 
             bool sanityCheck() const;
             GreeblingParticleSimulation::config createSimulationConfig() const;

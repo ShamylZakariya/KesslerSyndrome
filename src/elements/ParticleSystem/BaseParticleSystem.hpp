@@ -182,7 +182,7 @@ namespace elements {
                     drawLayer(other.drawLayer) {
             }
 
-            static config parse(const core::util::xml::XmlMultiTree &node);
+            static config parse(const XmlTree &node);
         };
 
     public:

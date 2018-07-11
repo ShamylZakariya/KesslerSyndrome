@@ -78,7 +78,6 @@ namespace game {
 
     void GameStage::load(DataSourceRef stageXmlData) {
         auto root = XmlTree(stageXmlData);
-        auto prefabsNode = root.getChild("prefabs");
         auto stageNode = root.getChild("stage");
 
         setName(stageNode.getAttribute("name").getValue());
@@ -133,13 +132,10 @@ namespace game {
         
         auto greebleSystemsNode = util::xml::findElement(*planetNode, "greebleSystems");
         if (greebleSystemsNode) {
-            for (size_t i = 0;;i++) {
-                auto greebleSystemNode = util::xml::XmlMultiTree(*greebleSystemsNode).getChild("greebleSystem",i);
-                if (!greebleSystemNode) {
-                    break;
+            for (const auto &greebleSystemNode : greebleSystemsNode->getChildren()) {
+                if (greebleSystemsNode->getTag() == "greebleSystem") {
+                    loadGreebleSystem(*greebleSystemNode);
                 }
-                
-                loadGreebleSystem(greebleSystemNode);
             }
         }
 
@@ -345,7 +341,7 @@ namespace game {
         return cl;
     }
     
-    void GameStage::loadGreebleSystem(const util::xml::XmlMultiTree &greebleNode) {
+    void GameStage::loadGreebleSystem(const XmlTree &greebleNode) {
         auto config = GreeblingParticleSystem::config::parse(greebleNode);
         if (config) {
             const auto &attachments = _planet->getAttachments();
