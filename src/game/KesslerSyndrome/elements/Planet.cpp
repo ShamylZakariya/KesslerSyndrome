@@ -7,8 +7,8 @@
 
 #include "game/KesslerSyndrome/elements/Planet.hpp"
 
-#include "TerrainDetail.hpp"
-#include "GameConstants.hpp"
+#include "elements/Terrain/TerrainDetail.hpp"
+#include "game/KesslerSyndrome/GameConstants.hpp"
 
 using namespace core;
 using namespace elements;

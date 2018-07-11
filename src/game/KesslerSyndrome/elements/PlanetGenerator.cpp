@@ -5,7 +5,7 @@
 //  Created by Shamyl Zakariya on 2/1/18.
 //
 
-#include "PlanetGenerator.hpp"
+#include "game/KesslerSyndrome/elements/PlanetGenerator.hpp"
 
 #include <cinder/Rand.h>
 #include <cinder/Perlin.h>
