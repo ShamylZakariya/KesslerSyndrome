@@ -548,9 +548,9 @@ namespace core {
                 BlendMode _blendMode;
 
                 vector< ShapeRef > _shapes;
-                map< string, ShapeRef > _shapesByName;
+                map< string, ShapeRef > _shapesById;
                 vector< GroupRef > _groups;
-                map< string, GroupRef > _groupsByName;
+                map< string, GroupRef > _groupsById;
                 map< string, string > _attributes;
                 vector< drawable > _drawables;
 
@@ -579,8 +579,7 @@ namespace core {
                 //
 
                 XmlTree svgNode = XmlTree(svgData).getChild("svg");
-
-                parse(svgNode);
+                _parse(svgNode);
 
                 //
                 //	Figure out the document size. This is important because we use a bottom-left
@@ -602,18 +601,11 @@ namespace core {
             void Group::clear() {
                 _originShape.reset();
                 _shapes.clear();
-                _shapesByName.clear();
+                _shapesById.clear();
                 _groups.clear();
-                _groupsByName.clear();
+                _groupsById.clear();
                 _attributes.clear();
                 _drawables.clear();
-            }
-
-            void Group::parse(const XmlTree &svgGroupNode) {
-                clear();
-                _parseGroupAttributes(svgGroupNode);
-                _loadAppearances(svgGroupNode);
-                _loadGroupsAndShapes(svgGroupNode);
             }
 
             void Group::draw(const render_state &state) {
@@ -622,7 +614,7 @@ namespace core {
                 //	Build the shader (lazily)
                 //
 
-                if (isRoot() && !_shader) {
+                if (isRootGroup() && !_shader) {
                     auto vsh = CI_GLSL(150,
                             uniform
                             mat4 ciModelViewProjection;
@@ -654,7 +646,7 @@ namespace core {
                     _draw(state, 1, _shader);
                 }
 
-                if (state.testGizmoBit(Gizmos::AABBS) && isRoot()) {
+                if (state.testGizmoBit(Gizmos::AABBS) && isRootGroup()) {
                     gl::color(1, 0, 1);
                     cpBB bounds = getBB();
                     gl::drawStrokedRect(Rectf(bounds.l, bounds.b, bounds.r, bounds.t), state.viewport->getReciprocalScale());
@@ -672,7 +664,7 @@ namespace core {
 
                 app::console() << ind << "[Group name: " << getId() << std::endl << ind << " +shapes:" << std::endl;
 
-                for (ShapeRef shape : getShapes()) {
+                for (ShapeRef shape : getChildShapes()) {
                     app::console() << ind2 << "[SvgShape name: " << shape->getId()
                                    << " type: " << shape->getType()
                                    << " origin: " << str(shape->isOrigin())
@@ -684,51 +676,51 @@ namespace core {
                 }
 
                 app::console() << ind << " +groups:" << std::endl;
-                for (const GroupRef &obj : getGroups()) {
+                for (const GroupRef &obj : getChildGroups()) {
                     obj->trace(depth + 1);
                 }
 
                 app::console() << ind << "]" << std::endl;
             }
 
-            GroupRef Group::getRoot() const {
+            GroupRef Group::getRootGroup() const {
                 auto r = const_cast<Group *>(this)->shared_from_this();
 
-                while (GroupRef p = r->getParent()) {
+                while (GroupRef p = r->getParentGroup()) {
                     r = p;
                 }
 
                 return r;
             }
 
-            bool Group::isRoot() const {
-                return !getParent();
+            bool Group::isRootGroup() const {
+                return !getParentGroup();
             }
 
-            GroupRef Group::getGroupNamed(const std::string &name) const {
-                auto pos(_groupsByName.find(name));
-                if (pos != _groupsByName.end()) return pos->second;
+            GroupRef Group::getChildGroupById(const std::string &name) const {
+                auto pos(_groupsById.find(name));
+                if (pos != _groupsById.end()) return pos->second;
 
                 return nullptr;
             }
 
-            ShapeRef Group::getShapeNamed(const std::string &name) const {
-                auto pos(_shapesByName.find(name));
-                if (pos != _shapesByName.end()) return pos->second;
+            ShapeRef Group::getChildShapeById(const std::string &name) const {
+                auto pos(_shapesById.find(name));
+                if (pos != _shapesById.end()) return pos->second;
 
                 return nullptr;
             }
 
-            GroupRef Group::find(const std::string &pathToChild, char separator) const {
+            GroupRef Group::findGroup(const std::string &pathToChild, char separator) const {
                 if (pathToChild.at(0) == separator) {
-                    return getRoot()->find(pathToChild.substr(1), separator);
+                    return getRootGroup()->findGroup(pathToChild.substr(1), separator);
                 }
 
                 GroupRef node = const_cast<Group *>(this)->shared_from_this();
                 strings::stringvec path = strings::split(pathToChild, separator);
 
                 for (auto childName(path.begin()), end(path.end()); childName != end; ++childName) {
-                    node = node->getGroupNamed(*childName);
+                    node = node->getChildGroupById(*childName);
 
                     //
                     //	if the node is empty, return it as a failure. if we're on the last element, return the node
@@ -739,9 +731,48 @@ namespace core {
 
                 return nullptr;
             }
+            
+            namespace {
+                GroupRef _findGroupById(const GroupRef &group, const string &groupId) {
+                    if (group->getId() == groupId) {
+                        return group;
+                    }
+                    for (const auto &childGroup : group->getChildGroups()) {
+                        auto result = _findGroupById(childGroup, groupId);
+                        if (result != nullptr) {
+                            return result;
+                        }
+                    }
+                    return nullptr;
+                }
+                
+                ShapeRef _findShapeById(const GroupRef &group, const string &shapeId) {
+                    for (const auto &childShape : group->getChildShapes()) {
+                        if (childShape->getId() == shapeId) {
+                            return childShape;
+                        }
+                    }
+                    for (const auto &childGroup : group->getChildGroups()) {
+                        auto result = _findShapeById(childGroup, shapeId);
+                        if (result != nullptr) {
+                            return result;
+                        }
+                    }
+                    return nullptr;                }
+            }
+            
+            GroupRef Group::findGroupById(const string &groupId, bool searchFromRoot) {
+                auto node = searchFromRoot ? getRootGroup() : shared_from_this();
+                return _findGroupById(node, groupId);
+            }
+            
+            ShapeRef Group::findShapeById(const string &shapeId, bool searchFromRoot) {
+                auto node = searchFromRoot ? getRootGroup() : shared_from_this();
+                return _findShapeById(node, shapeId);
+            }
 
             dvec2 Group::getDocumentSize() const {
-                return getRoot()->_documentSize;
+                return getRootGroup()->_documentSize;
             }
 
             void Group::setPosition(const dvec2 &position) {
@@ -781,6 +812,13 @@ namespace core {
                 const dmat4 worldTransform = _worldTransform(dmat4(1));
                 const dmat4 inverseWorldTransform = glm::inverse(worldTransform);
                 return inverseWorldTransform * p;
+            }
+            
+            void Group::_parse(const XmlTree &svgGroupNode) {
+                clear();
+                _parseGroupAttributes(svgGroupNode);
+                _loadAppearances(svgGroupNode);
+                _loadGroupsAndShapes(svgGroupNode);
             }
 
             void Group::_draw(const render_state &state, double parentOpacity, const gl::GlslProgRef &shader) {
@@ -852,11 +890,11 @@ namespace core {
                     if (tag == "g") {
                         GroupRef child = make_shared<Group>();
 
-                        child->parse(*childNode);
+                        child->_parse(*childNode);
                         child->_parent = self;
 
                         _groups.push_back(child);
-                        _groupsByName[child->getId()] = child;
+                        _groupsById[child->getId()] = child;
 
                         _drawables.push_back(drawable(child, nullptr));
                     } else if (util::svg::canParseShape(tag)) {
@@ -866,7 +904,7 @@ namespace core {
                         shape->parse(*childNode);
 
                         _shapes.push_back(shape);
-                        _shapesByName[shape->getId()] = shape;
+                        _shapesById[shape->getId()] = shape;
 
                         if (shape->isOrigin()) {
                             _originShape = shape;
@@ -959,14 +997,14 @@ namespace core {
                 //	its transform is inherently local.
                 //
 
-                if (isRoot()) {
+                if (isRootGroup()) {
                     _localTransformPosition = worldOrigin - parentWorldOrigin;
                     _groupTransform = dmat4(1);
                 }
             }
 
             dmat4 Group::_worldTransform(dmat4 m) {
-                if (GroupRef p = getParent()) {
+                if (GroupRef p = getParentGroup()) {
                     return p->_worldTransform(m);
                 }
 
@@ -980,12 +1018,12 @@ namespace core {
 
                 toWorld = toWorld * _transform;
 
-                for (auto shape : getShapes()) {
+                for (auto shape : getChildShapes()) {
                     cpBB shapeLocalBB = shape->getLocalBB();
                     bb = cpBBExpand(bb, cpBBTransform(shapeLocalBB, toWorld));
                 }
 
-                for (auto childGroup : getGroups()) {
+                for (auto childGroup : getChildGroups()) {
                     bb = cpBBExpand(bb, childGroup->_getBB(toWorld));
                 }
 

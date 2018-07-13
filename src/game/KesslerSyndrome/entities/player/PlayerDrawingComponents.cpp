@@ -249,15 +249,15 @@ namespace game {
         //  Find various components that we animate
         //
         
-        _root = _svgDoc->find("artboard/player/root");
-        _eyes = _svgDoc->find("artboard/player/bulb/eyes")->getGroups();
-        _bulb = _svgDoc->find("artboard/player/bulb");
+        _root = _svgDoc->findGroupById("root");
+        _eyes = _svgDoc->findGroupById("eyes")->getChildGroups();
+        _bulb = _svgDoc->findGroupById("bulb");
         
         //
         //  Now determine leg color by examining the SVG
         //
         
-        const auto rootShape = _root->getGroupNamed("leg_root")->getShapes().front();
+        const auto rootShape = _root->getChildGroupById("leg_root")->getChildShapes().front();
         const auto appearance = rootShape->getAppearance();
         const auto legColor = ColorA(appearance->getFillColor(), appearance->getFillAlpha());
         

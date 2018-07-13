@@ -11,7 +11,8 @@ This player sucks. What about a blob player like the Shoggoths in Surfacer?
     - DONE: Make my #includes use paths, not just the filename
     - DONE: Switch to c++ 14? 17? right now we'r eusing c++ 11
     - DONE: Kill XmlMultiTree - I'm not even using it, and it adds complexity.
-    - Svg Group needs a "find element by Id", because the path thing works but is awful
+    - DONE: Svg Group needs a "find element by Id", because the path thing works but is awful
+        - implemented, but untested
     - use unowned_ptr<> for chipmunk pointers. https://github.com/coryshrmn/cgs/blob/master/include/cgs/unowned_ptr.hpp
 
 
