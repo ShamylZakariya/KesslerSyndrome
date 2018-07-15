@@ -7,16 +7,17 @@ This player sucks. What about a blob player like the Shoggoths in Surfacer?
     2) Read up Surfacer code for Shoggoths
     3) Make ParticleSystem have option to render to texture, with a composite pass
 
-### TODO:
+### Todo (HIGH):
     - DONE: Make my #includes use paths, not just the filename
     - DONE: Switch to c++ 14? 17? right now we'r eusing c++ 11
     - DONE: Kill XmlMultiTree - I'm not even using it, and it adds complexity.
     - DONE: Svg Group needs a "find element by Id", because the path thing works but is awful
-        - implemented, but untested
+    
+    - Make ParticleSystem have an option to render to texture, run shaders against it, and then composite (this will enable me to do the nice MotileFluid stuff)
+
+
+## Todo (LOW)
     - use unowned_ptr<> for chipmunk pointers. https://github.com/coryshrmn/cgs/blob/master/include/cgs/unowned_ptr.hpp
-
-
-## Todo
 
 
 ## Optimization 
