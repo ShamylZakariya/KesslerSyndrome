@@ -12,9 +12,9 @@
 #include <cinder/Shape2d.h>
 #include <cinder/Triangulate.h>
 
-#include "Common.hpp"
-#include "MathHelpers.hpp"
-#include "Exception.hpp"
+#include "core/Common.hpp"
+#include "core/MathHelpers.hpp"
+#include "core/Exception.hpp"
 
 namespace cinder {
     class XmlTree;

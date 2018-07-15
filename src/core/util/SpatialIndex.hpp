@@ -16,8 +16,8 @@
 #include <chipmunk/chipmunk.h>
 #include <cinder/gl/scoped.h>
 
-#include "ChipmunkHelpers.hpp"
-#include "MathHelpers.hpp"
+#include "core/ChipmunkHelpers.hpp"
+#include "core/MathHelpers.hpp"
 
 namespace core {
     namespace util {

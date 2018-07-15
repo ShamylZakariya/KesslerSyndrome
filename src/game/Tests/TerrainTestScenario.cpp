@@ -6,13 +6,11 @@
 //
 //
 
-#include "TerrainTestScenario.hpp"
-#include "App.hpp"
-
 #include <cinder/Rand.h>
 
-#include "DevComponents.hpp"
-#include "SpatialIndex.hpp"
+#include "game/Tests/TerrainTestScenario.hpp"
+#include "core/util/SpatialIndex.hpp"
+#include "elements/Components/DevComponents.hpp"
 
 using namespace core;
 using namespace elements;

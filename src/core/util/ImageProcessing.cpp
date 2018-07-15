@@ -5,10 +5,10 @@
 //  Created by Shamyl Zakariya on 11/30/17.
 //
 
-#include "ImageProcessing.hpp"
-
 #include <queue>
 #include <thread>
+
+#include "core/util/ImageProcessing.hpp"
 
 namespace core {
     namespace util {

@@ -5,11 +5,10 @@
 //  Created by Shamyl Zakariya on 10/7/17.
 //
 
-#include "TerrainDetail.hpp"
-
 #include <queue>
 
-#include "ContourSimplification.hpp"
+#include "elements/Terrain/TerrainDetail.hpp"
+#include "core/util/ContourSimplification.hpp"
 
 namespace elements {
     namespace terrain {

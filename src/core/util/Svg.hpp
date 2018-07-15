@@ -13,12 +13,12 @@
 #include <cinder/Xml.h>
 #include <cinder/gl/VboMesh.h>
 
-#include "Common.hpp"
-#include "Object.hpp"
-#include "Exception.hpp"
-#include "MathHelpers.hpp"
-#include "RenderState.hpp"
-#include "SvgParsing.hpp"
+#include "core/Common.hpp"
+#include "core/Object.hpp"
+#include "core/Exception.hpp"
+#include "core/MathHelpers.hpp"
+#include "core/RenderState.hpp"
+#include "core/util/SvgParsing.hpp"
 
 namespace core {
     namespace util {
@@ -336,29 +336,42 @@ namespace core {
                  */
                 void load(DataSourceRef svgData, double documentScale = 1);
 
+                /**
+                 Unload any Svg data, leaving this an empty group with no child Shapes or child Groups
+                 */
                 void clear();
 
-                void parse(const XmlTree &svgGroupNode);
-
+                /**
+                 Get this Group's id
+                 */
                 string getId() const {
                     return _id;
                 }
 
+                /**
+                 Get all attributes set on this Group's xml node
+                 */
                 const map <string, string> &getAttributes() const {
                     return _attributes;
                 }
 
-                const vector <ShapeRef> getShapes() const {
+                /**
+                 Get all immediate children of this Group which are Shapes
+                 */
+                const vector <ShapeRef> getChildShapes() const {
                     return _shapes;
                 }
 
-                const vector <GroupRef> getGroups() const {
+                /**
+                 Get all immediate children of this Group which are Groups
+                 */
+                const vector <GroupRef> getChildGroups() const {
                     return _groups;
                 }
 
                 /**
-                 Get this group's appearance. Generall the style attributes in the appearance of a Group will not be set. It's when
-                 the group has a chile <use .../> declaration which will specify fill, stroke etc that the Appearance will have
+                 Get this group's appearance. Generally the style attributes in the appearance of a Group will not be set. It's when
+                 the group has a child with <use .../> declaration which will specify fill, stroke etc that the Appearance will have
                  meaningful values.
                  */
                 AppearanceRef getAppearance() const {
@@ -366,31 +379,31 @@ namespace core {
                 }
 
                 /**
-                 get this Group's parent. May be empty.
+                 get this Group's parent. May be empty if this is the root node.
                  */
-                GroupRef getParent() const {
+                GroupRef getParentGroup() const {
                     return _parent.lock();
                 }
 
                 /**
                  get root group of the tree
                  */
-                GroupRef getRoot() const;
+                GroupRef getRootGroup() const;
 
                 /**
                  return true iff the root is this Group
                  */
-                bool isRoot() const;
+                bool isRootGroup() const;
 
                 /**
-                 Find the child Group of this Group with id=name
+                 Find the child Group of this Group with the given id
                  */
-                GroupRef getGroupNamed(const string &name) const;
+                GroupRef getChildGroupById(const string &id) const;
 
                 /**
-                 Find the child SvgShape of this Group with id=name
+                 Find the child Shape of this Group with given id
                  */
-                ShapeRef getShapeNamed(const string &name) const;
+                ShapeRef getChildShapeById(const string &id) const;
 
                 /**
                  Get this group's origin shape if it has one.
@@ -401,13 +414,28 @@ namespace core {
                 }
 
                 /**
-                 Find a child Group given a path, in form of path/to/child.
+                 Find a child Group given a path of ids, in form of path/to/child.
                  If @pathToChild starts with the separator, it is considered an absolute path and is evaluated from the root Group.
-                 find() uses the name() and label() for name comparison, trying name() first, and then label(). This is an artifact
-                 of Inkscape making it really hard to assign ids, but easy to assign labels to groups.
                  */
-                GroupRef find(const string &pathToChild, char separator = '/') const;
+                GroupRef findGroup(const string &pathToChild, char separator = '/') const;
+                
+                /**
+                 Starting from this Group, or optionall from root, descend the tree to find the first Group with the specified id. If you document has multiple
+                 Groups with the same id (something that shouldn't, but *can* happen) you would be better served using findGroup() which acts on paths.
+                 */
+                GroupRef findGroupById(const string &id, bool searchFromRoot = true);
 
+                /**
+                 Starting from this Group, or optionall from root, descend the tree to find the first Shape with the specified id. If you document has multiple
+                 Shapes with the same id (something that shouldn't, but *can* happen) you would be better served using findGroup() which acts on paths
+                 to find the parent Group, and then call getChildShapeById() to find your desired shape.
+                 */
+                ShapeRef findShapeById(const string &id, bool searchFromRoot = true);
+                
+                /**
+                 Render this Group given the current render_state.
+                 Note: If you don't want to make a dedicated DrawComponent just to render an Svg, see SvgDrawComponent
+                 */
                 void draw(const render_state &state);
 
                 /**
@@ -420,18 +448,34 @@ namespace core {
                  */
                 void trace(int depth = 0) const;
 
+                /**
+                 Get the size of the document in its coordinate system. This is parsed from the root <svg> node's width/height or specified viewbox, etc.
+                */
                 dvec2 getDocumentSize() const;
 
+                /**
+                 Set the position of this Group, dragging all child Groups and Shapes with it.
+                 */
                 void setPosition(const dvec2 &position);
 
                 dvec2 getPosition() const {
                     return _localTransformPosition;
                 }
                 
+                /**
+                 Set the rotation of this group, rotating all child Groups and Shapes with it.
+                 @rotation is a rotation vector, e.g., vec2(cos(theta),sin(theta))
+                 */
                 void setRotation(const dvec2 &rotation);
-                
+
+                /**
+                 Get the rotation of this Group in the form of a rotation vector
+                 */
                 dvec2 getRotation() const;
 
+                /**
+                 Set the rotation of this group and child Groups and Shapes in radians.
+                 */
                 void setAngle(double a);
 
                 double getAngle() const { return _localTransformAngle; }
@@ -488,6 +532,8 @@ namespace core {
             private:
 
                 friend class Shape;
+                
+                void _parse(const XmlTree &svgGroupNode);
 
                 void _draw(const render_state &state, double opacity, const gl::GlslProgRef &shader);
 
@@ -529,9 +575,9 @@ namespace core {
                 BlendMode _blendMode;
 
                 vector <ShapeRef> _shapes;
-                map <string, ShapeRef> _shapesByName;
+                map <string, ShapeRef> _shapesById;
                 vector <GroupRef> _groups;
-                map <string, GroupRef> _groupsByName;
+                map <string, GroupRef> _groupsById;
                 map <string, string> _attributes;
                 vector <drawable> _drawables;
 
@@ -551,6 +597,14 @@ namespace core {
 
 #pragma mark - SvgDrawComponent
 
+            /**
+             Simple DrawComponent for drawing Svg Groups. For example:
+             <code>
+             auto drawLayer = 1;
+             auto doc = util::svg::Group::loadSvgDocument(app::loadAsset("path/to/something.svg"), drawLayer);
+             getStage()->addObject(Object::with("Hello SVG", { make_shared<util::svg::SvgDrawComponent>(doc) }));
+             </code>
+             */
             class SvgDrawComponent : public DrawComponent {
             public:
                 SvgDrawComponent(util::svg::GroupRef doc, int layer = 0) :

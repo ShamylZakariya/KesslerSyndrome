@@ -9,12 +9,13 @@
 #ifndef Player_hpp
 #define Player_hpp
 
-#include "Core.hpp"
-#include "ViewportController.hpp"
+#include "core/Core.hpp"
 
-#include "PlayerInputComponents.hpp"
-#include "PlayerPhysicsComponents.hpp"
-#include "PlayerDrawingComponents.hpp"
+#include "game/KesslerSyndrome/entities/player/PlayerInputComponents.hpp"
+#include "game/KesslerSyndrome/entities/player/PlayerPhysicsComponents.hpp"
+#include "game/KesslerSyndrome/entities/player/PlayerDrawingComponents.hpp"
+
+#include "elements/Components/ViewportController.hpp"
 
 namespace game {
 

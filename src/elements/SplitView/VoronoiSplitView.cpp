@@ -6,9 +6,11 @@
 //  Copyright © 2018 Shamyl Zakariya. All rights reserved.
 //
 
-#include "VoronoiSplitView.hpp"
-#include "GlslProgLoader.hpp"
-#include "Easing.hpp"
+#include <cinder/gl/scoped.h>
+
+#include "elements/SplitView/VoronoiSplitView.hpp"
+#include "core/util/GlslProgLoader.hpp"
+#include "core/util/Easing.hpp"
 
 using namespace core;
 namespace elements {
@@ -44,8 +46,8 @@ namespace elements {
         
         gl::ScopedBlendAlpha blender;
         
-        _viewportA->getFbo()->getColorTexture()->bind(0);
-        _viewportB->getFbo()->getColorTexture()->bind(1);
+        gl::ScopedTextureBind stbA(_viewportA->getFbo()->getColorTexture(), 0);
+        gl::ScopedTextureBind stbB(_viewportB->getFbo()->getColorTexture(), 1);
         _shader->uniform("ColorTex0", 0);
         _shader->uniform("ColorTex1", 1);
         _shader->uniform("Tint0", ColorA(1,1,1,1));

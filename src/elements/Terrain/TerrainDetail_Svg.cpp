@@ -5,9 +5,9 @@
 //  Created by Shamyl Zakariya on 1/30/18.
 //
 
-#include "TerrainDetail_Svg.hpp"
+#include "elements/Terrain/TerrainDetail_Svg.hpp"
 
-#include "SvgParsing.hpp"
+#include "core/util/SvgParsing.hpp"
 
 
 namespace elements {

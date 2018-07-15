@@ -10,11 +10,7 @@
 
 #include <cinder/Rand.h>
 
-#include "Core.hpp"
-#include "Svg.hpp"
-
-#include "Terrain.hpp"
-#include "ParticleSystem.hpp"
+#include "core/Core.hpp"
 
 class EasingTestScenario : public core::Scenario {
 public:

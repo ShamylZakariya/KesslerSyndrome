@@ -8,8 +8,8 @@
 
 #include "PlayerPhysicsComponents.hpp"
 
-#include "GameConstants.hpp"
-#include "Player.hpp"
+#include "game/KesslerSyndrome/GameConstants.hpp"
+#include "game/KesslerSyndrome/entities/player/Player.hpp"
 
 using namespace core;
 namespace game {
@@ -253,7 +253,6 @@ namespace game {
             Width = getConfig().width,
             Height = getConfig().height,
             Density = getConfig().density,
-            HalfWidth = Width / 2,
             HalfHeight = Height / 2,
             Mass = Width * Height * Density,
             Moment = cpMomentForBox(Mass, Width, Height),

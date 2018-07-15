@@ -8,9 +8,9 @@
 #ifndef Planet_hpp
 #define Planet_hpp
 
-#include "Terrain.hpp"
-#include "Xml.hpp"
-#include "PlanetGenerator.hpp"
+#include "core/util/Xml.hpp"
+#include "elements/Terrain/Terrain.hpp"
+#include "game/KesslerSyndrome/elements/PlanetGenerator.hpp"
 
 namespace game {
 
@@ -37,11 +37,11 @@ namespace game {
             {
             }
 
-            static config parse(core::util::xml::XmlMultiTree node);
+            static config parse(XmlTree node);
 
         };
 
-        static PlanetRef create(string name, elements::terrain::WorldRef world, core::util::xml::XmlMultiTree planetNode, int drawLayer);
+        static PlanetRef create(string name, elements::terrain::WorldRef world, XmlTree planetNode, int drawLayer);
 
         static PlanetRef create(string name, elements::terrain::WorldRef world, const config &surfaceConfig, const config &coreConfig, const vector<planet_generation::params::perimeter_attachment_params> &attachments, dvec2 origin, double partitionSize, int drawLayer);
 

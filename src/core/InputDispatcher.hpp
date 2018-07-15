@@ -15,8 +15,8 @@
 #include <cinder/app/KeyEvent.h>
 #include <cinder/app/FileDropEvent.h>
 
-#include "Common.hpp"
-#include "MathHelpers.hpp"
+#include "core/Common.hpp"
+#include "core/MathHelpers.hpp"
 
 namespace core {
 

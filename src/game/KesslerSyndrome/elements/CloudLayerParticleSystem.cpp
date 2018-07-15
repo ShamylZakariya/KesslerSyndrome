@@ -5,14 +5,14 @@
 //  Created by Shamyl Zakariya on 10/18/17.
 //
 
-#include "CloudLayerParticleSystem.hpp"
+#include "game/KesslerSyndrome/elements/CloudLayerParticleSystem.hpp"
 
 using namespace core;
 using namespace elements;
 
 namespace game {
     
-    CloudLayerParticleSimulation::noise_config CloudLayerParticleSimulation::noise_config::parse(const core::util::xml::XmlMultiTree &node) {
+    CloudLayerParticleSimulation::noise_config CloudLayerParticleSimulation::noise_config::parse(const XmlTree &node) {
         noise_config n;
         n.octaves = util::xml::readNumericAttribute<int>(node, "noise", n.octaves);
         n.seed = util::xml::readNumericAttribute<int>(node, "seed", n.seed);
@@ -20,7 +20,7 @@ namespace game {
     }
 
 
-    CloudLayerParticleSimulation::particle_config CloudLayerParticleSimulation::particle_config::parse(const util::xml::XmlMultiTree &node) {
+    CloudLayerParticleSimulation::particle_config CloudLayerParticleSimulation::particle_config::parse(const XmlTree &node) {
         particle_config pt;
         pt.minRadius = util::xml::readNumericAttribute<double>(node, "minRadius", pt.minRadius);
         pt.maxRadius = util::xml::readNumericAttribute<double>(node, "maxRadius", pt.maxRadius);
@@ -31,7 +31,7 @@ namespace game {
     }
 
 
-    CloudLayerParticleSimulation::config CloudLayerParticleSimulation::config::parse(const util::xml::XmlMultiTree &node) {
+    CloudLayerParticleSimulation::config CloudLayerParticleSimulation::config::parse(const XmlTree &node) {
         config c;
 
         c.noise = noise_config::parse(node.getChild("noise"));
@@ -221,7 +221,7 @@ namespace game {
 
 #pragma mark - CloudLayerParticleSystem
 
-    CloudLayerParticleSystem::config CloudLayerParticleSystem::config::parse(const util::xml::XmlMultiTree &node) {
+    CloudLayerParticleSystem::config CloudLayerParticleSystem::config::parse(const XmlTree &node) {
         config c;
         c.drawConfig.drawLayer = DrawLayers::EFFECTS;
         c.drawConfig = ParticleSystemDrawComponent::config::parse(node.getChild("draw"));

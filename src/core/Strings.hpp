@@ -17,7 +17,7 @@
 #include <string>
 #include <vector>
 
-#include "MathHelpers.hpp"
+#include "core/MathHelpers.hpp"
 
 /**
 	@file strings.h

@@ -5,10 +5,10 @@
 //  Created by Shamyl Zakariya on 3/4/18.
 //
 
-#include "EasingTestScenario.hpp"
-#include "DevComponents.hpp"
-#include "ImageProcessing.hpp"
-#include "Easing.hpp"
+#include "game/Tests/EasingTestScenario.hpp"
+#include "core/util/ImageProcessing.hpp"
+#include "core/util/Easing.hpp"
+#include "elements/Components/DevComponents.hpp"
 
 using namespace core;
 using namespace elements;

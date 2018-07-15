@@ -5,10 +5,10 @@
 //  Created by Shamyl Zakariya on 10/6/17.
 //
 
-#include "Planet.hpp"
+#include "game/KesslerSyndrome/elements/Planet.hpp"
 
-#include "TerrainDetail.hpp"
-#include "GameConstants.hpp"
+#include "elements/Terrain/TerrainDetail.hpp"
+#include "game/KesslerSyndrome/GameConstants.hpp"
 
 using namespace core;
 using namespace elements;
@@ -51,7 +51,7 @@ namespace game {
             return params;
         }
         
-        planet_generation::params::perimeter_attachment_params parseAttachmentGenerator(const core::util::xml::XmlMultiTree &node) {
+        planet_generation::params::perimeter_attachment_params parseAttachmentGenerator(const XmlTree &node) {
             planet_generation::params::perimeter_attachment_params p(0);
             p.batchId = util::xml::readNumericAttribute<size_t>(node, "batchId", batchId++);
             p.normalToUpDotTarget = util::xml::readNumericAttribute<double>(node, "normalToUpDotTarget", 1);
@@ -62,21 +62,21 @@ namespace game {
             return p;
         }
         
-        vector<planet_generation::params::perimeter_attachment_params> parseAttachmentGenerators(const core::util::xml::XmlMultiTree &node) {
+        vector<planet_generation::params::perimeter_attachment_params> parseAttachmentGenerators(const XmlTree &node) {
             vector<planet_generation::params::perimeter_attachment_params> params;
-            for (size_t i = 0;;i++) {
-                auto generator = node.getChild("generator", i);
-                if (!generator) {
-                    break;
+            
+            for (const auto &c : node.getChildren()) {
+                if (c->getTag() == "generator") {
+                    params.push_back(parseAttachmentGenerator(*c));
                 }
-                params.push_back(parseAttachmentGenerator(generator));
             }
+            
             return params;
         }
         
     }
 
-    Planet::config Planet::config::parse(core::util::xml::XmlMultiTree configNode) {
+    Planet::config Planet::config::parse(XmlTree configNode) {
         config c;
         c.seed = util::xml::readNumericAttribute<int>(configNode, "seed", c.seed);
         c.radius = util::xml::readNumericAttribute<double>(configNode, "radius", c.radius);
@@ -86,7 +86,7 @@ namespace game {
         return c;
     }
 
-    PlanetRef Planet::create(string name, terrain::WorldRef world, core::util::xml::XmlMultiTree planetNode, int drawLayer) {
+    PlanetRef Planet::create(string name, terrain::WorldRef world, XmlTree planetNode, int drawLayer) {
         dvec2 origin = util::xml::readPointAttribute(planetNode, "origin", dvec2(0, 0));
         double partitionSize = util::xml::readNumericAttribute<double>(planetNode, "partitionSize", 250);
         config surfaceConfig = config::parse(planetNode.getChild("surface"));

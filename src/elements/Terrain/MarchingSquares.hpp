@@ -8,7 +8,7 @@
 #ifndef MarchingSquares_h
 #define MarchingSquares_h
 
-#include "Core.hpp"
+#include "core/Core.hpp"
 
 ///////////////////////////////////////////////////////////////////////
 // Adapted from "Polygonising A Scalar Field" by Paul Bourke

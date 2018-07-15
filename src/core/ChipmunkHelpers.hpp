@@ -12,8 +12,8 @@
 #include <cinder/app/App.h>
 #include <chipmunk/chipmunk.h>
 
-#include "Common.hpp"
-#include "MathHelpers.hpp"
+#include "core/Common.hpp"
+#include "core/MathHelpers.hpp"
 
 inline cpVect cpv(const dvec2 &v) {
     return ::cpv(v.x, v.y);

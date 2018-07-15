@@ -6,7 +6,7 @@
 //
 //
 
-#include "DevComponents.hpp"
+#include "elements/Components/DevComponents.hpp"
 
 using namespace core;
 namespace elements {
@@ -129,7 +129,7 @@ namespace elements {
         dmat4 modelMatrix = glm::translate(dvec3(centerWorld, 0)) * glm::scale(dvec3(scale, 1));
         gl::multModelMatrix(modelMatrix);
         
-        _texture->bind(0);
+        gl::ScopedTextureBind stb(_texture, 0);
         _shader->uniform("Tex0", 0);
         
         _batch->draw();

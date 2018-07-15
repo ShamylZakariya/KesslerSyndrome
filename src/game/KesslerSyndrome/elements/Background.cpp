@@ -5,12 +5,12 @@
 //  Created by Shamyl Zakariya on 10/7/17.
 //
 
-#include "Background.hpp"
+#include "game/KesslerSyndrome/elements/Background.hpp"
 
 using namespace core;
 namespace game {
 
-    BackgroundFillDrawComponent::config BackgroundFillDrawComponent::config::parse(core::util::xml::XmlMultiTree node) {
+    BackgroundFillDrawComponent::config BackgroundFillDrawComponent::config::parse(const XmlTree &node) {
         config c;
 
         c.spaceColor = util::xml::readColorAttribute(node, "spaceColor", c.spaceColor);
@@ -98,15 +98,18 @@ namespace game {
         _batch->draw();
     }
 
-    Background::config Background::config::parse(core::util::xml::XmlMultiTree node) {
+    Background::config Background::config::parse(XmlTree node) {
         config c;
 
-        c.backgroundFill = BackgroundFillDrawComponent::config::parse(node.getChild("fill"));
+        if (node.hasChild("fill")) {
+            auto fill = node.getChild("fill");
+            c.backgroundFill = BackgroundFillDrawComponent::config::parse(fill);
+        }
 
         return c;
     }
 
-    BackgroundRef Background::create(core::util::xml::XmlMultiTree backgroundNode) {
+    BackgroundRef Background::create(XmlTree backgroundNode) {
         config c = config::parse(backgroundNode);
         BackgroundRef bg = make_shared<Background>();
 

@@ -9,9 +9,9 @@
 #ifndef Tracking_hpp
 #define Tracking_hpp
 
-#include "Object.hpp"
-#include "TimeState.hpp"
-#include "Viewport.hpp"
+#include "core/Object.hpp"
+#include "core/TimeState.hpp"
+#include "core/Viewport.hpp"
 
 namespace core {
 

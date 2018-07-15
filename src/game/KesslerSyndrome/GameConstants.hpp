@@ -8,7 +8,7 @@
 #ifndef GameConstants_hpp
 #define GameConstants_hpp
 
-#include "Core.hpp"
+#include "core/Core.hpp"
 
 namespace game {
 

@@ -10,10 +10,9 @@
 
 #include <cinder/Rand.h>
 
-#include "Core.hpp"
-
-#include "Terrain.hpp"
-#include "TerrainCutRecorder.hpp"
+#include "core/Core.hpp"
+#include "elements/Terrain/Terrain.hpp"
+#include "game/Tests/util/TerrainCutRecorder.hpp"
 
 class PerlinWorldTestScenario : public core::Scenario {
 public:

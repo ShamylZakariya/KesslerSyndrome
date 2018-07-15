@@ -9,7 +9,7 @@
 #ifndef TerrainDetail_h
 #define TerrainDetail_h
 
-#include "TerrainWorld.hpp"
+#include "elements/Terrain/TerrainWorld.hpp"
 
 #include <cinder/Log.h>
 #include <cinder/Triangulate.h>

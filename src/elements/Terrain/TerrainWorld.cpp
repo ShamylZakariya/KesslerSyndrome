@@ -6,20 +6,20 @@
 //
 //
 
-#include "TerrainWorld.hpp"
+#include <queue>
+#include <limits>
 
 #include <cinder/Triangulate.h>
 #include <cinder/Rand.h>
 #include <cinder/Xml.h>
 
-#include <queue>
-#include <limits>
+#include "elements/Terrain/TerrainWorld.hpp"
+#include "elements/Terrain/TerrainDetail.hpp"
+#include "elements/Terrain/TerrainDetail_MarchingSquares.hpp"
+#include "elements/Terrain/TerrainDetail_Svg.hpp"
 
-#include "ContourSimplification.hpp"
-#include "TerrainDetail.hpp"
-#include "TerrainDetail_MarchingSquares.hpp"
-#include "TerrainDetail_Svg.hpp"
-#include "SvgParsing.hpp"
+#include "core/util/ContourSimplification.hpp"
+#include "core/util/SvgParsing.hpp"
 
 using namespace core;
 

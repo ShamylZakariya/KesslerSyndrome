@@ -6,9 +6,9 @@
 //  Copyright © 2018 Shamyl Zakariya. All rights reserved.
 //
 
-#include "CrackGeometry.hpp"
-#include "TerrainDetail.hpp"
-#include "GameConstants.hpp"
+#include "game/KesslerSyndrome/elements/CrackGeometry.hpp"
+#include "elements/Terrain/TerrainDetail.hpp"
+#include "game/KesslerSyndrome/GameConstants.hpp"
 
 using namespace core;
 using namespace elements;

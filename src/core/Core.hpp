@@ -11,26 +11,26 @@
 
 // base stuff
 
-#include "Common.hpp"
-#include "ChipmunkHelpers.hpp"
-#include "Exception.hpp"
-#include "InputDispatcher.hpp"
-#include "MathHelpers.hpp"
-#include "Signals.hpp"
-#include "StopWatch.hpp"
-#include "Strings.hpp"
-#include "TimeState.hpp"
-#include "RenderState.hpp"
-#include "Viewport.hpp"
+#include "core/Common.hpp"
+#include "core/ChipmunkHelpers.hpp"
+#include "core/Exception.hpp"
+#include "core/InputDispatcher.hpp"
+#include "core/MathHelpers.hpp"
+#include "core/Signals.hpp"
+#include "core/StopWatch.hpp"
+#include "core/Strings.hpp"
+#include "core/TimeState.hpp"
+#include "core/RenderState.hpp"
+#include "core/Viewport.hpp"
 
 // higher level stuff
 
-#include "App.hpp"
-#include "Object.hpp"
-#include "Entity.hpp"
-#include "Stage.hpp"
-#include "Compositor.hpp"
-#include "Scenario.hpp"
-#include "Tracking.hpp"
+#include "core/App.hpp"
+#include "core/Object.hpp"
+#include "core/Entity.hpp"
+#include "core/Stage.hpp"
+#include "core/Compositor.hpp"
+#include "core/Scenario.hpp"
+#include "core/Tracking.hpp"
 
 #endif /* Core_h */

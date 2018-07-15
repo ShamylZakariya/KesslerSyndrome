@@ -11,10 +11,10 @@
 
 #include <cinder/Perlin.h>
 
-#include "Object.hpp"
-#include "TimeState.hpp"
-#include "Viewport.hpp"
-#include "Tracking.hpp"
+#include "core/Object.hpp"
+#include "core/TimeState.hpp"
+#include "core/Viewport.hpp"
+#include "core/Tracking.hpp"
 
 namespace elements {
     

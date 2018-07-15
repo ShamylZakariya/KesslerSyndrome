@@ -6,7 +6,7 @@
 //
 //
 
-#include "Entity.hpp"
+#include "core/Entity.hpp"
 
 namespace core {
 
@@ -15,7 +15,7 @@ namespace core {
      bool _died;
      */
 
-    HealthComponent::config HealthComponent::loadConfig(util::xml::XmlMultiTree node) {
+    HealthComponent::config HealthComponent::loadConfig(const XmlTree &node) {
         config c;
         c.maxHealth = util::xml::readNumericAttribute<double>(node, "max_health", 100);
         c.health = util::xml::readNumericAttribute<double>(node, "health", c.maxHealth);

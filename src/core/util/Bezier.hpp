@@ -9,7 +9,7 @@
 #ifndef Bezier_hpp
 #define Bezier_hpp
 
-#include "MathHelpers.hpp"
+#include "core/MathHelpers.hpp"
 
 namespace core {
     namespace util {

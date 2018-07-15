@@ -9,7 +9,7 @@
 #ifndef MultiViewportTestScenario_hpp
 #define MultiViewportTestScenario_hpp
 
-#include "Core.hpp"
+#include "core/Core.hpp"
 
 class MultiViewportTestScenario : public core::Scenario {
 public:

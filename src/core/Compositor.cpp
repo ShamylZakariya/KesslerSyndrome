@@ -6,10 +6,10 @@
 //  Copyright © 2018 Shamyl Zakariya. All rights reserved.
 //
 
-#include "Compositor.hpp"
-#include "GlslProgLoader.hpp"
-
 #include <cinder/gl/scoped.h>
+
+#include "core/Compositor.hpp"
+#include "core/util/GlslProgLoader.hpp"
 
 namespace core {
     
@@ -67,7 +67,7 @@ namespace core {
         
         gl::scale(vec3(width,height,1));
         
-        _fbo->getColorTexture()->bind(0);
+        gl::ScopedTextureBind stb(_fbo->getColorTexture(), 0);
         _shader->uniform("ColorTex", 0);
 
         gl::ScopedBlend sb(_srcRgb, _dstRgb, _srcAlpha, _dstAlpha);

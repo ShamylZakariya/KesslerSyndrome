@@ -9,13 +9,14 @@
 #ifndef PlayerDrawingComponents_hpp
 #define PlayerDrawingComponents_hpp
 
-#include "Core.hpp"
-#include "Svg.hpp"
-#include "ParticleSystem.hpp"
-
-#include "PlayerPhysicsComponents.hpp"
-
 #include <cinder/Perlin.h>
+
+#include "core/Core.hpp"
+#include "core/util/Svg.hpp"
+#include "elements/ParticleSystem/ParticleSystem.hpp"
+
+#include "game/KesslerSyndrome/entities/player/PlayerPhysicsComponents.hpp"
+
 
 namespace game {
     

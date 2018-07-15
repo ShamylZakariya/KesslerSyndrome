@@ -9,8 +9,8 @@
 #ifndef RenderState_h
 #define RenderState_h
 
-#include "TimeState.hpp"
-#include "Viewport.hpp"
+#include "core/TimeState.hpp"
+#include "core/Viewport.hpp"
 
 namespace core {
 

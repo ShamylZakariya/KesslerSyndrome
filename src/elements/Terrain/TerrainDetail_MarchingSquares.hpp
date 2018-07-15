@@ -8,8 +8,10 @@
 #ifndef TerrainDetail_MarchingSquares_hpp
 #define TerrainDetail_MarchingSquares_hpp
 
-#include "Core.hpp"
-#include "MarchingSquares.hpp"
+#include "core/Core.hpp"
+
+#include "core/util/ContourSimplification.hpp"
+#include "elements/Terrain/MarchingSquares.hpp"
 
 namespace elements {
     namespace terrain {

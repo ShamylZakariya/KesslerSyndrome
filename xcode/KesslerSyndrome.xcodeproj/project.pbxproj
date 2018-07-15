@@ -790,10 +790,6 @@
 					"$(inherited)",
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
-				HEADER_SEARCH_PATHS = (
-					"\"$(CINDER_PATH)/include\"",
-					"$(CHIPMUNK_PATH)/include\"",
-				);
 				INFOPLIST_FILE = "Tests-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				OTHER_LDFLAGS = (
@@ -803,10 +799,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "org.zakariya.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SYMROOT = ./build;
-				USER_HEADER_SEARCH_PATHS = (
-					"\"$(CINDER_PATH)/include\"",
-					"$(CHIPMUNK_PATH)/include\" ../include",
-				);
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -831,10 +823,6 @@
 					"$(inherited)",
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
-				HEADER_SEARCH_PATHS = (
-					"\"$(CINDER_PATH)/include\"",
-					"$(CHIPMUNK_PATH)/include\"",
-				);
 				INFOPLIST_FILE = "Tests-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				OTHER_LDFLAGS = (
@@ -845,10 +833,6 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRIP_INSTALLED_PRODUCT = YES;
 				SYMROOT = ./build;
-				USER_HEADER_SEARCH_PATHS = (
-					"\"$(CINDER_PATH)/include\"",
-					"$(CHIPMUNK_PATH)/include\" ../include",
-				);
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
@@ -873,10 +857,6 @@
 					"$(inherited)",
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
-				HEADER_SEARCH_PATHS = (
-					"\"$(CINDER_PATH)/include\"",
-					"$(CHIPMUNK_PATH)/include\"",
-				);
 				INFOPLIST_FILE = "KesslerSyndrome-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				OTHER_LDFLAGS = (
@@ -886,10 +866,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = org.zakariya.KesslerSyndrome;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SYMROOT = ./build;
-				USER_HEADER_SEARCH_PATHS = (
-					"\"$(CINDER_PATH)/include\"",
-					"$(CHIPMUNK_PATH)/include\" ../include",
-				);
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -915,10 +891,6 @@
 					"$(inherited)",
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
-				HEADER_SEARCH_PATHS = (
-					"\"$(CINDER_PATH)/include\"",
-					"$(CHIPMUNK_PATH)/include\"",
-				);
 				INFOPLIST_FILE = "KesslerSyndrome-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				OTHER_LDFLAGS = (
@@ -929,10 +901,6 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRIP_INSTALLED_PRODUCT = YES;
 				SYMROOT = ./build;
-				USER_HEADER_SEARCH_PATHS = (
-					"\"$(CINDER_PATH)/include\"",
-					"$(CHIPMUNK_PATH)/include\" ../include",
-				);
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
@@ -940,11 +908,10 @@
 		C01FCF4F08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
 				CHIPMUNK_PATH = "../vendor/Chipmunk-7.0.1";
 				CINDER_PATH = ../vendor/cinder_0.9.0_mac;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
@@ -972,13 +939,16 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = "\"$(CINDER_PATH)/include\"";
+				HEADER_SEARCH_PATHS = (
+					"\"$(CINDER_PATH)/include\"",
+					"$(CHIPMUNK_PATH)/include\"",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = (
-					"\"$(CINDER_PATH)/include\"",
 					../include,
+					../src,
 				);
 			};
 			name = Debug;
@@ -986,11 +956,10 @@
 		C01FCF5008A954540054247B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
 				CHIPMUNK_PATH = "../vendor/Chipmunk-7.0.1";
 				CINDER_PATH = ../vendor/cinder_0.9.0_mac;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
@@ -1017,12 +986,15 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = "\"$(CINDER_PATH)/include\"";
+				HEADER_SEARCH_PATHS = (
+					"\"$(CINDER_PATH)/include\"",
+					"$(CHIPMUNK_PATH)/include\"",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = (
-					"\"$(CINDER_PATH)/include\"",
 					../include,
+					../src,
 				);
 			};
 			name = Release;

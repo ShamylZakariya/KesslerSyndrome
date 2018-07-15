@@ -6,10 +6,9 @@
 //
 //
 
-#include "Scenario.hpp"
-
-#include "Stage.hpp"
-#include "Strings.hpp"
+#include "core/Scenario.hpp"
+#include "core/Stage.hpp"
+#include "core/Strings.hpp"
 
 namespace core {
 

@@ -8,7 +8,7 @@
 #ifndef TerrainCutRecorder_hpp
 #define TerrainCutRecorder_hpp
 
-#include "Core.hpp"
+#include "core/Core.hpp"
 
 class TerrainCutRecorder : public core::signals::receiver {
 public:

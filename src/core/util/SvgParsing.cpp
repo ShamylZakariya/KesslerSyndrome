@@ -6,11 +6,11 @@
 //
 //
 
-#include "SvgParsing.hpp"
 
 #include <cinder/Xml.h>
 
-#include "Strings.hpp"
+#include "core/util/SvgParsing.hpp"
+#include "core/Strings.hpp"
 
 using namespace core::strings;
 

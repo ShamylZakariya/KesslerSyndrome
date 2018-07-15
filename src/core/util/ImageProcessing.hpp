@@ -8,12 +8,11 @@
 #ifndef ImageProcessing_hpp
 #define ImageProcessing_hpp
 
-#include "Common.hpp"
-#include "MathHelpers.hpp"
-
 #include <cinder/Channel.h>
 #include <cinder/Perlin.h>
 
+#include "core/Common.hpp"
+#include "core/MathHelpers.hpp"
 
 namespace core {
     namespace util {

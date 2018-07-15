@@ -6,9 +6,9 @@
 //
 //
 
-#include "Object.hpp"
-
-#include "Stage.hpp"
+#include "core/Object.hpp"
+#include "core/Stage.hpp"
+#include "core/ChipmunkHelpers.hpp"
 
 namespace core {
 

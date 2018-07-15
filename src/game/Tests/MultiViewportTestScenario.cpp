@@ -6,17 +6,13 @@
 //  Copyright © 2018 Shamyl Zakariya. All rights reserved.
 //
 
-#include "MultiViewportTestScenario.hpp"
-
-#include "App.hpp"
-#include "DevComponents.hpp"
-#include "ImageProcessing.hpp"
-#include "GlslProgLoader.hpp"
-#include "Easing.hpp"
-#include "Tracking.hpp"
-#include "VoronoiSplitView.hpp"
-
 #include <cinder/gl/scoped.h>
+
+#include "game/Tests/MultiViewportTestScenario.hpp"
+#include "core/util/GlslProgLoader.hpp"
+#include "core/Tracking.hpp"
+#include "elements/Components/DevComponents.hpp"
+#include "elements/SplitView/VoronoiSplitView.hpp"
 
 using namespace core;
 using namespace elements;

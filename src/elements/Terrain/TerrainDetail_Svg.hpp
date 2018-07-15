@@ -8,7 +8,7 @@
 #ifndef TerrainDetail_Svg_hpp
 #define TerrainDetail_Svg_hpp
 
-#include "TerrainDetail.hpp"
+#include "elements/Terrain/TerrainDetail.hpp"
 
 namespace elements {
     namespace terrain {

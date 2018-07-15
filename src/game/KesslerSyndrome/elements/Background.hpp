@@ -8,10 +8,10 @@
 #ifndef Background_hpp
 #define Background_hpp
 
-#include "Core.hpp"
-#include "Xml.hpp"
+#include "core/Core.hpp"
+#include "core/util/Xml.hpp"
 
-#include "GameConstants.hpp"
+#include "game/KesslerSyndrome/GameConstants.hpp"
 
 namespace game {
 
@@ -35,7 +35,7 @@ namespace game {
                     steps(8) {
             }
 
-            static config parse(core::util::xml::XmlMultiTree node);
+            static config parse(const XmlTree &node);
         };
 
     public:
@@ -65,10 +65,10 @@ namespace game {
             config() {
             }
 
-            static config parse(core::util::xml::XmlMultiTree node);
+            static config parse(XmlTree node);
         };
 
-        static BackgroundRef create(core::util::xml::XmlMultiTree backgroundNode);
+        static BackgroundRef create(XmlTree backgroundNode);
 
     public:
 

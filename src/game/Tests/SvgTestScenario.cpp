@@ -6,10 +6,8 @@
 //
 //
 
-#include "SvgTestScenario.hpp"
-#include "App.hpp"
-
-#include "DevComponents.hpp"
+#include "game/Tests/SvgTestScenario.hpp"
+#include "elements/Components/DevComponents.hpp"
 
 SvgTestScenario::SvgTestScenario() {
 }
@@ -31,7 +29,7 @@ void SvgTestScenario::setup() {
     }));
 
     testSimpleSvgLoad();
-    //testSimpleSvgGroupOriginTransforms();
+    testSimpleSvgGroupOriginTransforms();
 }
 
 void SvgTestScenario::cleanup() {
@@ -68,9 +66,6 @@ bool SvgTestScenario::keyDown(const app::KeyEvent &event) {
     if (event.getChar() == 'r') {
         reset();
         return true;
-    } else if (event.getCode() == app::KeyEvent::KEY_SPACE) {
-
-        return true;
     }
     return false;
 }
@@ -86,17 +81,21 @@ void SvgTestScenario::testSimpleSvgLoad() {
     auto doc = util::svg::Group::loadSvgDocument(app::loadAsset("svg_tests/eggsac.svg"), 1);
     doc->trace();
     getStage()->addObject(Object::with("Hello SVG", {make_shared<util::svg::SvgDrawComponent>(doc)}));
+
+    CI_ASSERT_MSG(doc->findGroupById("bulb"), "Expect findGroupById to work");
+    CI_ASSERT_MSG(doc->findGroupById("g3862"), "Expect findGroupById to work");
+    CI_ASSERT_MSG(doc->findShapeById("path3836"), "Expect findShapeById to work");
 }
 
 void SvgTestScenario::testSimpleSvgGroupOriginTransforms() {
     auto doc = util::svg::Group::loadSvgDocument(app::loadAsset("svg_tests/group_origin_test.svg"), 1);
-    auto root = doc->find("Page-1/group_origin_test/root");
-    auto green = root->find("green");
-    auto green1 = green->find("green-1");
-    auto green2 = green->find("green-2");
-    auto purple = root->find("purple");
-    auto purple1 = purple->find("purple-1");
-    auto purple2 = purple->find("purple-2");
+    auto root = doc->findGroup("Page-1/group_origin_test/root");
+    auto green = root->findGroup("green");
+    auto green1 = green->findGroup("green-1");
+    auto green2 = green->findGroup("green-2");
+    auto purple = root->findGroup("purple");
+    auto purple1 = purple->findGroup("purple-1");
+    auto purple2 = purple->findGroup("purple-2");
 
     root->setPosition(-root->getDocumentSize() / 2.0);
 

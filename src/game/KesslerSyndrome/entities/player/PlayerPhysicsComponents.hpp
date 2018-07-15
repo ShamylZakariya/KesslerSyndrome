@@ -9,8 +9,8 @@
 #ifndef PlayerPhysicsComponents_hpp
 #define PlayerPhysicsComponents_hpp
 
-#include "Core.hpp"
-#include "PlayerInputComponents.hpp"
+#include "core/Core.hpp"
+#include "game/KesslerSyndrome/entities/player/PlayerInputComponents.hpp"
 
 namespace game {
     

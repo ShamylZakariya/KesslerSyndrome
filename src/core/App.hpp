@@ -10,14 +10,12 @@
 #define GameApp_hpp
 
 #include <stdio.h>
-#include "TimeState.hpp"
-
 #include <cinder/app/App.h>
 
-#include "InputDispatcher.hpp"
-#include "ChipmunkHelpers.hpp"
-#include "Scenario.hpp"
-
+#include "core/TimeState.hpp"
+#include "core/InputDispatcher.hpp"
+#include "core/ChipmunkHelpers.hpp"
+#include "core/Scenario.hpp"
 
 namespace core {
 

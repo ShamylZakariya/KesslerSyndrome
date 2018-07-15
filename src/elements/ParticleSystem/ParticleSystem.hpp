@@ -10,7 +10,7 @@
 
 #include <cinder/Rand.h>
 
-#include "BaseParticleSystem.hpp"
+#include "elements/ParticleSystem/BaseParticleSystem.hpp"
 
 namespace elements {
 
@@ -453,7 +453,7 @@ namespace elements {
                     atlasType(elements::Atlas::None) {
             }
 
-            static config parse(const core::util::xml::XmlMultiTree &node);
+            static config parse(const XmlTree &node);
         };
 
     public:
@@ -537,7 +537,7 @@ namespace elements {
                     kinematicParticleGravitationLayerMask(core::ALL_GRAVITATION_LAYERS) {
             }
 
-            static config parse(const core::util::xml::XmlMultiTree &node);
+            static config parse(const XmlTree &node);
         };
 
         static ParticleSystemRef create(std::string name, const config &c);

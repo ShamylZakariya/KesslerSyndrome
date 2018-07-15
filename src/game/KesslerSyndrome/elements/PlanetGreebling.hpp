@@ -8,9 +8,9 @@
 #ifndef PlanetGreebling_hpp
 #define PlanetGreebling_hpp
 
-#include "Planet.hpp"
-#include "ParticleSystem.hpp"
-#include "GameConstants.hpp"
+#include "elements/ParticleSystem/ParticleSystem.hpp"
+#include "game/KesslerSyndrome/elements/Planet.hpp"
+#include "game/KesslerSyndrome/GameConstants.hpp"
 
 namespace game {
     
@@ -165,7 +165,7 @@ namespace game {
             atlasType(elements::Atlas::None)
             {}
             
-            static boost::optional<config> parse(const core::util::xml::XmlMultiTree &node);
+            static boost::optional<config> parse(const XmlTree &node);
 
             bool sanityCheck() const;
             GreeblingParticleSimulation::config createSimulationConfig() const;

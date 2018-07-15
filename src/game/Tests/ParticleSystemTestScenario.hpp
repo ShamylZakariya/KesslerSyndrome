@@ -10,12 +10,12 @@
 
 #include <cinder/Rand.h>
 
-#include "Core.hpp"
-#include "Svg.hpp"
+#include "core/Core.hpp"
+#include "core/util/Svg.hpp"
 
-#include "Terrain.hpp"
-#include "ParticleSystem.hpp"
-#include "ViewportController.hpp"
+#include "elements/Terrain/Terrain.hpp"
+#include "elements/ParticleSystem/ParticleSystem.hpp"
+#include "elements/Components/ViewportController.hpp"
 
 
 class ParticleSystemTestScenario : public core::Scenario {

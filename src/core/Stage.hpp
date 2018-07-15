@@ -9,11 +9,11 @@
 #ifndef Stage_hpp
 #define Stage_hpp
 
-#include "Common.hpp"
-#include "Object.hpp"
-#include "Signals.hpp"
-#include "RenderState.hpp"
-#include "TimeState.hpp"
+#include "core/Common.hpp"
+#include "core/Object.hpp"
+#include "core/Signals.hpp"
+#include "core/RenderState.hpp"
+#include "core/TimeState.hpp"
 
 namespace core {
 

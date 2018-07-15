@@ -11,14 +11,14 @@
 
 #include <cinder/Xml.h>
 
-#include "Core.hpp"
+#include "core/Core.hpp"
 
-#include "Background.hpp"
-#include "Planet.hpp"
-#include "CloudLayerParticleSystem.hpp"
-#include "ParticleSystem.hpp"
-#include "ViewportController.hpp"
-#include "Player.hpp"
+#include "elements/ParticleSystem/ParticleSystem.hpp"
+#include "elements/Components/ViewportController.hpp"
+#include "game/KesslerSyndrome/elements/Background.hpp"
+#include "game/KesslerSyndrome/elements/Planet.hpp"
+#include "game/KesslerSyndrome/elements/CloudLayerParticleSystem.hpp"
+#include "game/KesslerSyndrome/entities/player/Player.hpp"
 
 namespace game {
 
@@ -78,7 +78,7 @@ namespace game {
 
         CloudLayerParticleSystemRef loadCloudLayer(const XmlTree &cloudLayer, int drawLayer);
         
-        void loadGreebleSystem(const core::util::xml::XmlMultiTree &greebleNode);
+        void loadGreebleSystem(const XmlTree &greebleNode);
 
         void buildExplosionParticleSystem();
 

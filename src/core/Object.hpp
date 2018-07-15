@@ -9,11 +9,11 @@
 #ifndef Object_hpp
 #define Object_hpp
 
-#include "Common.hpp"
-#include "InputDispatcher.hpp"
-#include "RenderState.hpp"
-#include "Signals.hpp"
-#include "TimeState.hpp"
+#include "core/Common.hpp"
+#include "core/InputDispatcher.hpp"
+#include "core/RenderState.hpp"
+#include "core/Signals.hpp"
+#include "core/TimeState.hpp"
 
 namespace core {
 

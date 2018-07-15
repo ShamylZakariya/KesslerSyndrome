@@ -5,17 +5,17 @@
 //  Created by Shamyl Zakariya on 2/1/18.
 //
 
-#include "PlanetGenerator.hpp"
+#include "game/KesslerSyndrome/elements/PlanetGenerator.hpp"
 
 #include <cinder/Rand.h>
 #include <cinder/Perlin.h>
 
-#include "MarchingSquares.hpp"
-#include "ContourSimplification.hpp"
-#include "ImageProcessing.hpp"
+#include "core/util/ContourSimplification.hpp"
+#include "core/util/ImageProcessing.hpp"
 
-#include "TerrainDetail.hpp"
-#include "TerrainDetail_MarchingSquares.hpp"
+#include "elements/Terrain/MarchingSquares.hpp"
+#include "elements/Terrain/TerrainDetail.hpp"
+#include "elements/Terrain/TerrainDetail_MarchingSquares.hpp"
 
 using namespace core;
 using namespace elements;

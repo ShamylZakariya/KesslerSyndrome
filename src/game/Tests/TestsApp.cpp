@@ -5,17 +5,17 @@
 //  Created by Shamyl Zakariya on 10/9/17.
 //
 
-#include "cinder/app/RendererGl.h"
-#include "App.hpp"
+#include <cinder/app/RendererGl.h>
+#include "core/Core.hpp"
 
-#include "TerrainTestScenario.hpp"
-#include "TerrainAttachmentsTestScenario.hpp"
-#include "SvgTestScenario.hpp"
-#include "PerlinWorldTestScenario.hpp"
-#include "IPTestsScenario.hpp"
-#include "EasingTestScenario.hpp"
-#include "ParticleSystemTestScenario.hpp"
-#include "MultiViewportTestScenario.hpp"
+#include "game/Tests/TerrainTestScenario.hpp"
+#include "game/Tests/TerrainAttachmentsTestScenario.hpp"
+#include "game/Tests/SvgTestScenario.hpp"
+#include "game/Tests/PerlinWorldTestScenario.hpp"
+#include "game/Tests/IPTestsScenario.hpp"
+#include "game/Tests/EasingTestScenario.hpp"
+#include "game/Tests/ParticleSystemTestScenario.hpp"
+#include "game/Tests/MultiViewportTestScenario.hpp"
 
 #define SCENARIO_FACTORY(s) [](){ return make_pair(#s, make_shared<s>()); }
 

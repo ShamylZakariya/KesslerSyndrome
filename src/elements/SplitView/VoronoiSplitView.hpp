@@ -9,10 +9,8 @@
 #ifndef VoronoiSplitView_hpp
 #define VoronoiSplitView_hpp
 
-#include "Core.hpp"
-#include "Tracking.hpp"
-
-#include <cinder/gl/scoped.h>
+#include "core/Core.hpp"
+#include "core/Tracking.hpp"
 
 namespace elements {
     
