@@ -16,6 +16,7 @@
 #include "game/Tests/EasingTestScenario.hpp"
 #include "game/Tests/ParticleSystemTestScenario.hpp"
 #include "game/Tests/MultiViewportTestScenario.hpp"
+#include "game/Tests/FilterStackTestScenario.hpp"
 
 #define SCENARIO_FACTORY(s) [](){ return make_pair(#s, make_shared<s>()); }
 
@@ -38,6 +39,7 @@ public:
         _scenarioFactories = {
             SCENARIO_FACTORY(MultiViewportTestScenario),
             SCENARIO_FACTORY(ParticleSystemTestScenario),
+            SCENARIO_FACTORY(FilterStackTestScenario),
             SCENARIO_FACTORY(PerlinWorldTestScenario),
             SCENARIO_FACTORY(SvgTestScenario),
             SCENARIO_FACTORY(TerrainAttachmentsTestScenario),
@@ -46,7 +48,7 @@ public:
             SCENARIO_FACTORY(TerrainTestScenario),
         };
         
-        _index = 0;
+        _index = 2;
         loadScenario();
     }
     

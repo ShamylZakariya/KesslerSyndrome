@@ -17,6 +17,7 @@
 
 #include "core/Common.hpp"
 #include "core/Viewport.hpp"
+#include "core/FilterStack.hpp"
 
 namespace core {
 
@@ -34,7 +35,7 @@ namespace core {
         /**
          Composite input(s) to a target, with a given width & height
          */
-        virtual void composite(int width, int height) = 0;
+        virtual void composite(const render_state &state, int width, int height) = 0;
         
         /**
          Standard time update
@@ -66,7 +67,10 @@ namespace core {
         GLenum getBlendSrcAlpha() const { return _srcAlpha; }
         GLenum getBlendDstAlpha() const { return _dstAlpha; }
         
-        void composite(int width, int height) override;
+        void composite(const render_state &state, int width, int height) override;
+        void update(const time_state &time) override;
+        
+        const FilterStackRef getFilterStack() const { return _filterStack; }
     
     protected:
         
@@ -74,16 +78,19 @@ namespace core {
         gl::GlslProgRef _shader;
         gl::BatchRef _batch;
         GLenum _srcRgb, _dstRgb, _srcAlpha, _dstAlpha;
+        FilterStackRef _filterStack;
 
     };
     
+    SMART_PTR(ViewportCompositor);
+
     class ViewportCompositor : public FboCompositor {
     public:
         
         ViewportCompositor(BaseViewportRef viewport);
         ViewportCompositor(BaseViewportRef viewport, std::string shaderAssetPath);
         
-        void composite(int width, int height) override;
+        void composite(const render_state &state, int width, int height) override;
 
     protected:
         

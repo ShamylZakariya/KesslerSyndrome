@@ -37,7 +37,7 @@ namespace elements {
     {
     }
     
-    void VoronoiSplitViewCompositor::composite(int width, int height) {
+    void VoronoiSplitViewCompositor::composite(const render_state &state, int width, int height) {
         gl::ScopedViewport sv(0,0,width,height);
         
         gl::ScopedMatrices sm;

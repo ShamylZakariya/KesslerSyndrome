@@ -26,7 +26,7 @@ namespace elements {
         
         VoronoiSplitViewCompositor(const core::BaseViewportRef &viewportA, const core::BaseViewportRef &viewportB);
         
-        void composite(int width, int height) override;
+        void composite(const core::render_state &state, int width, int height) override;
         
         void setSplitSideDir(dvec2 dir) {
             _side = dir;

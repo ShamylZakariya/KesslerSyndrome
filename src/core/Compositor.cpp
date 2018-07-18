@@ -34,7 +34,8 @@ namespace core {
             _srcRgb(GL_SRC_ALPHA),
             _dstRgb(GL_ONE_MINUS_SRC_ALPHA),
             _srcAlpha(GL_ONE),
-            _dstAlpha(GL_ZERO)
+            _dstAlpha(GL_ZERO),
+            _filterStack(make_shared<FilterStack>())
     {
     }
 
@@ -44,7 +45,8 @@ namespace core {
             _srcRgb(GL_SRC_ALPHA),
             _dstRgb(GL_ONE_MINUS_SRC_ALPHA),
             _srcAlpha(GL_ONE),
-            _dstAlpha(GL_ZERO)
+            _dstAlpha(GL_ZERO),
+            _filterStack(make_shared<FilterStack>())
     {
     }
 
@@ -58,7 +60,11 @@ namespace core {
         _dstAlpha = dstAlpha;
     }
     
-    void FboCompositor::composite(int width, int height) {
+    void FboCompositor::composite(const render_state &state, int width, int height) {
+        gl::FboRef src = _fbo;
+        if (!_filterStack->isEmpty()) {
+            src = _filterStack->execute(state, src);
+        }
         
         gl::ScopedViewport sv(0,0,width,height);
 
@@ -67,11 +73,15 @@ namespace core {
         
         gl::scale(vec3(width,height,1));
         
-        gl::ScopedTextureBind stb(_fbo->getColorTexture(), 0);
+        gl::ScopedTextureBind stb(src->getColorTexture(), 0);
         _shader->uniform("ColorTex", 0);
 
         gl::ScopedBlend sb(_srcRgb, _dstRgb, _srcAlpha, _dstAlpha);
         _batch->draw();
+    }
+    
+    void FboCompositor::update(const time_state &time) {
+        _filterStack->update(time);
     }
 
 #pragma mark - ViewportCompositor
@@ -85,8 +95,8 @@ namespace core {
             _viewport(viewport)
     {}
 
-    void ViewportCompositor::composite(int width, int height) {
+    void ViewportCompositor::composite(const render_state &state, int width, int height) {
         setFbo(_viewport->getFbo());
-        FboCompositor::composite(width,height);
+        FboCompositor::composite(state, width,height);
     }
 }
