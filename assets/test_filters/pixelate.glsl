@@ -15,15 +15,17 @@ void main(void) {
 
 fragment:
 #version 150
+uniform ivec2 ciWindowSize;
+
 uniform sampler2D ColorTex;
-uniform vec4 Offset;
-uniform vec4 Multiplier;
+uniform float PixelSize;
 
 in vec2 TexCoord;
 
 out vec4 oColor;
 
 void main(void) {
-    vec4 tex = texture(ColorTex, TexCoord);
-    oColor = Offset + (tex * Multiplier);
+    vec2 coord = round((TexCoord * ciWindowSize) / PixelSize) * (PixelSize / ciWindowSize);
+    vec4 tex = texture(ColorTex, coord);
+    oColor = tex;
 }

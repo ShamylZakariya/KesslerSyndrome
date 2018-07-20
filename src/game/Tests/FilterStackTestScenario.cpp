@@ -37,22 +37,25 @@ namespace {
         
     };
     
-    class SimpleFilter : public Filter {
+    class SimpleGlslFilter : public Filter {
     public:
-        SimpleFilter(const gl::GlslProgRef &shader):
+        SimpleGlslFilter(const gl::GlslProgRef &shader):
                 _shader(shader)
         {}
         
     protected:
         
+        virtual void _bindUniforms(const render_state &state, const gl::FboRef &input) {
+            _shader->uniform("ColorTex", 0);
+        }
+        
         void _render( const render_state &state, const gl::FboRef &input ) override {
             if (!_blitter) {
                 _blitter = _createBlitter(_shader);
             }
-            
+            _bindUniforms(state, input);
+
             gl::ScopedTextureBind stb(input->getColorTexture(), 0);
-            _shader->uniform("ColorTex", 0);
-            
             _blitter->draw();
         }
         
@@ -60,6 +63,57 @@ namespace {
 
         gl::GlslProgRef _shader;
         gl::BatchRef _blitter;
+
+    };
+    
+    class ColorshiftFilter : public SimpleGlslFilter {
+    public:
+        ColorshiftFilter(ColorA offset = ColorA(0,0,0,0), ColorA multiplier = ColorA(1,1,1,1)):
+                SimpleGlslFilter(util::loadGlslAsset("test_filters/colorshift.glsl")),
+                _colorOffset(offset),
+                _colorMultiplier(multiplier)
+        {}
+        
+        void setColorOffset(ColorA offset) { _colorOffset = offset; }
+        ColorA getColorOffset() const { return _colorOffset; }
+
+        void setColorMultiplier(ColorA offset) { _colorMultiplier = offset; }
+        ColorA getColorMultiplier() const { return _colorMultiplier; }
+
+    protected:
+        
+        void _bindUniforms(const render_state &state, const gl::FboRef &input) override {
+            SimpleGlslFilter::_bindUniforms(state, input);
+            _shader->uniform("Offset", _colorOffset);
+            _shader->uniform("Multiplier", _colorMultiplier);
+        }
+        
+    private:
+        
+        ColorA _colorOffset, _colorMultiplier;
+        
+    };
+    
+    class PixelateFilter : public SimpleGlslFilter {
+    public:
+        PixelateFilter(int pixelSize):
+                SimpleGlslFilter(util::loadGlslAsset("test_filters/pixelate.glsl")),
+                _pixelSize(pixelSize)
+        {}
+        
+        void setPixelSize(int ps) { _pixelSize = max<int>(ps, 1); }
+        int getPixelSize() const { return _pixelSize; }
+        
+    protected:
+        
+        void _bindUniforms(const render_state &state, const gl::FboRef &input) override {
+            SimpleGlslFilter::_bindUniforms(state, input);
+            _shader->uniform("PixelSize", static_cast<float>(_pixelSize));
+        }
+
+    protected:
+        
+        int _pixelSize;
 
     };
     
@@ -103,8 +157,26 @@ void FilterStackTestScenario::setup() {
     auto composer = getViewportComposer();
     auto compositor = dynamic_pointer_cast<ViewportCompositor>(composer->getCompositor());
     
-    auto colorshiftFilter = make_shared<SimpleFilter>(util::loadGlslAsset("test_filters/colorshift.glsl"));
-    compositor->getFilterStack()->push(colorshiftFilter);
+    auto colorshiftFilter = make_shared<ColorshiftFilter>(ColorA(0,0.2,0,0), ColorA(0.5,0.6,1.5,1));
+    auto pixelateFilter = make_shared<PixelateFilter>(16);
+    compositor->getFilterStack()->push({ colorshiftFilter, pixelateFilter });
+
+
+    // track 'r' for resetting scenario
+    getStage()->addObject(Object::with("InputDelegation",{
+        elements::KeyboardDelegateComponent::create(0,{ cinder::app::KeyEvent::KEY_RIGHTBRACKET,cinder::app::KeyEvent::KEY_LEFTBRACKET })->onPress([pixelateFilter, colorshiftFilter](int keyCode){
+            switch (keyCode) {
+                case cinder::app::KeyEvent::KEY_RIGHTBRACKET:
+                    pixelateFilter->setPixelSize(pixelateFilter->getPixelSize() + 1);
+                    break;
+                case cinder::app::KeyEvent::KEY_LEFTBRACKET:
+                    pixelateFilter->setPixelSize(pixelateFilter->getPixelSize() - 1);
+                    break;
+                default: break;
+            }
+        }),
+    }));
+
 }
 
 void FilterStackTestScenario::cleanup() {
