@@ -14,8 +14,23 @@
 namespace core {
     namespace filters {
         
+        /**
+         SimpleGlslFilter
+         Base class for simple single-pass filters which simply use a single shader to convolve an image.
+         Implementations can likely just override _bindUniforms(), (calling inherited!) to set needed uniforms.
+         
+         See ColorshiftFilter and PixelateFilter for reference.
+         
+         Your filter shaders can assume the following uniforms will be accessible:
+         - uniform float Alpha; // [0,1] the amount to apply this filter
+         - uniform sampler2D ColorTex; // the input texture data
+         - uniform vec2 ColorTexSize; // the size of the input texture data
+         - uniform vec2 ColorTexSizeInverse; // inverse of the size of input texture data
+         
+         */
         class SimpleGlslFilter : public Filter {
         public:
+
             SimpleGlslFilter(const gl::GlslProgRef &shader);
             
         protected:
@@ -33,6 +48,11 @@ namespace core {
             
         };
         
+        /**
+         ColorshiftFilter
+         ColorshiftFilter is a simple filter implementing a linear transform like y=mx+b, where
+         the output color is the input color scaled by "multiplier", and then added to "offset".
+         */
         class ColorshiftFilter : public SimpleGlslFilter {
         public:
             ColorshiftFilter(ColorA offset = ColorA(0,0,0,0), ColorA multiplier = ColorA(1,1,1,1));
@@ -53,8 +73,14 @@ namespace core {
             
         };
         
+        /**
+         PixelateFilter
+         PixelateFilter implements a pixelated output, similar to the SNES mode-7 effects where the screen
+         would go blocky to effect some kind of scene transition.
+         */
         class PixelateFilter : public SimpleGlslFilter {
         public:
+            
             PixelateFilter(int pixelSize);
             
             void setPixelSize(int ps) { _pixelSize = max<int>(ps, 1); }
@@ -71,6 +97,11 @@ namespace core {
         };
         
         
+        /**
+         BlurFilter
+         Implements a box blur using a two-pass convolution. BlurFilter requires multi-pass rendering and should be viewed
+         as a template for how to implement other multipass filters using FboRelay.
+         */
         class BlurFilter : public Filter {
         public:
             
