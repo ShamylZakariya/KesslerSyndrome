@@ -47,6 +47,11 @@ namespace {
         
         virtual void _bindUniforms(const render_state &state, const gl::FboRef &input) {
             _shader->uniform("ColorTex", 0);
+            
+            const vec2 ColorTexSize(input->getSize());
+            _shader->uniform("Alpha", static_cast<float>(getAlpha()));
+            _shader->uniform("ColorTexSize", ColorTexSize);
+            _shader->uniform("ColorTexSizeInverse", vec2(1/ColorTexSize.x,1/ColorTexSize.y));
         }
         
         void _render( const render_state &state, const gl::FboRef &input ) override {
@@ -116,6 +121,140 @@ namespace {
         int _pixelSize;
 
     };
+
+    
+    class GaussianBlurFilter : public Filter {
+    public:
+        
+        GaussianBlurFilter(int radius):
+                _hPassAsset("test_filters/gaussian_h.glsl"),
+                _vPassAsset("test_filters/gaussian_v.glsl"),
+                _radius(radius)
+        {
+        }
+        
+        void setRadius(int r) {
+            _radius = r;
+            _invalidate();
+        }
+        
+        int getRadius() const { return _radius; }
+        
+    protected:
+        
+        void _resize( const ivec2 &newSize ) override {
+            _invalidate();
+        }
+        
+        void _invalidate() {
+            _hPass.reset();
+            _vPass.reset();
+            _hBlitter.reset();
+            _vBlitter.reset();
+        }
+        
+        void _create() {
+            
+            // create the kernel
+            const int kSize = _createKernel(_radius, _kernel);
+
+            // load shaders, replacing "__SIZE__" with our kernel size
+            const map<string,string> substitutions = { { "__SIZE__", str(kSize) } };
+            _hPass = util::loadGlslAsset(_hPassAsset, substitutions);
+            _vPass = util::loadGlslAsset(_vPassAsset, substitutions);
+
+            // create the blitters
+            _hBlitter = _createBlitter(_hPass);
+            _vBlitter = _createBlitter(_vPass);
+            
+            // load uniforms
+            const vec2 ColorTexSize(_size);
+            const vec2 ColorTexSizeInverse(1/ColorTexSize.x, 1/ColorTexSize.y);
+
+            _hPass->uniform("ColorTexSize", ColorTexSize);
+            _hPass->uniform("ColorTexSizeInverse", ColorTexSizeInverse);
+            _hPass->uniform("Kernel", _kernel.data(), kSize);
+
+            _vPass->uniform("ColorTexSize", ColorTexSize);
+            _vPass->uniform("ColorTexSizeInverse", ColorTexSizeInverse);
+            _vPass->uniform("Kernel", _kernel.data(), kSize);
+        }
+        
+        void _execute(const render_state &state, FboRelay &relay) override {
+            if (!_hPass) {
+                _create();
+            }
+            
+            gl::ScopedMatrices sm;
+            gl::setMatricesWindow( _size.x, _size.y, true );
+            gl::scale(vec3(_size.x,_size.y,1));
+            
+            const auto alpha = static_cast<float>(getAlpha());
+            
+            // hPass
+            {
+                gl::ScopedFramebuffer sfb(relay.getDst());
+                gl::ScopedTextureBind stb(relay.getSrc()->getColorTexture(), 0);
+                
+                _hPass->uniform("ColorTex", 0);
+                _hPass->uniform("Alpha", alpha);
+
+                _hBlitter->draw();
+            }
+            
+            relay.next();
+            
+            // vPass
+            {
+                gl::ScopedFramebuffer sfb(relay.getDst());
+                gl::ScopedTextureBind stb(relay.getSrc()->getColorTexture(), 0);
+                _vPass->uniform("ColorTex", 0);
+                _vPass->uniform("Alpha", alpha);
+                _vBlitter->draw();
+            }
+
+            relay.next();
+            
+        }
+        
+        int _createKernel( int radius, vector<vec2> &kernel )
+        {
+            kernel.clear();
+            
+            for ( int i = -radius; i <= radius; i++ )
+            {
+                int dist = std::abs( i );
+                float mag = 1.0f - ( float(dist) / float(radius) );
+                kernel.push_back( vec2( i, sqrt(mag) ));
+            }
+            
+            //
+            // normalize
+            //
+            
+            float sum = 0;
+            for ( size_t i = 0, N = kernel.size(); i < N; i++ )
+            {
+                sum += kernel[i].y;
+            }
+            
+            for ( size_t i = 0, N = kernel.size(); i < N; i++ )
+            {
+                kernel[i].y /= sum;
+            }
+            
+            return static_cast<int>(kernel.size());
+        }
+        
+    protected:
+        
+        int _radius;
+        string _hPassAsset, _vPassAsset;
+        gl::GlslProgRef _hPass, _vPass;
+        gl::BatchRef _hBlitter, _vBlitter;
+        vector<vec2> _kernel;
+        
+    };
     
 }
 
@@ -159,18 +298,28 @@ void FilterStackTestScenario::setup() {
     
     auto colorshiftFilter = make_shared<ColorshiftFilter>(ColorA(0,0.2,0,0), ColorA(0.5,0.6,1.5,1));
     auto pixelateFilter = make_shared<PixelateFilter>(16);
-    compositor->getFilterStack()->push({ colorshiftFilter, pixelateFilter });
+    auto blurFilter = make_shared<GaussianBlurFilter>(32);
+
+    compositor->getFilterStack()->push({
+        blurFilter,
+        colorshiftFilter,
+        pixelateFilter,
+    });
 
 
     // track 'r' for resetting scenario
     getStage()->addObject(Object::with("InputDelegation",{
-        elements::KeyboardDelegateComponent::create(0,{ cinder::app::KeyEvent::KEY_RIGHTBRACKET,cinder::app::KeyEvent::KEY_LEFTBRACKET })->onPress([pixelateFilter, colorshiftFilter](int keyCode){
+        elements::KeyboardDelegateComponent::create(0,{ cinder::app::KeyEvent::KEY_RIGHTBRACKET,cinder::app::KeyEvent::KEY_LEFTBRACKET })->onPress([compositor](int keyCode){
             switch (keyCode) {
                 case cinder::app::KeyEvent::KEY_RIGHTBRACKET:
-                    pixelateFilter->setPixelSize(pixelateFilter->getPixelSize() + 1);
+                    for (auto &f : compositor->getFilterStack()->getFilters()) {
+                        f->setAlpha(f->getAlpha() + 0.1);
+                    }
                     break;
                 case cinder::app::KeyEvent::KEY_LEFTBRACKET:
-                    pixelateFilter->setPixelSize(pixelateFilter->getPixelSize() - 1);
+                    for (auto &f : compositor->getFilterStack()->getFilters()) {
+                        f->setAlpha(f->getAlpha() - 0.1);
+                    }
                     break;
                 default: break;
             }

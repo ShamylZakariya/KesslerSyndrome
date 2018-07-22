@@ -26,23 +26,27 @@ namespace core {
     {}
     
     void Filter::setAlpha(double a) {
+        double oldAlpha = _alpha;
         _alpha = saturate(a);
+        _alphaChanged(oldAlpha, _alpha);
     }
 
     gl::BatchRef Filter::_createBlitter(const gl::GlslProgRef &shader) const {
         return gl::Batch::create(geom::Rect().rect(Rectf(0, 0, 1, 1)), shader);
     }
     
-    void Filter::_execute(const render_state &state, const gl::FboRef &src, const gl::FboRef &dest) {
-        gl::ScopedFramebuffer sfb(dest);
-
+    void Filter::_execute(const render_state &state, FboRelay &relay) {
+        gl::ScopedFramebuffer sfb(relay.getDst());
         gl::ScopedViewport sv(0,0,_size.x,_size.y);
         
         gl::ScopedMatrices sm;
         gl::setMatricesWindow( _size.x, _size.y, true );
         gl::scale(vec3(_size.x,_size.y,1));
 
-        _render(state, src);
+        _render(state, relay.getSrc());
+        
+        // prepare for next pass
+        relay.next();
     }
 
     
@@ -98,18 +102,18 @@ namespace core {
             }
         }
 
-        gl::FboRef a = input;
-        gl::FboRef b = _buffer;
+        FboRelay relay(input, _buffer);
         
         if (!_filters.empty()) {
             for (const auto &f : _filters) {
                 if (f->getAlpha() > ALPHA_EPSILON) {
-                    f->_execute(state, a, b);
-                    std::swap(a,b);
+                    f->_execute(state, relay);
                 }
             }
         }
-        return a;
+        
+        // after next() is called on a relay, src is always the previous pass's dst
+        return relay.getSrc();
     }
     
     void FilterStack::update(const time_state &time) {

@@ -25,6 +25,24 @@ namespace core {
     SMART_PTR(Filter);
     SMART_PTR(FilterStack);
     
+    class FboRelay {
+    public:
+        FboRelay(const gl::FboRef &src, const gl::FboRef &dst):
+        _a(src),
+        _b(dst)
+        {}
+        
+        inline const gl::FboRef &getSrc() const { return _a; }
+        inline const gl::FboRef &getDst() const { return _b; }
+        
+        void next() {
+            std::swap(_a, _b);
+        }
+        
+    private:
+        gl::FboRef _a, _b;
+    };
+    
     /**
      Filter represents a single convolution to be applied to an input Fbo.
      Implementations should at minimum override _render(), but more complex Filters, such as separable convolutions requiring 2 or more passes
@@ -44,7 +62,7 @@ namespace core {
          Note: A filter with alpha of 0 is skipped; Expensive effects which you don't always want running can have their
          alpha set to zero when not in use.
          */
-        virtual void setAlpha(double a);
+        void setAlpha(double a);
 
         /// Get the current strength of the filter.
         double getAlpha() const { return _alpha; }
@@ -55,6 +73,9 @@ namespace core {
         
         /// Called by FilterStack when it's resized; Note: FilterStack directly sets _size before calling this.
         virtual void _resize( const ivec2 &newSize ) {}
+        
+        /// Called via setAlpha() to respond to changes to alpha
+        virtual void _alphaChanged(double oldAlpha, double newAlpha) {}
 
         /// Perform time-based updates
         virtual void _update(const time_state &time) {}
@@ -63,7 +84,7 @@ namespace core {
         virtual gl::BatchRef _createBlitter(const gl::GlslProgRef &shader) const;
 
         /// Called by FilterStack to prepare render state; you should most-likely implement _render() and leave this alone
-        virtual void _execute(const render_state &state, const gl::FboRef &src, const gl::FboRef &dest);
+        virtual void _execute(const render_state &state, FboRelay &relay);
         
         /// Perform your filtered render using input as your source texture data. Destination Fbo is already bound by _execute().
         virtual void _render( const render_state &state, const gl::FboRef &input ){}

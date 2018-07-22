@@ -15,6 +15,7 @@ void main(void) {
 
 fragment:
 #version 150
+uniform float Alpha;
 uniform sampler2D ColorTex;
 uniform vec4 Offset;
 uniform vec4 Multiplier;
@@ -25,5 +26,5 @@ out vec4 oColor;
 
 void main(void) {
     vec4 tex = texture(ColorTex, TexCoord);
-    oColor = Offset + (tex * Multiplier);
+    oColor = mix(tex, Offset + (tex * Multiplier), Alpha);
 }
