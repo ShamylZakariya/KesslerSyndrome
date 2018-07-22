@@ -14,17 +14,26 @@ void main(void) {
 }
 
 fragment:
-#version 150
 uniform float Alpha;
 uniform sampler2D ColorTex;
-uniform vec4 Offset;
-uniform vec4 Multiplier;
+uniform vec2 ColorTexSize;
+uniform vec2 ColorTexSizeInverse;
+
+uniform vec2 Kernel[__SIZE__];
 
 in vec2 TexCoord;
 
 out vec4 oColor;
 
-void main(void) {
-    vec4 tex = texture(ColorTex, TexCoord);
-    oColor = mix(tex, Offset + (tex * Multiplier), Alpha);
+void main( void )
+{
+	int i;
+	vec4 sample = vec4(0);
+	
+	for ( i = 0; i < __SIZE__; i++ )
+	{
+		sample += texture( ColorTex, TexCoord + (Alpha * ColorTexSizeInverse * vec2( 0, Kernel[i].s ))) * Kernel[i].t;
+	}
+
+	oColor = sample;
 }

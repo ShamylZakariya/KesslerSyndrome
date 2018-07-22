@@ -15,19 +15,19 @@ void main(void) {
 
 fragment:
 #version 150
-
 uniform float Alpha;
 uniform sampler2D ColorTex;
 uniform vec2 ColorTexSize;
-uniform float PixelSize;
+uniform vec2 ColorTexSizeInverse;
+
+uniform vec4 Offset;
+uniform vec4 Multiplier;
 
 in vec2 TexCoord;
 
 out vec4 oColor;
 
 void main(void) {
-    float pixelSize = mix(1.0f,PixelSize, Alpha);
-    vec2 pixelateCoord = round((TexCoord * ColorTexSize) / pixelSize) * (pixelSize / ColorTexSize);
-    vec4 tex = texture(ColorTex, pixelateCoord);
-    oColor = tex;
+    vec4 tex = texture(ColorTex, TexCoord);
+    oColor = mix(tex, Offset + (tex * Multiplier), Alpha);
 }

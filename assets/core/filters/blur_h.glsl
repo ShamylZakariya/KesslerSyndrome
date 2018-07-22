@@ -18,6 +18,7 @@ uniform float Alpha;
 uniform sampler2D ColorTex;
 uniform vec2 ColorTexSize;
 uniform vec2 ColorTexSizeInverse;
+
 uniform vec2 Kernel[__SIZE__];
 
 in vec2 TexCoord;
