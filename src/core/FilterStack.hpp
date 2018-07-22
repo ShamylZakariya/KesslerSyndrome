@@ -25,6 +25,26 @@ namespace core {
     SMART_PTR(Filter);
     SMART_PTR(FilterStack);
     
+    /**
+     FboRelay is a helper for implementing "ping pong" style shader sequences where
+     a shared reads from one Fbo, writing to another, and then the next shader reads
+     from the previous' destination, writing to the previous's source. And so on.
+     
+     Usage will look something like so:
+     
+        FboRelay relay(input, tempFboBufferOfSameSizeAsInput)
+     
+         for shader in shaders {
+            writeTo(relay.getDst())
+            readFrom(relay.getSrc())
+     
+            executeShader(shader)
+            relay.next()
+         }
+     
+         result = relay.getSrc()
+     
+     */
     class FboRelay {
     public:
         FboRelay(const gl::FboRef &src, const gl::FboRef &dst):
