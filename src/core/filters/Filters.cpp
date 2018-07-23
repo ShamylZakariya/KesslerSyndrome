@@ -185,7 +185,7 @@ namespace core {
             for ( int i = -radius; i <= radius; i++ )
             {
                 int dist = std::abs( i );
-                float mag = 1.0f - ( float(dist) / float(radius) );
+                float mag = 1.0f - sqrt( float(dist) / float(radius) );
                 kernel.push_back( vec2( i, sqrt(mag) ));
             }
             
