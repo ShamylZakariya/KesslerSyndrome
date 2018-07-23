@@ -8,6 +8,7 @@
 
 #include "core/FilterStack.hpp"
 
+#include "core/util/GlslProgLoader.hpp"
 
 namespace core {
     
@@ -54,6 +55,7 @@ namespace core {
 
     /*
      gl::FboRef _buffer;
+     gl::BatchRef _blitter;
      vector<FilterRef> _filters;
      ivec2 _size;
      */
@@ -92,6 +94,12 @@ namespace core {
     
     gl::FboRef FilterStack::execute(const render_state &state, const gl::FboRef &input) {
         
+        //
+        // Create _buffer to match size of input; note FboFormat doesn't have an
+        // equality operator, so we can't check on this condition. I think it's probably an
+        // acceptable compromise; we're unlikely to be switching out fbo formats for the input at runtime
+        //
+
         if (!_buffer || input->getSize() != _size /*|| input->getFormat() != _buffer->getFormat()*/) {
             _size = input->getSize();
             _buffer = gl::Fbo::create(_size.x, _size.y, input->getFormat());
@@ -114,6 +122,33 @@ namespace core {
         
         // after next() is called on a relay, src is always the previous pass's dst
         return relay.getSrc();
+    }
+    
+    void FilterStack::executeToScreen(const render_state &state, const gl::FboRef &input, const gl::GlslProgRef &compositeShader) {
+        auto result = execute(state, input);
+        
+        if (compositeShader) {
+            if (_blitter) {
+                if (_blitter->getGlslProg() != compositeShader) {
+                    _blitter->replaceGlslProg(compositeShader);
+                }
+            } else {
+                _blitter = gl::Batch::create(geom::Rect().rect(Rectf(0, 0, 1, 1)), compositeShader);
+            }
+
+            const auto viewportSize = state.viewport->getSize();
+            gl::ScopedViewport sv(viewportSize);
+            
+            gl::ScopedMatrices sm;
+            gl::setMatricesWindow( viewportSize.x, viewportSize.y, true );
+            gl::scale(vec3(viewportSize.x,viewportSize.y,1));
+            
+            gl::ScopedTextureBind stb(result->getColorTexture(), 0);
+            compositeShader->uniform("ColorTex", 0);
+            _blitter->draw();
+        } else {
+            result->blitToScreen(result->getBounds(), state.viewport->getBounds());
+        }
     }
     
     void FilterStack::update(const time_state &time) {

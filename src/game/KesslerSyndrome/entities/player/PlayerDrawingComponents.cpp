@@ -464,7 +464,7 @@ namespace game {
         auto physics = _physics.lock();
         CI_ASSERT_MSG(physics, "PlayerPhysicsComponentRef should be accessbile");
         
-        Rectd bounds = renderState.viewport->getBounds();
+        auto bounds = renderState.viewport->getBounds();
         int w = 20;
         int h = 60;
         int p = 10;

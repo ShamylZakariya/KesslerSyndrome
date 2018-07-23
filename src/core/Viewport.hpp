@@ -40,8 +40,8 @@ namespace core {
 
         virtual int getHeight() const = 0;
 
-        virtual Rectd getBounds() const {
-            return Rectd(0, 0, getWidth(), getHeight());
+        virtual Area getBounds() const {
+            return Area(0, 0, getWidth(), getHeight());
         }
 
         virtual dvec2 getCenter() const = 0;

@@ -165,20 +165,30 @@ namespace core {
         }
         
         /**
-         execute the filters in order against the contents of `input, returning an Fbo containing the result.
+         Execute the filters in order against the contents of `input, returning an Fbo containing the result.
          The returned Fbo belongs to FilterStack and will be overwritten in subsequent calls to execute(), so
          draw it immediately, or make a copy somehow if you intend to hold on to the results.
         */
         virtual gl::FboRef execute(const render_state &state, const gl::FboRef &input);
         
         /**
+         Execute the filters in order against the contents of input, rendering result to screen.
+         If a compositeShader is supplied, it will be used to composite the result to screen; otherwise,
+         the fbo will be blitted directly to screen.
+         compositeShader requires the following uniforms:
+            - uniform sampler2D ColorTex;
+         */
+        virtual void executeToScreen(const render_state &state, const gl::FboRef &input, const gl::GlslProgRef &compositeShader = nullptr);
+        
+        /**
          Dispatch time-based updates to all filters in the stack
          */
         virtual void update(const time_state &time);
-        
+                
     protected:
         
         gl::FboRef _buffer;
+        gl::BatchRef _blitter;
         vector<FilterRef> _filters;
         ivec2 _size;
         
