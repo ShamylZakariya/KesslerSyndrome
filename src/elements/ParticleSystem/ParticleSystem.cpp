@@ -63,7 +63,7 @@ namespace elements {
      size_t _count;
      cpBB _bb;
      vector<particle_prototype> _prototypes;
-     core::SpaceAccessRef _spaceAccess;
+     SpaceAccessRef _spaceAccess;
      */
 
     ParticleSimulation::ParticleSimulation() :
@@ -73,7 +73,7 @@ namespace elements {
     }
 
     // Component
-    void ParticleSimulation::onReady(core::ObjectRef parent, core::StageRef stage) {
+    void ParticleSimulation::onReady(ObjectRef parent, StageRef stage) {
         BaseParticleSimulation::onReady(parent, stage);
         _spaceAccess = stage->getSpace();
     }
@@ -82,7 +82,7 @@ namespace elements {
         BaseParticleSimulation::onCleanup();
     }
 
-    void ParticleSimulation::update(const core::time_state &time) {
+    void ParticleSimulation::update(const time_state &time) {
         BaseParticleSimulation::update(time);
         _prepareForSimulation(time);
         _simulate(time);
@@ -116,7 +116,7 @@ namespace elements {
         _pending.back()._velocity = dir * particle.initialVelocity;
     }
     
-    void ParticleSimulation::_prepareForSimulation(const core::time_state &time) {
+    void ParticleSimulation::_prepareForSimulation(const time_state &time) {
         // run a first pass where we update age and completion, then if necessary perform a compaction pass
         size_t expiredCount = 0;
         const size_t activeCount = getActiveCount();
@@ -234,7 +234,7 @@ namespace elements {
         }
     }
 
-    void ParticleSimulation::_simulate(const core::time_state &time) {
+    void ParticleSimulation::_simulate(const time_state &time) {
 
         const auto &gravities = getStage()->getGravities();
         cpBB bb = cpBBInvalid;
@@ -406,7 +406,7 @@ namespace elements {
             _rng(seed) {
     }
 
-    void ParticleEmitter::update(const core::time_state &time) {
+    void ParticleEmitter::update(const time_state &time) {
         if (ParticleSimulationRef sim = _simulation.lock()) {
 
             //
@@ -582,10 +582,12 @@ namespace elements {
     /*
      config _config;
      gl::GlslProgRef _shader;
-     vector<particle_vertex> _particles;
+     vector <particle_vertex> _particles;
      gl::VboRef _particlesVbo;
      gl::BatchRef _particlesBatch;
      GLsizei _batchDrawStart, _batchDrawCount;
+     core::FilterStackRef _filterStack;
+     ColorA _filterStackClearColor;
      */
 
     ParticleSystemDrawComponent::config ParticleSystemDrawComponent::config::parse(const XmlTree &node) {
@@ -642,16 +644,24 @@ namespace elements {
         auto mesh = gl::VboMesh::create(static_cast<uint32_t>(_particles.size()), GL_TRIANGLES, {{particleLayout, _particlesVbo}});
         _particlesBatch = gl::Batch::create(mesh, _shader);
     }
+    
+    namespace {
+        void save_and_die(const gl::FboRef &fbo, string dest) {
+            CI_LOG_D("save_and_die dest:" << dest);
+            writeImage(dest, fbo->getColorTexture()->createSource());
+            CI_ASSERT(false);
+        }
+    }
 
     void ParticleSystemDrawComponent::draw(const render_state &renderState) {
-        
-        auto sim = getSimulation();
-        if (updateParticles(sim)) {
-            gl::ScopedTextureBind tex(_config.textureAtlas, 0);
-            gl::ScopedBlendPremult blender;
+        if (!_filterStack) {
+            performDraw(renderState);
+        } else {
+            auto result = _filterStack->capture(renderState, [this](const render_state &renderState){
+                this->performDraw(renderState);
+            }, _filterStackClearColor, gl::Fbo::Format().disableDepth());
             
-            setShaderUniforms(_shader, renderState);
-            _particlesBatch->draw(_batchDrawStart, _batchDrawCount);
+            _filterStack->executeToScreen(renderState, result);
         }
 
         if (renderState.testGizmoBit(Gizmos::AABBS)) {
@@ -661,11 +671,21 @@ namespace elements {
             gl::color(bbColor);
             gl::drawStrokedRect(Rectf(bb.l, bb.b, bb.r, bb.t), 1);
         }
-        
+    }
+    
+    void ParticleSystemDrawComponent::performDraw(const render_state &renderState) {
+        auto sim = getSimulation();
+        if (updateParticles(sim)) {
+            gl::ScopedTextureBind tex(_config.textureAtlas, 0);
+            gl::ScopedBlendPremult blender;
+            
+            setShaderUniforms(_shader, renderState);
+            _particlesBatch->draw(_batchDrawStart, _batchDrawCount);
+        }
     }
     
     gl::GlslProgRef ParticleSystemDrawComponent::createDefaultShader() const {
-        return core::util::loadGlslAsset("core/elements/shaders/particle_system.glsl");
+        return util::loadGlslAsset("core/elements/shaders/particle_system.glsl");
     }
 
     void ParticleSystemDrawComponent::writeStableParticleValues(const BaseParticleSimulationRef &sim) {

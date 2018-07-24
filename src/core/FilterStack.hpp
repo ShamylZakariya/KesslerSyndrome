@@ -87,6 +87,12 @@ namespace core {
         /// Get the current strength of the filter.
         double getAlpha() const { return _alpha; }
         
+        void setClearsColorBuffer(bool clears) { _clearsColorBuffer = clears; }
+        bool clearsColorBuffer() const { return _clearsColorBuffer; }
+        
+        void setClearColor(ColorA clearColor) { _clearColor = clearColor; }
+        ColorA getClearColor() const { return _clearColor; }
+        
     protected:
 
         friend class FilterStack;
@@ -114,6 +120,8 @@ namespace core {
         /// Current width/height of the FilterStack
         ivec2 _size;
         double _alpha;
+        bool _clearsColorBuffer;
+        ColorA _clearColor;
         
     };
     
@@ -184,13 +192,26 @@ namespace core {
          Dispatch time-based updates to all filters in the stack
          */
         virtual void update(const time_state &time);
+        
+        /**
+         Convenience method to capture render output into an Fbo.
+         As an example usage, a set of drawing commands might be performed, captured, and have a sequence of filters executed against them and then composited to screen:
+         @code MyThing::draw(const render_state &state) {
+            auto result = filterStack->capture(state, [this](const render_state &state){
+                // perform drawing commands
+            });
+            filterStack->executeToScreen(state, result);
+         }
+         */
+        virtual const gl::FboRef &capture(const render_state &state, std::function<void(const render_state&)> renderFunc, ColorA clearColor = ColorA(0,0,0,0), const gl::Fbo::Format &fmt = gl::Fbo::Format().disableDepth());
                 
     protected:
         
-        gl::FboRef _buffer;
+        gl::FboRef _buffer, _captureBuffer;
         gl::BatchRef _blitter;
         vector<FilterRef> _filters;
         ivec2 _size;
+        gl::GlslProgRef _compositeShader;
         
     };
     

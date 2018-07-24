@@ -8,6 +8,9 @@
 #include "game/Tests/ParticleSystemTestScenario.hpp"
 #include "elements/Components/DevComponents.hpp"
 
+#include "game/KesslerSyndrome/elements/CloudLayerParticleSystem.hpp"
+#include "core/filters/Filters.hpp"
+
 using namespace core;
 using namespace elements;
 
@@ -108,9 +111,11 @@ void ParticleSystemTestScenario::setup() {
     
     auto keyboardViewportController = make_shared<KeyboardViewportControlComponent>(_viewportController);
     keyboardViewportController->setPanRate(50);
-    getStage()->addObject(Object::with("ViewportControlComponent", {
+
+    getStage()->addObject(Object::with("ViewportControl", {
         _viewportController,
-        keyboardViewportController
+        make_shared<elements::MouseViewportControlComponent>(_viewportController),
+        keyboardViewportController,
     }));
 
     auto grid = WorldCartesianGridDrawComponent::create(1);
@@ -118,17 +123,8 @@ void ParticleSystemTestScenario::setup() {
     grid->setGridColor(ColorA(1, 1, 1, 0.1));
     getStage()->addObject(Object::with("Grid", {grid}));
 
-
     //
-    //	Add an SVG for giggles
-    //
-
-    auto doc = util::svg::Group::loadSvgDocument(app::loadAsset("svg_tests/eggsac.svg"));
-    doc->setPosition(dvec2(0, 300));
-    getStage()->addObject(Object::with("Eggsac", {make_shared<util::svg::SvgDrawComponent>(doc)}));
-
-    //
-    //	Build some terrain
+    //	Build some dynamic geometry
     //
 
     vector <terrain::ShapeRef> shapes = {
@@ -148,11 +144,11 @@ void ParticleSystemTestScenario::setup() {
     getStage()->addObject(terrain);
 
 
-
     //
-    //	Build basic particle system
+    //	Build particle systems
     //
 
+    buildCloudLayerPs();
     buildExplosionPs();
 
 
@@ -164,20 +160,20 @@ void ParticleSystemTestScenario::setup() {
                 } else {
                     _explosionEmissionId = _explosionEmitter->emit(world, dvec2(0, 1), 120);
                 }
-                return true;
+                return false;
             })
             ->onRelease([this](dvec2 screen, dvec2 world, const app::MouseEvent &event) {
                 _explosionEmitter->cancel(_explosionEmissionId);
                 _explosionEmissionId = 0;
-                return true;
+                return false;
             })
             ->onMove([this](dvec2 screen, dvec2 world, dvec2 deltaScreen, dvec2 deltaWorld, const app::MouseEvent &event) {
-                return true;
+                return false;
             })
             ->onDrag([this](dvec2 screen, dvec2 world, dvec2 deltaScreen, dvec2 deltaWorld, const app::MouseEvent &event) {
                 dvec2 dir = normalize(deltaWorld);
                 _explosionEmitter->setEmissionPosition(_explosionEmissionId, world, dir);
-                return true;
+                return false;
             });
 
     getStage()->addObject(Object::with("Mouse Handling", {mdc}));
@@ -216,9 +212,6 @@ void ParticleSystemTestScenario::drawScreen(const render_state &state) {
     ss << std::setprecision(3) << "world (" << look.world.x << ", " << look.world.y << ") scale: " << scale << " up: ("
     << look.up.x << ", " << look.up.y << ") trauma: " << _viewportController->getCurrentTraumaLevel();
     gl::drawString(ss.str(), vec2(10, 40), Color(1, 1, 1));
-
-    
-
 }
 
 bool ParticleSystemTestScenario::keyDown(const app::KeyEvent &event) {
@@ -235,6 +228,29 @@ void ParticleSystemTestScenario::reset() {
 }
 
 #pragma mark - Tests
+
+void ParticleSystemTestScenario::buildCloudLayerPs() {
+    auto cloudLayerXmlAsset = app::loadAsset("tests/cloud_layer_ps.xml");
+    auto cloudLayer = XmlTree(cloudLayerXmlAsset).getChild("cloudLayer");
+    
+    game::CloudLayerParticleSystem::config config = game::CloudLayerParticleSystem::config::parse(cloudLayer);
+    config.drawConfig.drawLayer = 0;
+    
+    auto cl = game::CloudLayerParticleSystem::create(config);
+    getStage()->addObject(cl);
+
+    // now add a filter stack; note we need to set a clear color or else we get previous frame data because PS doesn't fill the buffer with its output
+    auto clearColor = ColorA(config.simulationConfig.particle.color, 0);
+    auto dc = cl->getComponent<ParticleSystemDrawComponent>();
+    auto fs = make_shared<FilterStack>();
+    dc->setFilterStack(fs, clearColor);
+
+    auto pixelateFilter = make_shared<filters::PixelateFilter>(16);
+    pixelateFilter->setClearsColorBuffer(true);
+    pixelateFilter->setClearColor(clearColor);
+    fs->push(pixelateFilter);
+
+}
 
 void ParticleSystemTestScenario::buildExplosionPs() {
     auto image = loadImage(app::loadAsset("kessler/textures/Explosion.png"));

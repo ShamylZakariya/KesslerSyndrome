@@ -202,34 +202,31 @@ namespace elements {
 #pragma mark - MouseViewportControlComponent
     
     /*
+     bool _handleRotation;
      vec2 _mouseScreen, _mouseWorld;
      ViewportControllerRef _viewportController;
      */
     
-    MouseViewportControlComponent::MouseViewportControlComponent(ViewportControllerRef viewportController, int dispatchReceiptIndex)
-    :
-    InputComponent(dispatchReceiptIndex),
-    _viewportController(viewportController) {
-    }
-    
-    namespace {
-        dvec2 rotate(dvec2 up, double by) {
-            return glm::rotate(up, by);
-        }
+    MouseViewportControlComponent::MouseViewportControlComponent(ViewportControllerRef viewportController, bool handleRotation, int dispatchReceiptIndex):
+            InputComponent(dispatchReceiptIndex),
+            _handleRotation(handleRotation),
+            _viewportController(viewportController)
+    {
     }
     
     void MouseViewportControlComponent::step(const time_state &time) {
-        const bool fast = (isKeyDown(app::KeyEvent::KEY_LSHIFT)||isKeyDown(app::KeyEvent::KEY_RSHIFT));
-        const double radsPerSec = (fast ? 100 : 10) * M_PI / 180;
-        if (isKeyDown(app::KeyEvent::KEY_q)) {
-            Viewport::look target = _viewportController->getTarget();
-            target.up = rotate(target.up, -radsPerSec * time.deltaT);
-            _viewportController->setTarget(target);
-            //_viewport->setRotation(_viewport->getRotation() - radsPerSec * time.deltaT);
-        } else if (isKeyDown(app::KeyEvent::KEY_e)) {
-            Viewport::look target = _viewportController->getTarget();
-            target.up = rotate(target.up, +radsPerSec * time.deltaT);
-            _viewportController->setTarget(target);
+        if (_handleRotation) {
+            const bool fast = (isKeyDown(app::KeyEvent::KEY_LSHIFT)||isKeyDown(app::KeyEvent::KEY_RSHIFT));
+            const double radsPerSec = (fast ? 100 : 10) * M_PI / 180;
+            if (isKeyDown(app::KeyEvent::KEY_q)) {
+                Viewport::look target = _viewportController->getTarget();
+                target.up = glm::rotate(target.up, -radsPerSec * time.deltaT);
+                _viewportController->setTarget(target);
+            } else if (isKeyDown(app::KeyEvent::KEY_e)) {
+                Viewport::look target = _viewportController->getTarget();
+                target.up = glm::rotate(target.up, +radsPerSec * time.deltaT);
+                _viewportController->setTarget(target);
+            }
         }
     }
     

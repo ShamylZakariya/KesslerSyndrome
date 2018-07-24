@@ -464,8 +464,26 @@ namespace elements {
         void setSimulation(const elements::BaseParticleSimulationRef simulation) override;
 
         void draw(const core::render_state &renderState) override;
+        
+        // ParticleSystemDrawComponent
+        
+        /**
+         Assign a FilterStack. null by default. When non-null, all rendering in draw() will be performed to an Fbo,
+         and then after the filters in the stack are executed, the result will be composited to screen.
+         @param stack The filter stack to assign
+         @param clearColor The color the capture Fbo will be cleared to
+         */
+        virtual void setFilterStack(const core::FilterStackRef &stack, ColorA clearColor) {
+            _filterStack = stack;
+            _filterStackClearColor = clearColor;
+        }
+        
+        const core::FilterStackRef &getFilterStack() const { return _filterStack; }
+        ColorA getFilterStackClearColor() const { return _filterStackClearColor; }
 
     protected:
+        
+        virtual void performDraw(const core::render_state &state);
         
         virtual gl::GlslProgRef createDefaultShader() const;
         
@@ -518,6 +536,8 @@ namespace elements {
         gl::VboRef _particlesVbo;
         gl::BatchRef _particlesBatch;
         GLsizei _batchDrawStart, _batchDrawCount;
+        core::FilterStackRef _filterStack;
+        ColorA _filterStackClearColor;
 
     };
 

@@ -76,6 +76,8 @@
 		63A71FAF20FF95D500B91188 /* FilterStackTestScenario.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63A71FAD20FF95D500B91188 /* FilterStackTestScenario.cpp */; };
 		63A71FB32104E85800B91188 /* Filters.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63A71FB12104E85800B91188 /* Filters.cpp */; };
 		63A71FB42104E86B00B91188 /* Filters.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63A71FB12104E85800B91188 /* Filters.cpp */; };
+		63A71FB52107819500B91188 /* Planet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 638F4D901F87D4F3004437E8 /* Planet.cpp */; };
+		63A71FB62107819500B91188 /* CloudLayerParticleSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63E29EF51F97A87300CAF39E /* CloudLayerParticleSystem.cpp */; };
 		63B8AF07202CA1A70021AC63 /* TerrainAttachmentsTestScenario.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63B8AF05202CA1A70021AC63 /* TerrainAttachmentsTestScenario.cpp */; };
 		63E29EF31F97A4C300CAF39E /* BaseParticleSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63E29EF01F97A4C300CAF39E /* BaseParticleSystem.cpp */; };
 		63E29EF41F97A4C300CAF39E /* BaseParticleSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63E29EF01F97A4C300CAF39E /* BaseParticleSystem.cpp */; };
@@ -402,7 +404,6 @@
 		632622ED1E7D9A630051ABE2 /* core */ = {
 			isa = PBXGroup;
 			children = (
-				63A71FB02104E81000B91188 /* filters */,
 				63F93C061F86804900F537CA /* App.cpp */,
 				63F93C051F86804800F537CA /* App.hpp */,
 				632622EE1E7D9A630051ABE2 /* ChipmunkHelpers.cpp */,
@@ -414,6 +415,7 @@
 				63F93C081F8681E100F537CA /* Entity.cpp */,
 				63F93C091F8681E100F537CA /* Entity.hpp */,
 				632622F21E7D9A630051ABE2 /* Exception.hpp */,
+				63A71FB02104E81000B91188 /* filters */,
 				63A71FA920FBB8B900B91188 /* FilterStack.cpp */,
 				63A71FAA20FBB8B900B91188 /* FilterStack.hpp */,
 				632622F31E7D9A630051ABE2 /* InputDispatcher.cpp */,
@@ -707,6 +709,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				63A71FB52107819500B91188 /* Planet.cpp in Sources */,
+				63A71FB62107819500B91188 /* CloudLayerParticleSystem.cpp in Sources */,
 				63A71FAC20FBB8CE00B91188 /* FilterStack.cpp in Sources */,
 				63611A922088DF96004EE731 /* MultiViewportTestScenario.cpp in Sources */,
 				63597BED20766F9D00B65C2A /* GlslProgLoader.cpp in Sources */,

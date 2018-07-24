@@ -160,6 +160,10 @@ namespace core {
                 _hPass->uniform("ColorTex", 0);
                 _hPass->uniform("Alpha", alpha);
                 
+                if (_clearsColorBuffer) {
+                    gl::clear(_clearColor);
+                }
+
                 _hBlitter->draw();
             }
             
@@ -169,8 +173,14 @@ namespace core {
             {
                 gl::ScopedFramebuffer sfb(relay.getDst());
                 gl::ScopedTextureBind stb(relay.getSrc()->getColorTexture(), 0);
+                
                 _vPass->uniform("ColorTex", 0);
                 _vPass->uniform("Alpha", alpha);
+                
+                if (_clearsColorBuffer) {
+                    gl::clear(_clearColor);
+                }
+
                 _vBlitter->draw();
             }
             

@@ -89,7 +89,7 @@ namespace elements {
     class MouseViewportControlComponent : public core::InputComponent {
     public:
         
-        MouseViewportControlComponent(elements::ViewportControllerRef viewportController, int dispatchReceiptIndex = 1000);
+        MouseViewportControlComponent(elements::ViewportControllerRef viewportController, bool handleRotation = false, int dispatchReceiptIndex = 1000);
         
         // InputComponent
         void step(const core::time_state &time) override;
@@ -106,6 +106,7 @@ namespace elements {
         
     private:
         
+        bool _handleRotation;
         vec2 _mouseScreen, _mouseWorld;
         elements::ViewportControllerRef _viewportController;
         

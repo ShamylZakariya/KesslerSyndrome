@@ -17,10 +17,14 @@ namespace core {
     /*
      ivec2 _size;
      double _alpha;
+     bool _clearsColorBuffer;
+     ColorA _clearColor;
      */
     
     Filter::Filter():
-            _alpha(1)
+            _alpha(1),
+            _clearsColorBuffer(false),
+            _clearColor(0,0,0,0)
     {}
     
     Filter::~Filter()
@@ -43,6 +47,10 @@ namespace core {
         gl::ScopedMatrices sm;
         gl::setMatricesWindow( _size.x, _size.y, true );
         gl::scale(vec3(_size.x,_size.y,1));
+        
+        if (_clearsColorBuffer) {
+            gl::clear(_clearColor);
+        }
 
         _render(state, relay.getSrc());
         
@@ -54,13 +62,15 @@ namespace core {
 #pragma mark - FilterStack
 
     /*
-     gl::FboRef _buffer;
+     gl::FboRef _buffer, _captureBuffer;
      gl::BatchRef _blitter;
      vector<FilterRef> _filters;
      ivec2 _size;
+     gl::GlslProgRef _compositeShader;
      */
     
-    FilterStack::FilterStack()
+    FilterStack::FilterStack():
+            _compositeShader(util::loadGlslAsset("core/filters/passthrough.glsl"))
     {}
     
     FilterStack::~FilterStack()
@@ -126,29 +136,29 @@ namespace core {
     
     void FilterStack::executeToScreen(const render_state &state, const gl::FboRef &input, const gl::GlslProgRef &compositeShader) {
         auto result = execute(state, input);
+        auto shader = compositeShader ? compositeShader : _compositeShader;
         
-        if (compositeShader) {
-            if (_blitter) {
-                if (_blitter->getGlslProg() != compositeShader) {
-                    _blitter->replaceGlslProg(compositeShader);
-                }
-            } else {
-                _blitter = gl::Batch::create(geom::Rect().rect(Rectf(0, 0, 1, 1)), compositeShader);
+        if (_blitter) {
+            if (_blitter->getGlslProg() != shader) {
+                _blitter->replaceGlslProg(shader);
             }
-
-            const auto viewportSize = state.viewport->getSize();
-            gl::ScopedViewport sv(viewportSize);
-            
-            gl::ScopedMatrices sm;
-            gl::setMatricesWindow( viewportSize.x, viewportSize.y, true );
-            gl::scale(vec3(viewportSize.x,viewportSize.y,1));
-            
-            gl::ScopedTextureBind stb(result->getColorTexture(), 0);
-            compositeShader->uniform("ColorTex", 0);
-            _blitter->draw();
         } else {
-            result->blitToScreen(result->getBounds(), state.viewport->getBounds());
+            _blitter = gl::Batch::create(geom::Rect().rect(Rectf(0, 0, 1, 1)), shader);
         }
+
+        const auto viewportSize = state.viewport->getSize();
+        gl::ScopedViewport sv(viewportSize);
+        
+        gl::ScopedMatrices sm;
+        gl::setMatricesWindow( viewportSize.x, viewportSize.y, true );
+        gl::scale(vec3(viewportSize.x,viewportSize.y,1));
+        
+        gl::ScopedTextureBind stb(result->getColorTexture(), 0);
+        shader->uniform("ColorTex", 0);
+        _blitter->draw();
+        
+        // FIXME: I tried using Fbo::blitToScreen for the case where no compositeShader is specified. It doesn't work?
+        // result->blitToScreen(result->getBounds(), state.viewport->getBounds());
     }
     
     void FilterStack::update(const time_state &time) {
@@ -156,5 +166,21 @@ namespace core {
             f->_update(time);
         }
     }
+    
+    const gl::FboRef &FilterStack::capture(const render_state &state, std::function<void(const render_state&)> renderFunc, ColorA clearColor, const gl::Fbo::Format &fmt) {
+        const auto size = state.viewport->getSize();
+        if (!_captureBuffer || _captureBuffer->getSize() != size) {
+            _captureBuffer = gl::Fbo::create(size.x, size.y, fmt);
+        }
+        
+        gl::ScopedFramebuffer sfb(_captureBuffer);
+        gl::ScopedViewport sv(0,0,size.x,size.y);
+        
+        gl::clear(clearColor);
+        renderFunc(state);
+        
+        return _captureBuffer;
+    }
+
     
 }

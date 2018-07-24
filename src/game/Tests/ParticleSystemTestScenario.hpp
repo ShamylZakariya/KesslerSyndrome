@@ -17,7 +17,6 @@
 #include "elements/ParticleSystem/ParticleSystem.hpp"
 #include "elements/Components/ViewportController.hpp"
 
-
 class ParticleSystemTestScenario : public core::Scenario {
 public:
 
@@ -41,11 +40,12 @@ public:
 
 protected:
 
+    void buildCloudLayerPs();
     void buildExplosionPs();
 
 private:
 
-    elements::ParticleSystemRef _explosionPs;
+    elements::ParticleSystemRef _explosionPs, _cloudLayerPs;
     elements::ParticleEmitterRef _explosionEmitter;
     elements::ParticleEmitter::emission_id _explosionEmissionId;
     elements::ViewportControllerRef _viewportController;
