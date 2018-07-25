@@ -7,8 +7,12 @@
 
 #include "game/KesslerSyndrome/elements/CloudLayerParticleSystem.hpp"
 
+#include "core/util/GlslProgLoader.hpp"
+#include "core/filters/Filters.hpp"
+
 using namespace core;
 using namespace elements;
+
 
 namespace game {
     
@@ -218,8 +222,32 @@ namespace game {
             }
         }
     }
+    
+#pragma mark - CloudLayerParticleSystemDrawComponent
+    
+    CloudLayerParticleSystemDrawComponent::CloudLayerParticleSystemDrawComponent(config c, ColorA particleColor):
+            ParticleSystemDrawComponent(c)
+    {
+        auto clearColor = ColorA(particleColor, 0);
+        auto stack = make_shared<FilterStack>();
+        setFilterStack(stack, clearColor);
+        
+        auto compositor = util::loadGlslAsset("kessler/filters/cloudlayer_compositor.glsl");
+        compositor->uniform("Alpha", particleColor.a);
+        stack->setScreenCompositeShader(compositor);
+    }
+    
+    gl::GlslProgRef CloudLayerParticleSystemDrawComponent::createDefaultShader() const {
+        return util::loadGlslAsset("kessler/shaders/cloudlayer.glsl");
+    }
+    
+    void CloudLayerParticleSystemDrawComponent::setShaderUniforms(const gl::GlslProgRef &program, const core::render_state &renderState) {
+        ParticleSystemDrawComponent::setShaderUniforms(program, renderState);
+    }
+
 
 #pragma mark - CloudLayerParticleSystem
+    
 
     CloudLayerParticleSystem::config CloudLayerParticleSystem::config::parse(const XmlTree &node) {
         config c;
@@ -229,9 +257,18 @@ namespace game {
         return c;
     }
 
-    CloudLayerParticleSystemRef CloudLayerParticleSystem::create(const config &c) {
+    CloudLayerParticleSystemRef CloudLayerParticleSystem::create(config c) {
+
+        // alpha for cloud layer is applied in the compositor pass,
+        // so set alpha to 1 during initial rendering; and pass actual
+        // color to the draw component so it knows how to composite correctly
+
+        const auto particleColor = c.simulationConfig.particle.color;
+        c.simulationConfig.particle.color.a = 1;
+        
         auto simulation = make_shared<CloudLayerParticleSimulation>(c.simulationConfig);
-        auto draw = make_shared<ParticleSystemDrawComponent>(c.drawConfig);
+        auto draw = make_shared<CloudLayerParticleSystemDrawComponent>(c.drawConfig, particleColor);
+
         return Object::create<CloudLayerParticleSystem>("CloudLayer", {draw, simulation});
     }
 

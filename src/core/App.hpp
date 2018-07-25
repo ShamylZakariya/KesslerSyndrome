@@ -144,6 +144,9 @@ namespace core {
 
         virtual void step(void);
     };
+    
+    /// save contents of fbo to disk, and terminate app
+    void save_and_die(const ci::gl::FboRef &fbo, std::string dest);
 
 } // end namespace core
 

@@ -253,8 +253,8 @@ namespace core {
         //
         
         gl::clear(ColorA(0,0,0,1));
-        _viewportComposer->getCompositor()->composite(_width, _height);
-        _screenViewportComposer->getCompositor()->composite(_width, _height);
+        _viewportComposer->getCompositor()->composite(_renderState, _width, _height);
+        _screenViewportComposer->getCompositor()->composite(_screenRenderState, _width, _height);
     }
     
     void Scenario::dispatchSceneDraw(const render_state &renderState) {

@@ -25,7 +25,7 @@ in vec4 Color;
 out vec4 oColor;
 
 void main(void) {
-    float alpha = step(0.5, texture(uTex0, TexCoord).r);
+    float alpha = texture(uTex0, TexCoord).r;
     
     // NOTE: additive blending requires premultiplication
     oColor.rgb = Color.rgb * alpha;

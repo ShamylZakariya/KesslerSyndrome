@@ -32,5 +32,6 @@
 #include "core/Compositor.hpp"
 #include "core/Scenario.hpp"
 #include "core/Tracking.hpp"
+#include "core/FilterStack.hpp"
 
 #endif /* Core_h */

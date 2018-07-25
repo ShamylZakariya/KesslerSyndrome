@@ -1,33 +1,33 @@
 vertex:
 #version 150
 uniform mat4 ciModelViewProjection;
+uniform mat4 ciModelMatrix;
 
 in vec4 ciPosition;
 in vec2 ciTexCoord0;
-in vec4 ciColor;
 
 out vec2 TexCoord;
-out vec4 Color;
 
 void main(void) {
     gl_Position = ciModelViewProjection * ciPosition;
     TexCoord = ciTexCoord0;
-    Color = ciColor;
 }
 
 fragment:
 #version 150
-uniform sampler2D uTex0;
+uniform float Alpha;
+uniform sampler2D ColorTex;
+uniform vec2 ColorTexSize;
+uniform vec2 ColorTexSizeInverse;
+
+uniform vec4 Offset;
+uniform vec4 Multiplier;
 
 in vec2 TexCoord;
-in vec4 Color;
 
 out vec4 oColor;
 
 void main(void) {
-    float alpha = step(0.5, texture(uTex0, TexCoord).r);
-    
-    // NOTE: additive blending requires premultiplication
-    oColor.rgb = Color.rgb * alpha;
-    oColor.a = Color.a * alpha;
+    vec4 tex = texture(ColorTex, TexCoord);
+    oColor = mix(tex, Offset + (tex * Multiplier), Alpha);
 }

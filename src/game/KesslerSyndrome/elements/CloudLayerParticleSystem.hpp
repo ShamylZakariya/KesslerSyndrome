@@ -135,6 +135,18 @@ namespace game {
         vector<core::RadialGravitationCalculatorRef> _displacements;
         vector<particle_physics> _physics;
     };
+    
+    class CloudLayerParticleSystemDrawComponent : public elements::ParticleSystemDrawComponent {
+    public:
+
+        CloudLayerParticleSystemDrawComponent(config c, ColorA particleColor);
+
+    protected:
+
+        gl::GlslProgRef createDefaultShader() const override;
+        void setShaderUniforms(const gl::GlslProgRef &program, const core::render_state &renderState) override;
+
+    };
 
     class CloudLayerParticleSystem : public elements::BaseParticleSystem {
     public:
@@ -146,7 +158,7 @@ namespace game {
             static config parse(const XmlTree &node);
         };
 
-        static CloudLayerParticleSystemRef create(const config &c);
+        static CloudLayerParticleSystemRef create(config c);
 
     public:
 

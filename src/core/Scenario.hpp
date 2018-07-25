@@ -37,7 +37,11 @@ namespace core {
         ViewportComposer(const vector<BaseViewportRef> &viewports, const BaseCompositorRef &compositor);
         
         const vector<BaseViewportRef> &getViewports() const { return _viewports; }
+
         const BaseCompositorRef &getCompositor() const { return _compositor; }
+        
+        template<typename T>
+        shared_ptr<T> getCompositor() const { return dynamic_pointer_cast<T>(_compositor); }
 
 
         virtual void onScenarioResized(int width, int height);

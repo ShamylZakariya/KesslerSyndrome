@@ -71,6 +71,13 @@
 		63A282741FD067E400962F8E /* ImageProcessing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63A282711FD067E400962F8E /* ImageProcessing.cpp */; };
 		63A282751FD067E400962F8E /* ImageProcessing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63A282711FD067E400962F8E /* ImageProcessing.cpp */; };
 		63A5ED13204C9432001BD62E /* EasingTestScenario.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63A5ED11204C9432001BD62E /* EasingTestScenario.cpp */; };
+		63A71FAB20FBB8B900B91188 /* FilterStack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63A71FA920FBB8B900B91188 /* FilterStack.cpp */; };
+		63A71FAC20FBB8CE00B91188 /* FilterStack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63A71FA920FBB8B900B91188 /* FilterStack.cpp */; };
+		63A71FAF20FF95D500B91188 /* FilterStackTestScenario.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63A71FAD20FF95D500B91188 /* FilterStackTestScenario.cpp */; };
+		63A71FB32104E85800B91188 /* Filters.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63A71FB12104E85800B91188 /* Filters.cpp */; };
+		63A71FB42104E86B00B91188 /* Filters.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63A71FB12104E85800B91188 /* Filters.cpp */; };
+		63A71FB52107819500B91188 /* Planet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 638F4D901F87D4F3004437E8 /* Planet.cpp */; };
+		63A71FB62107819500B91188 /* CloudLayerParticleSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63E29EF51F97A87300CAF39E /* CloudLayerParticleSystem.cpp */; };
 		63B8AF07202CA1A70021AC63 /* TerrainAttachmentsTestScenario.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63B8AF05202CA1A70021AC63 /* TerrainAttachmentsTestScenario.cpp */; };
 		63E29EF31F97A4C300CAF39E /* BaseParticleSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63E29EF01F97A4C300CAF39E /* BaseParticleSystem.cpp */; };
 		63E29EF41F97A4C300CAF39E /* BaseParticleSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63E29EF01F97A4C300CAF39E /* BaseParticleSystem.cpp */; };
@@ -197,6 +204,12 @@
 		63A282721FD067E400962F8E /* ImageProcessing.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ImageProcessing.hpp; sourceTree = "<group>"; };
 		63A5ED11204C9432001BD62E /* EasingTestScenario.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = EasingTestScenario.cpp; sourceTree = "<group>"; };
 		63A5ED12204C9432001BD62E /* EasingTestScenario.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = EasingTestScenario.hpp; sourceTree = "<group>"; };
+		63A71FA920FBB8B900B91188 /* FilterStack.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FilterStack.cpp; sourceTree = "<group>"; };
+		63A71FAA20FBB8B900B91188 /* FilterStack.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = FilterStack.hpp; sourceTree = "<group>"; };
+		63A71FAD20FF95D500B91188 /* FilterStackTestScenario.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FilterStackTestScenario.cpp; sourceTree = "<group>"; };
+		63A71FAE20FF95D500B91188 /* FilterStackTestScenario.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = FilterStackTestScenario.hpp; sourceTree = "<group>"; };
+		63A71FB12104E85800B91188 /* Filters.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Filters.cpp; sourceTree = "<group>"; };
+		63A71FB22104E85800B91188 /* Filters.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Filters.hpp; sourceTree = "<group>"; };
 		63A9967020D807E000EF3785 /* Bezier.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Bezier.hpp; sourceTree = "<group>"; };
 		63B8AF05202CA1A70021AC63 /* TerrainAttachmentsTestScenario.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TerrainAttachmentsTestScenario.cpp; sourceTree = "<group>"; };
 		63B8AF06202CA1A70021AC63 /* TerrainAttachmentsTestScenario.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TerrainAttachmentsTestScenario.hpp; sourceTree = "<group>"; };
@@ -402,6 +415,9 @@
 				63F93C081F8681E100F537CA /* Entity.cpp */,
 				63F93C091F8681E100F537CA /* Entity.hpp */,
 				632622F21E7D9A630051ABE2 /* Exception.hpp */,
+				63A71FB02104E81000B91188 /* filters */,
+				63A71FA920FBB8B900B91188 /* FilterStack.cpp */,
+				63A71FAA20FBB8B900B91188 /* FilterStack.hpp */,
 				632622F31E7D9A630051ABE2 /* InputDispatcher.cpp */,
 				632622F41E7D9A630051ABE2 /* InputDispatcher.hpp */,
 				632622F61E7D9A630051ABE2 /* MathHelpers.hpp */,
@@ -477,6 +493,15 @@
 			path = player;
 			sourceTree = "<group>";
 		};
+		63A71FB02104E81000B91188 /* filters */ = {
+			isa = PBXGroup;
+			children = (
+				63A71FB12104E85800B91188 /* Filters.cpp */,
+				63A71FB22104E85800B91188 /* Filters.hpp */,
+			);
+			path = filters;
+			sourceTree = "<group>";
+		};
 		63E29EEF1F97A4B400CAF39E /* ParticleSystem */ = {
 			isa = PBXGroup;
 			children = (
@@ -530,24 +555,26 @@
 		63F93C281F86F84F00F537CA /* Tests */ = {
 			isa = PBXGroup;
 			children = (
-				631CBB6D2066FAB3006D3E31 /* util */,
-				63F93C2C1F86F84F00F537CA /* SvgTestScenario.cpp */,
-				63F93C291F86F84F00F537CA /* SvgTestScenario.hpp */,
-				63F93C2B1F86F84F00F537CA /* TerrainTestScenario.cpp */,
-				63F93C2A1F86F84F00F537CA /* TerrainTestScenario.hpp */,
-				638F4DA31F8BCF53004437E8 /* TestsApp.cpp */,
+				63A5ED11204C9432001BD62E /* EasingTestScenario.cpp */,
+				63A5ED12204C9432001BD62E /* EasingTestScenario.hpp */,
+				63A71FAD20FF95D500B91188 /* FilterStackTestScenario.cpp */,
+				63A71FAE20FF95D500B91188 /* FilterStackTestScenario.hpp */,
+				638BFB1B203F28DE004163A9 /* IPTestsScenario.cpp */,
+				638BFB1C203F28DE004163A9 /* IPTestsScenario.hpp */,
+				63611A8F2088DC14004EE731 /* MultiViewportTestScenario.cpp */,
+				63611A902088DC14004EE731 /* MultiViewportTestScenario.hpp */,
 				631171341FAB72A50098069F /* ParticleSystemTestScenario.cpp */,
 				631171351FAB72A50098069F /* ParticleSystemTestScenario.hpp */,
 				63920BC01FCA7AA80075B468 /* PerlinWorldTestScenario.cpp */,
 				63920BC11FCA7AA80075B468 /* PerlinWorldTestScenario.hpp */,
+				63F93C2C1F86F84F00F537CA /* SvgTestScenario.cpp */,
+				63F93C291F86F84F00F537CA /* SvgTestScenario.hpp */,
 				63B8AF05202CA1A70021AC63 /* TerrainAttachmentsTestScenario.cpp */,
 				63B8AF06202CA1A70021AC63 /* TerrainAttachmentsTestScenario.hpp */,
-				638BFB1B203F28DE004163A9 /* IPTestsScenario.cpp */,
-				638BFB1C203F28DE004163A9 /* IPTestsScenario.hpp */,
-				63A5ED11204C9432001BD62E /* EasingTestScenario.cpp */,
-				63A5ED12204C9432001BD62E /* EasingTestScenario.hpp */,
-				63611A8F2088DC14004EE731 /* MultiViewportTestScenario.cpp */,
-				63611A902088DC14004EE731 /* MultiViewportTestScenario.hpp */,
+				63F93C2B1F86F84F00F537CA /* TerrainTestScenario.cpp */,
+				63F93C2A1F86F84F00F537CA /* TerrainTestScenario.hpp */,
+				638F4DA31F8BCF53004437E8 /* TestsApp.cpp */,
+				631CBB6D2066FAB3006D3E31 /* util */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -682,6 +709,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				63A71FB52107819500B91188 /* Planet.cpp in Sources */,
+				63A71FB62107819500B91188 /* CloudLayerParticleSystem.cpp in Sources */,
+				63A71FAC20FBB8CE00B91188 /* FilterStack.cpp in Sources */,
 				63611A922088DF96004EE731 /* MultiViewportTestScenario.cpp in Sources */,
 				63597BED20766F9D00B65C2A /* GlslProgLoader.cpp in Sources */,
 				631CBB712066FEFA006D3E31 /* TerrainCutRecorder.cpp in Sources */,
@@ -701,12 +731,14 @@
 				638F4DB31F8BCFCE004437E8 /* Xml.cpp in Sources */,
 				63611A8E2087990C004EE731 /* Compositor.cpp in Sources */,
 				638F4DB41F8BCFCE004437E8 /* DevComponents.cpp in Sources */,
+				63A71FAF20FF95D500B91188 /* FilterStackTestScenario.cpp in Sources */,
 				638F4DB51F8BCFCE004437E8 /* Terrain.cpp in Sources */,
 				6363640B209756F500806152 /* VoronoiSplitView.cpp in Sources */,
 				6332FF852020C67700279B7F /* TerrainDetail_Svg.cpp in Sources */,
 				638F4DB61F8BCFCE004437E8 /* TerrainWorld.cpp in Sources */,
 				6332FF89202378C200279B7F /* PlanetGenerator.cpp in Sources */,
 				635CC37A20EA6F38007AE2FE /* CrackGeometry.cpp in Sources */,
+				63A71FB32104E85800B91188 /* Filters.cpp in Sources */,
 				63E29EFD1F9E3F5D00CAF39E /* ParticleSystem.cpp in Sources */,
 				636364062093743C00806152 /* Tracking.cpp in Sources */,
 				638F4DB71F8BCFCE004437E8 /* ViewportController.cpp in Sources */,
@@ -727,9 +759,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				63A71FB42104E86B00B91188 /* Filters.cpp in Sources */,
 				6363640A209756F500806152 /* VoronoiSplitView.cpp in Sources */,
 				63597BEC20766F8F00B65C2A /* GlslProgLoader.cpp in Sources */,
 				638F4DA21F898602004437E8 /* Background.cpp in Sources */,
+				63A71FAB20FBB8B900B91188 /* FilterStack.cpp in Sources */,
 				635CC38120F26F29007AE2FE /* PlayerPhysicsComponents.cpp in Sources */,
 				635CC37920EA6F37007AE2FE /* CrackGeometry.cpp in Sources */,
 				638F4DA11F897FB7004437E8 /* GameConstants.cpp in Sources */,
