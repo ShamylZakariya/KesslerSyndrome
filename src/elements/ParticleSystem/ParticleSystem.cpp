@@ -645,14 +645,6 @@ namespace elements {
         _particlesBatch = gl::Batch::create(mesh, _shader);
     }
     
-    namespace {
-        void save_and_die(const gl::FboRef &fbo, string dest) {
-            CI_LOG_D("save_and_die dest:" << dest);
-            writeImage(dest, fbo->getColorTexture()->createSource());
-            CI_ASSERT(false);
-        }
-    }
-
     void ParticleSystemDrawComponent::draw(const render_state &renderState) {
         if (!_filterStack) {
             performDraw(renderState);
