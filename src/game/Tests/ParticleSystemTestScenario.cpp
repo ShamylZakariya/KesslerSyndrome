@@ -238,18 +238,6 @@ void ParticleSystemTestScenario::buildCloudLayerPs() {
     
     auto cl = game::CloudLayerParticleSystem::create(config);
     getStage()->addObject(cl);
-
-    // now add a filter stack; note we need to set a clear color or else we get previous frame data because PS doesn't fill the buffer with its output
-    auto clearColor = ColorA(config.simulationConfig.particle.color, 0);
-    auto dc = cl->getComponent<ParticleSystemDrawComponent>();
-    auto fs = make_shared<FilterStack>();
-    dc->setFilterStack(fs, clearColor);
-
-    auto pixelateFilter = make_shared<filters::PixelateFilter>(16);
-    pixelateFilter->setClearsColorBuffer(true);
-    pixelateFilter->setClearColor(clearColor);
-    fs->push(pixelateFilter);
-
 }
 
 void ParticleSystemTestScenario::buildExplosionPs() {

@@ -1,7 +1,7 @@
 <cloudLayer>
-    <draw textureAtlas="kessler/textures/CloudTop.png" atlasType="None"/>
+    <draw textureAtlas="kessler/textures/CloudTop_Blurred.png" atlasType="None"/>
     <simulation origin="0,0" radius="300" count="500" period="30" turbulence="2" displacementForce="5" returnForce="3">
         <noise octaves="4" seed="1"/>
-        <particle minRadius="10" maxRadius="200" minRadiusNoiseValue="0.4" color="184,188,171,255"/>
+        <particle minRadius="10" maxRadius="200" minRadiusNoiseValue="0.4" color="184,188,171,128"/>
     </simulation>
 </cloudLayer>

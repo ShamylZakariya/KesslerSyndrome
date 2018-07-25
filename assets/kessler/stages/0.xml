@@ -74,14 +74,14 @@
 		<draw textureAtlas="kessler/textures/CloudTop.png" atlasType="None"/>
 		<simulation origin="0,0" radius="1070" count="500" period="30" turbulence="2" displacementForce="5" returnForce="3">
 			<noise octaves="4" seed="1"/>
-			<particle minRadius="10" maxRadius="200" minRadiusNoiseValue="0.4" color="184,188,171,255"/>
+			<particle minRadius="10" maxRadius="200" minRadiusNoiseValue="0.4" color="184,188,171,200"/>
 		</simulation>
 	</cloudLayer>
 	<cloudLayer id="foreground">
 		<draw textureAtlas="kessler/textures/CloudTop.png" atlasType="None"/>
 		<simulation origin="0,0" radius="1100" count="500" period="10" turbulence="8" displacementForce="10" returnForce="2">
 			<noise octaves="4" seed="2"/>
-			<particle minRadius="10" maxRadius="100" minRadiusNoiseValue="0.5" color="255,255,255,255"/>
+			<particle minRadius="10" maxRadius="100" minRadiusNoiseValue="0.5" color="255,255,255,200"/>
 		</simulation>
 	</cloudLayer>
 	<players>

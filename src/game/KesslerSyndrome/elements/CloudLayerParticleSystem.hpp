@@ -146,7 +146,7 @@ namespace game {
             static config parse(const XmlTree &node);
         };
 
-        static CloudLayerParticleSystemRef create(const config &c);
+        static CloudLayerParticleSystemRef create(config c);
 
     public:
 

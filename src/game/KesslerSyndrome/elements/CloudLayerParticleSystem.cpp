@@ -7,8 +7,12 @@
 
 #include "game/KesslerSyndrome/elements/CloudLayerParticleSystem.hpp"
 
+#include "core/util/GlslProgLoader.hpp"
+#include "core/filters/Filters.hpp"
+
 using namespace core;
 using namespace elements;
+
 
 namespace game {
     
@@ -220,6 +224,24 @@ namespace game {
     }
 
 #pragma mark - CloudLayerParticleSystem
+    
+    namespace {
+        
+        class CloudLayerFilter : public filters::SimpleGlslFilter {
+        public:
+            CloudLayerFilter(ColorA fillColor) :
+                    SimpleGlslFilter(util::loadGlslAsset("kessler/filters/cloudlayer.glsl"))
+            {}
+            
+        protected:
+            
+            void _bindUniforms(const render_state &state, const gl::FboRef &input) override {
+                SimpleGlslFilter::_bindUniforms(state, input);
+            }
+            
+        };
+        
+    }
 
     CloudLayerParticleSystem::config CloudLayerParticleSystem::config::parse(const XmlTree &node) {
         config c;
@@ -229,9 +251,25 @@ namespace game {
         return c;
     }
 
-    CloudLayerParticleSystemRef CloudLayerParticleSystem::create(const config &c) {
+    CloudLayerParticleSystemRef CloudLayerParticleSystem::create(config c) {
+        // alpha for cloud layer is applied in the compositor pass,
+        // so set alpha to 1 during initial rendering; and use correct alpha
+        // when compositing
+        auto color = c.simulationConfig.particle.color;
+        c.simulationConfig.particle.color.a = 1;
+        
         auto simulation = make_shared<CloudLayerParticleSimulation>(c.simulationConfig);
         auto draw = make_shared<ParticleSystemDrawComponent>(c.drawConfig);
+        
+        auto clearColor = ColorA(color, 0);
+        draw->setFilterStack(make_shared<FilterStack>(), clearColor);
+
+        auto filter = make_shared<CloudLayerFilter>(color);
+        filter->setAlpha(color.a);
+        filter->setClearsColorBuffer(true);
+        filter->setClearColor(clearColor);
+        draw->getFilterStack()->push(filter);
+        
         return Object::create<CloudLayerParticleSystem>("CloudLayer", {draw, simulation});
     }
 
