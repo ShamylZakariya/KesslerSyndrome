@@ -222,15 +222,15 @@ namespace game {
             }
         }
     }
-
-#pragma mark - CloudLayerParticleSystem
+    
+#pragma mark - CloudLayerParticleSystemDrawComponent
     
     namespace {
         
         class CloudLayerFilter : public filters::SimpleGlslFilter {
         public:
             CloudLayerFilter(ColorA fillColor) :
-                    SimpleGlslFilter(util::loadGlslAsset("kessler/filters/cloudlayer.glsl"))
+            SimpleGlslFilter(util::loadGlslAsset("kessler/filters/cloudlayer.glsl"))
             {}
             
         protected:
@@ -242,6 +242,23 @@ namespace game {
         };
         
     }
+
+    
+    CloudLayerParticleSystemDrawComponent::CloudLayerParticleSystemDrawComponent(config c):
+            ParticleSystemDrawComponent(c)
+    {}
+    
+    gl::GlslProgRef CloudLayerParticleSystemDrawComponent::createDefaultShader() const {
+        return util::loadGlslAsset("kessler/shaders/cloudlayer.glsl");
+    }
+    
+    void CloudLayerParticleSystemDrawComponent::setShaderUniforms(const gl::GlslProgRef &program, const core::render_state &renderState) {
+        ParticleSystemDrawComponent::setShaderUniforms(program, renderState);
+    }
+
+
+#pragma mark - CloudLayerParticleSystem
+    
 
     CloudLayerParticleSystem::config CloudLayerParticleSystem::config::parse(const XmlTree &node) {
         config c;
@@ -259,7 +276,7 @@ namespace game {
         c.simulationConfig.particle.color.a = 1;
         
         auto simulation = make_shared<CloudLayerParticleSimulation>(c.simulationConfig);
-        auto draw = make_shared<ParticleSystemDrawComponent>(c.drawConfig);
+        auto draw = make_shared<CloudLayerParticleSystemDrawComponent>(c.drawConfig);
         
         auto clearColor = ColorA(color, 0);
         draw->setFilterStack(make_shared<FilterStack>(), clearColor);

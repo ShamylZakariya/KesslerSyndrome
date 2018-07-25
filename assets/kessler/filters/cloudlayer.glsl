@@ -26,6 +26,6 @@ out vec4 oColor;
 
 void main(void) {
     vec4 tex = texture(ColorTex, TexCoord);
-    tex.a *= Alpha;
+    tex.a = step(0.5, tex.a) * Alpha;
     oColor = tex;
 }
