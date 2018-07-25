@@ -225,36 +225,16 @@ namespace game {
     
 #pragma mark - CloudLayerParticleSystemDrawComponent
     
-    namespace {
-        
-        class CloudLayerFilter : public filters::SimpleGlslFilter {
-        public:
-            CloudLayerFilter(ColorA fillColor) :
-            SimpleGlslFilter(util::loadGlslAsset("kessler/filters/cloudlayer.glsl"))
-            {}
-            
-        protected:
-            
-            void _bindUniforms(const render_state &state, const gl::FboRef &input) override {
-                SimpleGlslFilter::_bindUniforms(state, input);
-            }
-            
-        };
-        
-    }
-
-    
     CloudLayerParticleSystemDrawComponent::CloudLayerParticleSystemDrawComponent(config c, ColorA particleColor):
             ParticleSystemDrawComponent(c)
     {
         auto clearColor = ColorA(particleColor, 0);
-        setFilterStack(make_shared<FilterStack>(), clearColor);
+        auto stack = make_shared<FilterStack>();
+        setFilterStack(stack, clearColor);
         
-        auto filter = make_shared<CloudLayerFilter>(particleColor);
-        filter->setAlpha(particleColor.a);
-        filter->setClearsColorBuffer(true);
-        filter->setClearColor(clearColor);
-        getFilterStack()->push(filter);
+        auto compositor = util::loadGlslAsset("kessler/filters/cloudlayer_compositor.glsl");
+        compositor->uniform("Alpha", particleColor.a);
+        stack->setScreenCompositeShader(compositor);
     }
     
     gl::GlslProgRef CloudLayerParticleSystemDrawComponent::createDefaultShader() const {
