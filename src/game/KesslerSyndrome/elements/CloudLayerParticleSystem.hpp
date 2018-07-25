@@ -139,7 +139,7 @@ namespace game {
     class CloudLayerParticleSystemDrawComponent : public elements::ParticleSystemDrawComponent {
     public:
 
-        CloudLayerParticleSystemDrawComponent(config c);
+        CloudLayerParticleSystemDrawComponent(config c, ColorA particleColor);
 
     protected:
 

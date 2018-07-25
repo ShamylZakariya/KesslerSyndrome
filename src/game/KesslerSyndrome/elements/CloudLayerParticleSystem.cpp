@@ -244,9 +244,18 @@ namespace game {
     }
 
     
-    CloudLayerParticleSystemDrawComponent::CloudLayerParticleSystemDrawComponent(config c):
+    CloudLayerParticleSystemDrawComponent::CloudLayerParticleSystemDrawComponent(config c, ColorA particleColor):
             ParticleSystemDrawComponent(c)
-    {}
+    {
+        auto clearColor = ColorA(particleColor, 0);
+        setFilterStack(make_shared<FilterStack>(), clearColor);
+        
+        auto filter = make_shared<CloudLayerFilter>(particleColor);
+        filter->setAlpha(particleColor.a);
+        filter->setClearsColorBuffer(true);
+        filter->setClearColor(clearColor);
+        getFilterStack()->push(filter);
+    }
     
     gl::GlslProgRef CloudLayerParticleSystemDrawComponent::createDefaultShader() const {
         return util::loadGlslAsset("kessler/shaders/cloudlayer.glsl");
@@ -269,24 +278,17 @@ namespace game {
     }
 
     CloudLayerParticleSystemRef CloudLayerParticleSystem::create(config c) {
+
         // alpha for cloud layer is applied in the compositor pass,
-        // so set alpha to 1 during initial rendering; and use correct alpha
-        // when compositing
-        auto color = c.simulationConfig.particle.color;
+        // so set alpha to 1 during initial rendering; and pass actual
+        // color to the draw component so it knows how to composite correctly
+
+        const auto particleColor = c.simulationConfig.particle.color;
         c.simulationConfig.particle.color.a = 1;
         
         auto simulation = make_shared<CloudLayerParticleSimulation>(c.simulationConfig);
-        auto draw = make_shared<CloudLayerParticleSystemDrawComponent>(c.drawConfig);
-        
-        auto clearColor = ColorA(color, 0);
-        draw->setFilterStack(make_shared<FilterStack>(), clearColor);
+        auto draw = make_shared<CloudLayerParticleSystemDrawComponent>(c.drawConfig, particleColor);
 
-        auto filter = make_shared<CloudLayerFilter>(color);
-        filter->setAlpha(color.a);
-        filter->setClearsColorBuffer(true);
-        filter->setClearColor(clearColor);
-        draw->getFilterStack()->push(filter);
-        
         return Object::create<CloudLayerParticleSystem>("CloudLayer", {draw, simulation});
     }
 
