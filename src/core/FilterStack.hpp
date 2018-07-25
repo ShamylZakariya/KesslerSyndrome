@@ -180,13 +180,26 @@ namespace core {
         virtual gl::FboRef execute(const render_state &state, const gl::FboRef &input);
         
         /**
-         Execute the filters in order against the contents of input, rendering result to screen.
-         If a compositeShader is supplied, it will be used to composite the result to screen; otherwise,
-         the fbo will be blitted directly to screen.
+         Assign a shader to composite result to screen, when executeToScreen finishes executing its filters.
          compositeShader requires the following uniforms:
-            - uniform sampler2D ColorTex;
+         - uniform sampler2D ColorTex;
+         
+         If none is assigned, executeToScreen will simply use the passthrough shader (core/filters/passthrough.glsl)
          */
-        virtual void executeToScreen(const render_state &state, const gl::FboRef &input, const gl::GlslProgRef &compositeShader = nullptr);
+        virtual void setScreenCompositeShader(const gl::GlslProgRef &compositeShader) {
+            _compositeShader = compositeShader;
+        }
+        
+        /**
+         Get the composite shader. If none has been assigned, executeToScreen will use the default passthrough shader.
+         */
+        gl::GlslProgRef getScreenCompositeShader() const { return _compositeShader; }
+        
+        /**
+         Execute the filters in order against the contents of input, rendering result to screen using the screenCompositeShader
+         if assigned, otherwise using the default passthrough shader (core/filters/passthrough.glsl)
+         */
+        virtual void executeToScreen(const render_state &state, const gl::FboRef &input);
         
         /**
          Dispatch time-based updates to all filters in the stack
@@ -211,7 +224,7 @@ namespace core {
         gl::BatchRef _blitter;
         vector<FilterRef> _filters;
         ivec2 _size;
-        gl::GlslProgRef _compositeShader;
+        gl::GlslProgRef _compositeShader, _passthroughCompositeShader;
         
     };
     

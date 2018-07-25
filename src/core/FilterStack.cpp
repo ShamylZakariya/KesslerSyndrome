@@ -66,11 +66,11 @@ namespace core {
      gl::BatchRef _blitter;
      vector<FilterRef> _filters;
      ivec2 _size;
-     gl::GlslProgRef _compositeShader;
+     gl::GlslProgRef _compositeShader, _passthroughCompositeShader;
      */
     
     FilterStack::FilterStack():
-            _compositeShader(util::loadGlslAsset("core/filters/passthrough.glsl"))
+            _passthroughCompositeShader(util::loadGlslAsset("core/filters/passthrough.glsl"))
     {}
     
     FilterStack::~FilterStack()
@@ -134,9 +134,9 @@ namespace core {
         return relay.getSrc();
     }
     
-    void FilterStack::executeToScreen(const render_state &state, const gl::FboRef &input, const gl::GlslProgRef &compositeShader) {
+    void FilterStack::executeToScreen(const render_state &state, const gl::FboRef &input) {
         auto result = execute(state, input);
-        auto shader = compositeShader ? compositeShader : _compositeShader;
+        auto shader = _compositeShader ? _compositeShader : _passthroughCompositeShader;
         
         if (_blitter) {
             if (_blitter->getGlslProg() != shader) {
@@ -156,9 +156,6 @@ namespace core {
         gl::ScopedTextureBind stb(result->getColorTexture(), 0);
         shader->uniform("ColorTex", 0);
         _blitter->draw();
-        
-        // FIXME: I tried using Fbo::blitToScreen for the case where no compositeShader is specified. It doesn't work?
-        // result->blitToScreen(result->getBounds(), state.viewport->getBounds());
     }
     
     void FilterStack::update(const time_state &time) {
