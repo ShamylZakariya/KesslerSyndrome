@@ -58,11 +58,8 @@ namespace core {
 #pragma InputDispatcher
     
     /*
-     static InputDispatcherRef _sInstance;
-     static ScreenCoordinateSystem::origin _screenOrigin;
-     
-     std::vector< InputListener* > _listeners;
-     std::map< int, bool > _keyPressState;
+     std::vector<InputListener *> _listeners;
+     std::set<int> _keyPressState, _keysPressed, _keysReleased;
      ci::app::MouseEvent _lastMouseEvent;
      ci::app::KeyEvent _lastKeyEvent;
      ivec2 *_lastMousePosition;
@@ -117,6 +114,26 @@ namespace core {
         _mouseDragId.disconnect();
         _keyDownId.disconnect();
         _keyUpId.disconnect();
+    }
+    
+    bool InputDispatcher::isKeyDown(int keyCode) const {
+        return _keyPressState.count(keyCode) > 0;
+    }
+    
+    bool InputDispatcher::wasKeyPressed(int keyCode) const {
+        return _keysPressed.count(keyCode) > 0;
+    }
+    
+    bool InputDispatcher::wasKeyReleased(int keyCode) const {
+        return _keysReleased.count(keyCode) > 0;
+    }
+    
+    void InputDispatcher::update() {
+    }
+    
+    void InputDispatcher::postUpdate() {
+        _keysPressed.clear();
+        _keysReleased.clear();
     }
     
     void InputDispatcher::hideMouse() {
@@ -220,7 +237,9 @@ namespace core {
     }
     
     bool InputDispatcher::_keyDown(ci::app::KeyEvent event) {
-        _keyPressState[event.getCode()] = true;
+        const auto code = event.getCode();
+        _keysPressed.insert(code);
+        _keyPressState.insert(code);
         _lastKeyEvent = event;
         
         for (auto listener : _listeners) {
@@ -231,7 +250,9 @@ namespace core {
     }
     
     bool InputDispatcher::_keyUp(ci::app::KeyEvent event) {
-        _keyPressState[event.getCode()] = false;
+        const auto code = event.getCode();
+        _keysReleased.insert(code);
+        _keyPressState.erase(code);
         _lastKeyEvent = event;
         
         for (auto listener : _listeners) {

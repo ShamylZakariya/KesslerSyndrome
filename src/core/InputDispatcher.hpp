@@ -66,17 +66,25 @@ namespace core {
 
         virtual ~InputDispatcher();
 
-        /**
-            Convenience function to test if a key is pressed
-         */
-        inline bool isKeyDown(int keyCode) const {
-            std::map<int, bool>::const_iterator pos(_keyPressState.find(keyCode));
-            return pos != _keyPressState.end() ? pos->second : false;
-        }
+        /// convenience function to check if the key is currently pressed
+        bool isKeyDown(int keyCode) const;
+        
+        /// convenience function to check if the key was pressed this timestemp
+        bool wasKeyPressed(int keyCode) const;
+        
+        /// convenience function to check if the key was released this timestemp
+        bool wasKeyReleased(int keyCode) const;
 
+        /// called by App before dispatching update() to scenario
+        void update();
+        
+        /// called by App after dispatching update() to scenario
+        void postUpdate();
 
+        /// hide the user's mouse cursor
         void hideMouse();
 
+        /// reveal the user's mouse cursor
         void unhideMouse();
 
         bool mouseHidden() const {
@@ -167,7 +175,7 @@ namespace core {
         static ScreenCoordinateSystem::origin _screenOrigin;
 
         std::vector<InputListener *> _listeners;
-        std::map<int, bool> _keyPressState;
+        std::set<int> _keyPressState, _keysPressed, _keysReleased;
         ci::app::MouseEvent _lastMouseEvent;
         ci::app::KeyEvent _lastKeyEvent;
         ivec2 *_lastMousePosition;
