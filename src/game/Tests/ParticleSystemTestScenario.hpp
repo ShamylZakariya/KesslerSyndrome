@@ -40,6 +40,7 @@ public:
 
 protected:
 
+    void buildObjectWithFilterStack();
     void buildCloudLayerPs();
     void buildExplosionPs();
 

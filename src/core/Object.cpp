@@ -68,6 +68,18 @@ namespace core {
 
 
 #pragma mark - DrawComponent
+    
+    void DrawComponent::dispatchDraw(const render_state &renderState) {
+        if (!_filterStack) {
+            draw(renderState);
+        } else {
+            auto result = _filterStack->capture(renderState, [this](const render_state &renderState){
+                this->draw(renderState);
+            }, _filterStackClearColor, gl::Fbo::Format().disableDepth());
+            
+            _filterStack->executeToScreen(renderState, result);
+        }
+    }
 
     cpBB DrawComponent::getBB() const {
         switch(_visibilityDetermination) {

@@ -151,6 +151,8 @@ void ParticleSystemTestScenario::setup() {
     buildCloudLayerPs();
     buildExplosionPs();
 
+    // build an object with a filter stack to test per-object filters
+    buildObjectWithFilterStack();
 
     auto mdc = MouseDelegateComponent::create(10)
             ->onPress([this](dvec2 screen, dvec2 world, const app::MouseEvent &event) {
@@ -228,6 +230,44 @@ void ParticleSystemTestScenario::reset() {
 }
 
 #pragma mark - Tests
+
+void ParticleSystemTestScenario::buildObjectWithFilterStack() {
+    auto dc = make_shared<util::svg::SvgDrawComponent>(util::svg::Group::loadSvgDocument(app::loadAsset("svg_tests/eggsac.svg")));
+    dc->getSvg()->setPosition(dvec2(0,300));
+    dc->setFilterStack(make_shared<FilterStack>(), ColorA(0,0,0,0));
+    
+    auto pixelateFilter = make_shared<filters::PixelateFilter>(16);
+    pixelateFilter->setClearsColorBuffer(true);
+    pixelateFilter->setClearColor(ColorA(0,0,0,0));
+
+    auto colorShiftFilter = make_shared<filters::ColorshiftFilter>(ColorA(0.5,0,-0.5,0), ColorA(1,1,1,1));
+    colorShiftFilter->setClearsColorBuffer(true);
+    colorShiftFilter->setClearColor(ColorA(0,0,0,0));
+
+    dc->getFilterStack()->push({ pixelateFilter, colorShiftFilter });
+
+    class FilterAnimator : public core::Component {
+    public:
+        FilterAnimator(const vector<FilterRef> &filters) :
+        _filters(filters) {
+        }
+        
+        void step(const time_state &time) override {
+            double cycle = cos(time.time) * 0.5 + 0.5;
+
+            for (const auto &filter : _filters) {
+                filter->setAlpha(cycle);
+            }
+        }
+        
+    private:
+        vector<FilterRef> _filters;
+    };
+
+    auto animator = make_shared<FilterAnimator>(vector<FilterRef>({pixelateFilter, colorShiftFilter}));
+    
+    getStage()->addObject(Object::with("Eggsac", {dc, animator}));
+}
 
 void ParticleSystemTestScenario::buildCloudLayerPs() {
     auto cloudLayerXmlAsset = app::loadAsset("tests/cloud_layer_ps.xml");

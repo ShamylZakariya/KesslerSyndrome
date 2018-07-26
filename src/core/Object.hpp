@@ -14,6 +14,7 @@
 #include "core/RenderState.hpp"
 #include "core/Signals.hpp"
 #include "core/TimeState.hpp"
+#include "core/FilterStack.hpp"
 
 namespace core {
 
@@ -306,6 +307,10 @@ namespace core {
         virtual ~DrawComponent() {
         }
 
+        // called by the visibility determination pipeline to tell this DrawComponent to render.
+        // you should implement your render in ::draw(), not here.
+        virtual void dispatchDraw(const render_state &renderState);
+
         // default implementation returns:
         // cpBBInfinity for VisibilityDetermination::ALWAYS_DRAW
         // cpBBInvalid for VisibilityDetermination::NEVER_DRAW
@@ -330,6 +335,15 @@ namespace core {
         virtual BatchDrawDelegateRef getBatchDrawDelegate() const {
             return nullptr;
         }
+        
+        /**
+         Assign a FilterStack. null by default. When non-null, all rendering in draw() will be performed to an Fbo,
+         and then after the filters in the stack are executed, the result will be composited to screen.
+         @param stack The filter stack to assign
+         @param clearColor The color the capture Fbo will be cleared to
+         */
+        virtual void setFilterStack(const FilterStackRef &filterStack, ColorA clearColor) { _filterStack = filterStack; _filterStackClearColor = clearColor; }
+        const FilterStackRef &getFilterStack() const { return _filterStack; }
 
         // Component
         void onReady(ObjectRef parent, StageRef stage) override;
@@ -338,6 +352,8 @@ namespace core {
         
         int _drawLayer;
         VisibilityDetermination::style _visibilityDetermination;
+        FilterStackRef _filterStack;
+        ColorA _filterStackClearColor;
 
     };
 
