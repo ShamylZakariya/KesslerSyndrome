@@ -27,7 +27,7 @@ in vec2 TexCoord;
 out vec4 oColor;
 
 void main(void) {
-    float pixelSize = mix(1.0f,PixelSize, Alpha);
+    float pixelSize = round(mix(1.0f,PixelSize, Alpha));
     vec2 pixelateCoord = round((TexCoord * ColorTexSize) / pixelSize) * (pixelSize / ColorTexSize);
     vec4 tex = texture(ColorTex, pixelateCoord);
     oColor = tex;

@@ -646,14 +646,13 @@ namespace elements {
     }
     
     void ParticleSystemDrawComponent::draw(const render_state &renderState) {
-        if (!_filterStack) {
-            performDraw(renderState);
-        } else {
-            auto result = _filterStack->capture(renderState, [this](const render_state &renderState){
-                this->performDraw(renderState);
-            }, _filterStackClearColor, gl::Fbo::Format().disableDepth());
+        auto sim = getSimulation();
+        if (updateParticles(sim)) {
+            gl::ScopedTextureBind tex(_config.textureAtlas, 0);
+            gl::ScopedBlendPremult blender;
             
-            _filterStack->executeToScreen(renderState, result);
+            setShaderUniforms(_shader, renderState);
+            _particlesBatch->draw(_batchDrawStart, _batchDrawCount);
         }
 
         if (renderState.testGizmoBit(Gizmos::AABBS)) {
@@ -664,18 +663,7 @@ namespace elements {
             gl::drawStrokedRect(Rectf(bb.l, bb.b, bb.r, bb.t), 1);
         }
     }
-    
-    void ParticleSystemDrawComponent::performDraw(const render_state &renderState) {
-        auto sim = getSimulation();
-        if (updateParticles(sim)) {
-            gl::ScopedTextureBind tex(_config.textureAtlas, 0);
-            gl::ScopedBlendPremult blender;
-            
-            setShaderUniforms(_shader, renderState);
-            _particlesBatch->draw(_batchDrawStart, _batchDrawCount);
-        }
-    }
-    
+        
     gl::GlslProgRef ParticleSystemDrawComponent::createDefaultShader() const {
         return util::loadGlslAsset("core/elements/shaders/particle_system.glsl");
     }

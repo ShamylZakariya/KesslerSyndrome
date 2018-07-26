@@ -321,10 +321,10 @@ namespace core {
             DrawComponentRef dc = *dcIt;
             DrawComponent::BatchDrawDelegateRef delegate = dc->getBatchDrawDelegate();
             
-            if (delegate) {
-                dcIt = _drawDelegateRun(dcIt, end, state);
+            if (!delegate) {
+                dc->dispatchDraw(state);
             } else {
-                dc->draw(state);
+                dcIt = _drawDelegateRun(dcIt, end, state);
             }
         }
     }
@@ -349,7 +349,7 @@ namespace core {
             }
 
             dc = *dcIt;
-            dc->draw(state);
+            dc->dispatchDraw(state);
         }
 
         //
