@@ -10,6 +10,7 @@
 
 #include "game/KesslerSyndrome/elements/CloudLayerParticleSystem.hpp"
 #include "core/filters/Filters.hpp"
+#include "core/util/ImageWriting.hpp"
 
 using namespace core;
 using namespace elements;
@@ -161,6 +162,10 @@ void ParticleSystemTestScenario::setup() {
                     
                 case app::KeyEvent::KEY_r:
                     this->reset();
+                    return true;
+                    
+                case app::KeyEvent::KEY_p:
+                    util::saveScreenshot("~/Tmp", "ParticleSystemTestScenario");
                     return true;
                     
                 default:

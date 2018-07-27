@@ -149,7 +149,10 @@ namespace {
     class CharacterControlComponent : public core::InputComponent {
     public:
         
-        CharacterControlComponent(Player player):_player(player) {
+        CharacterControlComponent(Player player):
+            InputComponent(0),
+            _player(player)
+        {
             switch(player) {
                 case Player::A:
                     _upKeyCode = app::KeyEvent::KEY_w;

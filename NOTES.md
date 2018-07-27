@@ -8,11 +8,11 @@ This player sucks. What about a blob player like the Shoggoths in Surfacer?
     3) Make ParticleSystem have option to render to texture, with a composite pass
 
 ### Todo (HIGH):
-    - Make Input Listener not care about monitored keys, it complictates things and isn't useful
-    - Make a root/global input listener which is able to say that a key was just pressed, just released, or currently pressed (may almost exist)
+    - @DONE Make Input Listener not care about monitored keys, it complictates things and isn't useful
+    - @DONE Make a root/global input listener which is able to say that a key was just pressed, just released, or currently pressed (may almost exist)
         - InputDispatcher is a singleton
         - has isKeyPressed which almost fits bill
-    - Make function which takes an Fbo, a Key code, and when called, if the key was pressed, saves the Fbo to disk (incrementing a post-fix numeral)
+    - @DONE Make function which takes an Fbo, a Key code, and when called, if the key was pressed, saves the Fbo to disk (incrementing a post-fix numeral)
 
 
 ## Todo (LOW)
