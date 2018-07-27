@@ -8,6 +8,8 @@
 
 #include "game/KesslerSyndrome/entities/player/PlayerInputComponents.hpp"
 
+#include "game/KesslerSyndrome/GameConstants.hpp"
+
 using namespace core;
 namespace game {
     
@@ -17,7 +19,9 @@ namespace game {
      int _keyLeft, _keyRight, _keyJump, _keyCrouch, _keyAimCCW, _keyAimCW, _keyFire;
      */
     
-    PlayerInputComponent::PlayerInputComponent() {
+    PlayerInputComponent::PlayerInputComponent():
+    InputComponent(InputDispatchReceiptOrder::PLAYER)
+    {
         _keyLeft = app::KeyEvent::KEY_a;
         _keyRight = app::KeyEvent::KEY_d;
         _keyJump = app::KeyEvent::KEY_w;
@@ -25,46 +29,41 @@ namespace game {
         _keyAimCCW = app::KeyEvent::KEY_q;
         _keyAimCW = app::KeyEvent::KEY_e;
         _keyFire = app::KeyEvent::KEY_SPACE;
-        
-        monitorKeys({
-            _keyLeft, _keyRight, _keyJump, _keyCrouch, _keyAimCCW, _keyAimCW, _keyFire
-        });
-        
     }
     
     PlayerInputComponent::~PlayerInputComponent() {
     }
         
     bool PlayerInputComponent::isGoingRight() const {
-        return isMonitoredKeyDown(_keyRight);
+        return isKeyDown(_keyRight);
     }
     
     bool PlayerInputComponent::isGoingLeft() const {
-        return isMonitoredKeyDown(_keyLeft);
+        return isKeyDown(_keyLeft);
     }
     
     bool PlayerInputComponent::isJumping() const {
-        return isMonitoredKeyDown(_keyJump);
+        return isKeyDown(_keyJump);
     }
     
     bool PlayerInputComponent::isCrouching() const {
-        return isMonitoredKeyDown(_keyCrouch);
+        return isKeyDown(_keyCrouch);
     }
     
     bool PlayerInputComponent::isAimingCounterClockwise() const {
-        return isMonitoredKeyDown(_keyAimCCW);
+        return isKeyDown(_keyAimCCW);
     }
     
     bool PlayerInputComponent::isAimingClockwise() const {
-        return isMonitoredKeyDown(_keyAimCW);
+        return isKeyDown(_keyAimCW);
     }
     
     bool PlayerInputComponent::didFire() const {
-        return wasMonitoredKeyPressed(_keyFire);
+        return wasKeyPressed(_keyFire);
     }
     
     bool PlayerInputComponent::isFiring() const {
-        return isMonitoredKeyDown(_keyFire);
+        return isKeyDown(_keyFire);
     }
     
 }

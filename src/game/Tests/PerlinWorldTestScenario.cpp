@@ -297,7 +297,7 @@ void PerlinWorldTestScenario::draw(const render_state &state) {
     }
 }
 
-bool PerlinWorldTestScenario::keyDown(const app::KeyEvent &event) {
+bool PerlinWorldTestScenario::onKeyDown(const app::KeyEvent &event) {
     
     switch(event.getChar()) {
         case 'r':

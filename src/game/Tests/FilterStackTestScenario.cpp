@@ -92,21 +92,28 @@ void FilterStackTestScenario::setup() {
 
     // track 'r' for resetting scenario
     getStage()->addObject(Object::with("InputDelegation",{
-        elements::KeyboardDelegateComponent::create(0,{ cinder::app::KeyEvent::KEY_RIGHTBRACKET,cinder::app::KeyEvent::KEY_LEFTBRACKET })->onPress([filterStack](int keyCode){
+        elements::KeyboardDelegateComponent::create(0)->onPress([this, filterStack](int keyCode)->bool{
             switch (keyCode) {
+                case cinder::app::KeyEvent::KEY_r:
+                    this->reset();
+                    return true;
+                
                 case cinder::app::KeyEvent::KEY_RIGHTBRACKET:
                     for (auto &f : filterStack->getFilters()) {
                         f->setAlpha(f->getAlpha() + 0.1);
                     }
-                    break;
+                    return true;
+                
                 case cinder::app::KeyEvent::KEY_LEFTBRACKET:
                     for (auto &f : filterStack->getFilters()) {
                         f->setAlpha(f->getAlpha() - 0.1);
                     }
-                    break;
-                default: break;
+                    return true;
+                
+                default:
+                    return false;
             }
-        }),
+        })
     }));
 
 }
@@ -140,14 +147,6 @@ void FilterStackTestScenario::drawScreen(const render_state &state) {
     << look.up.x << ", " << look.up.y << ")";
     gl::drawString(ss.str(), vec2(10, 40), Color(0.2,0.2,0.7));
     
-}
-
-bool FilterStackTestScenario::keyDown(const app::KeyEvent &event) {
-    if (event.getChar() == 'r') {
-        reset();
-        return true;
-    }
-    return false;
 }
 
 void FilterStackTestScenario::reset() {

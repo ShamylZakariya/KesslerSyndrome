@@ -94,15 +94,15 @@ namespace elements {
         // InputComponent
         void step(const core::time_state &time) override;
         
-        bool mouseDown(const app::MouseEvent &event) override;
+        bool onMouseDown(const app::MouseEvent &event) override;
         
-        bool mouseUp(const app::MouseEvent &event) override;
+        bool onMouseUp(const app::MouseEvent &event) override;
         
-        bool mouseMove(const app::MouseEvent &event, const ivec2 &delta) override;
+        bool onMouseMove(const app::MouseEvent &event, const ivec2 &delta) override;
         
-        bool mouseDrag(const app::MouseEvent &event, const ivec2 &delta) override;
+        bool onMouseDrag(const app::MouseEvent &event, const ivec2 &delta) override;
         
-        bool mouseWheel(const app::MouseEvent &event) override;
+        bool onMouseWheel(const app::MouseEvent &event) override;
         
     private:
         
@@ -158,13 +158,13 @@ namespace elements {
         
         void step(const core::time_state &time) override;
         
-        bool mouseDown(const app::MouseEvent &event) override;
+        bool onMouseDown(const app::MouseEvent &event) override;
         
-        bool mouseUp(const app::MouseEvent &event) override;
+        bool onMouseUp(const app::MouseEvent &event) override;
         
-        bool mouseMove(const app::MouseEvent &event, const ivec2 &delta) override;
+        bool onMouseMove(const app::MouseEvent &event, const ivec2 &delta) override;
         
-        bool mouseDrag(const app::MouseEvent &event, const ivec2 &delta) override;
+        bool onMouseDrag(const app::MouseEvent &event, const ivec2 &delta) override;
         
         bool isDragging() const {
             return _mouseJoint != nullptr;
@@ -212,23 +212,23 @@ namespace elements {
     class KeyboardDelegateComponent : public core::InputComponent {
     public:
         
-        typedef function<void(int keyCode)> KeyHandler;
+        typedef function<bool(int keyCode)> KeyHandler;
         
-        static KeyboardDelegateComponentRef create(int dispatchReceiptIndex, const initializer_list<int> keycodes);
+        static KeyboardDelegateComponentRef create(int dispatchReceiptIndex);
         
     public:
-        KeyboardDelegateComponent(int dispatchReceiptIndex, const initializer_list<int> keycodes);
+        KeyboardDelegateComponent(int dispatchReceiptIndex);
         
         KeyboardDelegateComponentRef onPress(KeyHandler h);
         
         KeyboardDelegateComponentRef onRelease(KeyHandler h);
         
-        void monitoredKeyDown(int keyCode) override;
+        bool onKeyDown(const app::KeyEvent &event) override;
         
-        void monitoredKeyUp(int keyCode) override;
+        bool onKeyUp(const app::KeyEvent &event) override;
         
     private:
-        function<void(int keyCode)> _upHandler, _downHandler;
+        function<bool(int keyCode)> _upHandler, _downHandler;
     };
     
     SMART_PTR(MouseDelegateComponent);
@@ -258,15 +258,15 @@ namespace elements {
         
         MouseDelegateComponentRef onWheel(MouseWheelHandler);
         
-        bool mouseDown(const app::MouseEvent &event) override;
+        bool onMouseDown(const app::MouseEvent &event) override;
         
-        bool mouseUp(const app::MouseEvent &event) override;
+        bool onMouseUp(const app::MouseEvent &event) override;
         
-        bool mouseMove(const app::MouseEvent &event, const ivec2 &delta) override;
+        bool onMouseMove(const app::MouseEvent &event, const ivec2 &delta) override;
         
-        bool mouseDrag(const app::MouseEvent &event, const ivec2 &delta) override;
+        bool onMouseDrag(const app::MouseEvent &event, const ivec2 &delta) override;
         
-        bool mouseWheel(const app::MouseEvent &event) override;
+        bool onMouseWheel(const app::MouseEvent &event) override;
         
         
     private:

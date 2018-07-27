@@ -192,6 +192,20 @@ void TerrainTestScenario::setup() {
     getStage()->addObject(cutter);
     getStage()->addObject(grid);
     getStage()->addObject(cameraController);
+    
+    getStage()->addObject(Object::with("InputDelegation",{
+        elements::KeyboardDelegateComponent::create(0)->onPress([&](int keyCode)->bool{
+            switch(keyCode) {
+                    // track 'r' for resetting scenario
+                case app::KeyEvent::KEY_r:
+                    this->reset();
+                    return true;
+                default:
+                    return false;
+            }
+        })
+    }));
+
 }
 
 void TerrainTestScenario::cleanup() {
@@ -209,17 +223,6 @@ void TerrainTestScenario::drawScreen(const render_state &state) {
     float sps = App::get()->getAverageSps();
     string info = strings::format("%.1f %.1f", fps, sps);
     gl::drawString(info, vec2(10, 10), Color(1, 1, 1));
-}
-
-bool TerrainTestScenario::keyDown(const app::KeyEvent &event) {
-    if (event.getChar() == 'r') {
-        reset();
-        return true;
-    } else if (event.getCode() == app::KeyEvent::KEY_SPACE) {
-        //testExplicitCut();
-        return true;
-    }
-    return false;
 }
 
 void TerrainTestScenario::reset() {

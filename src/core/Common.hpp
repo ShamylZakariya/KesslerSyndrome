@@ -11,6 +11,7 @@
 
 using namespace std;
 using namespace ci;
+//using namespace ci::app;
 
 #define CLASS_NAME(ptr)        ((typeid(*(ptr))).name())
 #define SMART_PTR(cname)    class cname; typedef std::shared_ptr< class cname > cname ## Ref; typedef std::weak_ptr< class cname > cname ## WeakRef;

@@ -393,65 +393,24 @@ namespace core {
 
     class InputComponent : public Component, public InputListener {
     public:
-        InputComponent();
 
+        /**
+         Create an InputComponent with a given dispatchReceiptIndex.
+         InputComponents with a lower dispatchReceiptIndex will have the oppotunity to consume input events
+         before those with a higher dispatchReceiptIndex.
+         */
         InputComponent(int dispatchReceiptIndex);
 
         virtual ~InputComponent() {
         }
 
         void onReady(ObjectRef parent, StageRef stage) override;
-        void preUpdate(const core::time_state &state) override;
-        void postUpdate(const core::time_state &state) override;
 
         bool isListening() const override;
-
-        void monitorKey(int keyCode);
-
-        void ignoreKey(int keyCode);
-
-        void monitorKeys(const initializer_list<int> &keyCodes);
-
-        void ignoreKeys(const initializer_list<int> &keyCodes);
-
-        /**
-            Called when a monitored key is pressed
-         */
-        virtual void monitoredKeyDown(int keyCode) {
-        }
-
-        /**
-            Called when a monitored key is released
-         */
-        virtual void monitoredKeyUp(int keyCode) {
-        }
-
-        /**
-            return true if any monitored keys are pressed.
-            this ignores any keys that haven't been registered for monitoring by monitorKey()
-         */
-        bool isMonitoredKeyDown(int keyCode) const;
-        
-        /**
-            returns true iff the keycode was not pressed in the previous time step, and is pressed this time step.
-            This is useful for single-shot actions like firing a gun once per press.
-         */
-        bool wasMonitoredKeyPressed(int keyCode) const;
-
-        /**
-         returns true iff the keycode was pressed in the previous time step, and is not pressed this time step
-         */
-        bool wasMonitoredKeyReleased(int keyCode) const;
-
-        
-        bool keyDown(const app::KeyEvent &event) override;
-
-        bool keyUp(const app::KeyEvent &event) override;
 
     private:
 
         bool _attached;
-        set<int> _monitoredKeyCodes, _pressedKeyCodes, _previousUpdatePressedKeyCodes;
 
     };
 

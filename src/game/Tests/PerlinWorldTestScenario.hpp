@@ -29,7 +29,7 @@ public:
 
     virtual void draw(const core::render_state &state) override;
 
-    virtual bool keyDown(const app::KeyEvent &event) override;
+    virtual bool onKeyDown(const app::KeyEvent &event) override;
 
     void reset();
 
