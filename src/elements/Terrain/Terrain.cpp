@@ -85,7 +85,7 @@ namespace elements {
         _terrain(terrain) {
         }
         
-        bool MouseCutterComponent::mouseDown(const app::MouseEvent &event) {
+        bool MouseCutterComponent::onMouseDown(const app::MouseEvent &event) {
             _mouseScreen = event.getPos();
             _mouseWorld = getStage()->getMainViewport()->screenToWorld(_mouseScreen);
             
@@ -95,7 +95,7 @@ namespace elements {
             return true;
         }
         
-        bool MouseCutterComponent::mouseUp(const app::MouseEvent &event) {
+        bool MouseCutterComponent::onMouseUp(const app::MouseEvent &event) {
             if (_cutting) {
                 if (_terrain) {
                     const float radius = _radius / getStage()->getMainViewport()->getScale();
@@ -110,13 +110,13 @@ namespace elements {
             return false;
         }
         
-        bool MouseCutterComponent::mouseMove(const app::MouseEvent &event, const ivec2 &delta) {
+        bool MouseCutterComponent::onMouseMove(const app::MouseEvent &event, const ivec2 &delta) {
             _mouseScreen = event.getPos();
             _mouseWorld = getStage()->getMainViewport()->screenToWorld(_mouseScreen);
             return false;
         }
         
-        bool MouseCutterComponent::mouseDrag(const app::MouseEvent &event, const ivec2 &delta) {
+        bool MouseCutterComponent::onMouseDrag(const app::MouseEvent &event, const ivec2 &delta) {
             _mouseScreen = event.getPos();
             _mouseWorld = getStage()->getMainViewport()->screenToWorld(_mouseScreen);
             if (_cutting) {

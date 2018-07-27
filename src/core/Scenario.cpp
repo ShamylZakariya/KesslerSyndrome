@@ -149,18 +149,6 @@ namespace core {
         _renderState.gizmoMask = _screenRenderState.gizmoMask = mask & ~gizmoBit;
     }
 
-    void Scenario::screenshot(const fs::path &folderPath, const string &namingPrefix, const string format) {
-        size_t index = 0;
-        fs::path fullPath;
-
-        do {
-            fullPath = folderPath / (namingPrefix + str(index++) + "." + format);
-        } while (fs::exists(fullPath));
-
-        Surface s = app::copyWindowSurface();
-        writeImage(fullPath.string(), s, ImageTarget::Options(), format);
-    }
-
     void Scenario::setStage(StageRef stage) {
         if (_stage) {
             _stage->removeFromScenario();

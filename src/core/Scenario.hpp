@@ -157,11 +157,6 @@ namespace core {
             return _renderState.gizmoMask;
         }
         
-        /**
-         Save a screenshot as PNG to @a path
-         */
-        void screenshot(const fs::path &folderPath, const std::string &namingPrefix, const std::string format = "png");
-
         void setStage(StageRef stage);
 
         StageRef getStage() const {

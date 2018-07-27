@@ -30,6 +30,19 @@ void SvgTestScenario::setup() {
 
     testSimpleSvgLoad();
     testSimpleSvgGroupOriginTransforms();
+    
+    getStage()->addObject(Object::with("InputDelegation",{
+        elements::KeyboardDelegateComponent::create(0)->onPress([&](int keyCode)->bool{
+            switch(keyCode) {
+                // track 'r' for resetting scenario
+                case app::KeyEvent::KEY_r:
+                    this->reset();
+                    return true;
+                default:
+                    return false;
+            }
+        })
+    }));
 }
 
 void SvgTestScenario::cleanup() {
@@ -60,14 +73,6 @@ void SvgTestScenario::drawScreen(const render_state &state) {
        << look.up.x << ", " << look.up.y << ")";
     gl::drawString(ss.str(), vec2(10, 40), Color(1, 1, 1));
 
-}
-
-bool SvgTestScenario::keyDown(const app::KeyEvent &event) {
-    if (event.getChar() == 'r') {
-        reset();
-        return true;
-    }
-    return false;
 }
 
 void SvgTestScenario::reset() {

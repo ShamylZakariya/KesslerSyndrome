@@ -141,6 +141,20 @@ void EasingTestScenario::setup() {
     y = add_ease_row(stage, {EASE_DESC(bounce_ease_out), EASE_DESC(bounce_ease_in), EASE_DESC(bounce_ease_in_out), EASE_DESC(bounce_ease_out_in)}, y);
     y = add_ease_row(stage, {EASE_DESC(back_ease_out), EASE_DESC(back_ease_in), EASE_DESC(back_ease_in_out), EASE_DESC(back_ease_out_in)}, y);
     
+    
+    getStage()->addObject(Object::with("InputDelegation",{
+        elements::KeyboardDelegateComponent::create(0)->onPress([&](int keyCode)->bool{
+            switch(keyCode) {
+                    
+                case app::KeyEvent::KEY_r:
+                    this->reset();
+                    return true;
+                    
+                default:
+                    return false;
+            }
+        })
+    }));
 }
 
 void EasingTestScenario::cleanup() {
@@ -157,17 +171,6 @@ void EasingTestScenario::draw(const render_state &state) {
 
 void EasingTestScenario::drawScreen(const render_state &state) {
     Scenario::drawScreen(state);
-}
-
-bool EasingTestScenario::keyDown(const app::KeyEvent &event) {
-    
-    switch(event.getChar()) {
-        case 'r':
-            reset();
-            return true;
-    }
-    
-    return false;
 }
 
 void EasingTestScenario::reset() {

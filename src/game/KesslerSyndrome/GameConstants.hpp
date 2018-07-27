@@ -83,6 +83,12 @@ namespace game {
             EXPLOSION = 1 << 1
         };
     }
+    
+    namespace InputDispatchReceiptOrder {
+        enum Order {
+            PLAYER = 0
+        };
+    }
 
 
 }

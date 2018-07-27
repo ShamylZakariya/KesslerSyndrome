@@ -8,7 +8,6 @@ This player sucks. What about a blob player like the Shoggoths in Surfacer?
     3) Make ParticleSystem have option to render to texture, with a composite pass
 
 ### Todo (HIGH):
-    - Make ParticleSystem have an option to render to texture, run shaders against it, and then composite (this will enable me to do the nice MotileFluid stuff)
 
 
 ## Todo (LOW)

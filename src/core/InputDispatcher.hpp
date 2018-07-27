@@ -66,17 +66,25 @@ namespace core {
 
         virtual ~InputDispatcher();
 
-        /**
-            Convenience function to test if a key is pressed
-         */
-        inline bool isKeyDown(int keyCode) const {
-            std::map<int, bool>::const_iterator pos(_keyPressState.find(keyCode));
-            return pos != _keyPressState.end() ? pos->second : false;
-        }
+        /// convenience function to check if the key is currently pressed
+        bool isKeyDown(int keyCode) const;
+        
+        /// convenience function to check if the key was pressed this timestemp
+        bool wasKeyPressed(int keyCode) const;
+        
+        /// convenience function to check if the key was released this timestemp
+        bool wasKeyReleased(int keyCode) const;
 
+        /// called by App before dispatching update() to scenario
+        void update();
+        
+        /// called by App after dispatching update() to scenario
+        void postUpdate();
 
+        /// hide the user's mouse cursor
         void hideMouse();
 
+        /// reveal the user's mouse cursor
         void unhideMouse();
 
         bool mouseHidden() const {
@@ -119,7 +127,7 @@ namespace core {
             return _lastMouseEvent.getPos();
         }
 
-        ci::app::MouseEvent getLastMouseEvent() const {
+        app::MouseEvent getLastMouseEvent() const {
             return _lastMouseEvent;
         }
 
@@ -145,21 +153,21 @@ namespace core {
 
         void _sortListeners();
 
-        ivec2 _mouseDelta(const ci::app::MouseEvent &event);
+        ivec2 _mouseDelta(const app::MouseEvent &event);
 
-        bool _mouseDown(ci::app::MouseEvent event);
+        bool _mouseDown(app::MouseEvent event);
 
-        bool _mouseUp(ci::app::MouseEvent event);
+        bool _mouseUp(app::MouseEvent event);
 
-        bool _mouseWheel(ci::app::MouseEvent event);
+        bool _mouseWheel(app::MouseEvent event);
 
-        bool _mouseMove(ci::app::MouseEvent event);
+        bool _mouseMove(app::MouseEvent event);
 
-        bool _mouseDrag(ci::app::MouseEvent event);
+        bool _mouseDrag(app::MouseEvent event);
 
-        bool _keyDown(ci::app::KeyEvent event);
+        bool _keyDown(app::KeyEvent event);
 
-        bool _keyUp(ci::app::KeyEvent event);
+        bool _keyUp(app::KeyEvent event);
 
     private:
 
@@ -167,9 +175,9 @@ namespace core {
         static ScreenCoordinateSystem::origin _screenOrigin;
 
         std::vector<InputListener *> _listeners;
-        std::map<int, bool> _keyPressState;
-        ci::app::MouseEvent _lastMouseEvent;
-        ci::app::KeyEvent _lastKeyEvent;
+        std::set<int> _keyPressState, _keysPressed, _keysReleased;
+        app::MouseEvent _lastMouseEvent;
+        app::KeyEvent _lastKeyEvent;
         ivec2 *_lastMousePosition;
         cinder::signals::Connection _mouseDownId, _mouseUpId, _mouseWheelId, _mouseMoveId, _mouseDragId, _keyDownId, _keyUpId;
         bool _mouseHidden, _mouseLeftDown, _mouseMiddleDown, _mouseRightDown;
@@ -178,29 +186,28 @@ namespace core {
 
     /**
      @class InputListener
-     Interface for classes which want to be notified of user input
+     Interface for classes which want to be notified of user input. You will generally do so via InputComponent subclasses.
 
-     Derive your class from InputListener and then when you want
-     to start listening to input, call InputListener::takeFocus() to push
-     your listener to the top of the input listener stack.
-
-     Your InputListener will automatically detach during destruction.
-
-     Each of the input handling functions (mouseDown, mouseUp, etc ) return a boolean. Return true if your listener
+     Each of the input handling functions (onMouseDown, onMouseUp, onKeyDown, etc ) return a boolean. Return true if your listener
      consumed the event. If so, the event will NOT be passed on to the next listener in the stack. If you ignore
      the event return false to let it pass on to the next listener.
+     
+     To "poll" events without consuming them, e.g., to monitor a key value during a call to update() in a Component,
+     call isKeyDown, getMousePosition, etc. See InputComponent.
+     
+     Listeners will be notified in order of getDispatchReceiptIndex(), where listeners with a lower index will have the
+     opportunity to consume the input before those with a higher value.
+     
+     Listeners are not listening by default, you must call setListening(true) to start listening to input. This is
+     handled automatically by the InputComponent lifecycle in InputComponent::onReady()
      */
     class InputListener {
     public:
 
-        friend class InputDispatcher;
-
         /**
-            To use an InputListener, you mush get the singleton InputDispatcher and push your listener. The listener
-            will become the first listener, and will receive input events first, before other listeners in the stack.
+         Create an InputListener with a given dispatchReceiptIndex, where a lower dispatchReceiptIndex will have the
+         oppotunity to consume input events earlier than those with a higher dispatchReceiptIndex.
          */
-        InputListener();
-
         InputListener(int dispatchReceiptIndex);
 
         virtual ~InputListener();
@@ -211,6 +218,7 @@ namespace core {
             return _dispatchReceiptIndex;
         }
 
+        /// pass true to "turn on" this InputListener, false to ignore input.
         void setListening(bool listening) {
             _listening = listening;
         }
@@ -219,39 +227,48 @@ namespace core {
             return _listening;
         }
 
-        virtual bool mouseDown(const ci::app::MouseEvent &event) {
+        virtual bool onMouseDown(const app::MouseEvent &event) {
             return false;
         }
 
-        virtual bool mouseUp(const ci::app::MouseEvent &event) {
+        virtual bool onMouseUp(const app::MouseEvent &event) {
             return false;
         }
 
-        virtual bool mouseWheel(const ci::app::MouseEvent &event) {
+        virtual bool onMouseWheel(const app::MouseEvent &event) {
             return false;
         }
 
-        virtual bool mouseMove(const ci::app::MouseEvent &event, const ivec2 &delta) {
+        virtual bool onMouseMove(const app::MouseEvent &event, const ivec2 &delta) {
             return false;
         }
 
-        virtual bool mouseDrag(const ci::app::MouseEvent &event, const ivec2 &delta) {
+        virtual bool onMouseDrag(const app::MouseEvent &event, const ivec2 &delta) {
             return false;
         }
 
-        virtual bool keyDown(const ci::app::KeyEvent &event) {
+        virtual bool onKeyDown(const app::KeyEvent &event) {
             return false;
         }
 
-        virtual bool keyUp(const ci::app::KeyEvent &event) {
+        virtual bool onKeyUp(const app::KeyEvent &event) {
             return false;
         }
 
-        /**
-            Convenience function to query if a key is currently pressed
-         */
-        virtual bool isKeyDown(int keyCode) const {
+        //
+        // The following methods are for polling behavior and aren't affected by isListening()
+        //
+
+        bool isKeyDown(int keyCode) const {
             return InputDispatcher::get()->isKeyDown(keyCode);
+        }
+
+        bool wasKeyPressed(int keyCode) const {
+            return InputDispatcher::get()->wasKeyPressed(keyCode);
+        }
+
+        bool wasKeyReleased(int keyCode) const {
+            return InputDispatcher::get()->wasKeyReleased(keyCode);
         }
 
         ivec2 getMousePosition() const {

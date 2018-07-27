@@ -149,13 +149,22 @@ namespace {
     class CharacterControlComponent : public core::InputComponent {
     public:
         
-        CharacterControlComponent(Player player) {
+        CharacterControlComponent(Player player):
+            InputComponent(0),
+            _player(player)
+        {
             switch(player) {
                 case Player::A:
-                    monitorKeys({ app::KeyEvent::KEY_w, app::KeyEvent::KEY_a, app::KeyEvent::KEY_s, app::KeyEvent::KEY_d });
+                    _upKeyCode = app::KeyEvent::KEY_w;
+                    _downKeyCode = app::KeyEvent::KEY_s;
+                    _leftKeyCode = app::KeyEvent::KEY_a;
+                    _rightKeyCode = app::KeyEvent::KEY_d;
                     break;
                 case Player::B:
-                    monitorKeys({ app::KeyEvent::KEY_LEFT, app::KeyEvent::KEY_UP, app::KeyEvent::KEY_RIGHT, app::KeyEvent::KEY_DOWN });
+                    _upKeyCode = app::KeyEvent::KEY_UP;
+                    _downKeyCode = app::KeyEvent::KEY_DOWN;
+                    _leftKeyCode = app::KeyEvent::KEY_LEFT;
+                    _rightKeyCode = app::KeyEvent::KEY_RIGHT;
                     break;
             }
         }
@@ -169,26 +178,27 @@ namespace {
             Component::update(time);
             auto state = _state.lock();
             
-            if (isMonitoredKeyDown(app::KeyEvent::KEY_w) || isMonitoredKeyDown(app::KeyEvent::KEY_UP)) {
+            if (isKeyDown(_upKeyCode)) {
                 state->setPosition(state->getPosition() + state->getSpeed() * dvec2(0,1));
             }
             
-            if (isMonitoredKeyDown(app::KeyEvent::KEY_s) || isMonitoredKeyDown(app::KeyEvent::KEY_DOWN)) {
+            if (isKeyDown(_downKeyCode)) {
                 state->setPosition(state->getPosition() + state->getSpeed() * dvec2(0,-1));
             }
             
-            if (isMonitoredKeyDown(app::KeyEvent::KEY_a) || isMonitoredKeyDown(app::KeyEvent::KEY_LEFT)) {
+            if (isKeyDown(_leftKeyCode)) {
                 state->setPosition(state->getPosition() + state->getSpeed() * dvec2(-1,0));
             }
             
-            if (isMonitoredKeyDown(app::KeyEvent::KEY_d) || isMonitoredKeyDown(app::KeyEvent::KEY_RIGHT)) {
+            if (isKeyDown(_rightKeyCode)) {
                 state->setPosition(state->getPosition() + state->getSpeed() * dvec2(1,0));
             }
-            
         }
         
     private:
         
+        Player _player;
+        int _upKeyCode, _downKeyCode, _rightKeyCode, _leftKeyCode;
         weak_ptr<CharacterState> _state;
         
     };
@@ -256,8 +266,14 @@ void MultiViewportTestScenario::setup()
     
     // track 'r' for resetting scenario
     getStage()->addObject(Object::with("InputDelegation",{
-        KeyboardDelegateComponent::create(0,{ cinder::app::KeyEvent::KEY_r })->onPress([&](int keyCode){
-            this->reset();
+        KeyboardDelegateComponent::create(0)->onPress([&](int keyCode)->bool{
+            switch(keyCode) {
+                case app::KeyEvent::KEY_r:
+                    this->reset();
+                    return true;
+                default:
+                    return false;
+            }
         }),
         MouseDelegateComponent::create(0)->onWheel([&](dvec2 screen, dvec2 world, double deltaWheel, const app::MouseEvent &event)->bool{
             this->_scale += deltaWheel * 0.1;

@@ -41,6 +41,8 @@ namespace core {
     }
 
     void App::update() {
+        InputDispatcher::get()->update();
+        
         // run physics step()
 #if USE_PHYSICS_LOOP
         _physicsLoop->step();
@@ -50,6 +52,9 @@ namespace core {
 
         // update is always called after physics step()
         _scenario->dispatchUpdate();
+        
+        // InputDispatcher::postUpdate has to be called after everything is done updating
+        InputDispatcher::get()->postUpdate();
     }
 
     void App::draw() {
@@ -233,12 +238,5 @@ namespace core {
         _cyclesLeftOver = updateIterations;
         _lastTime = _currentTime;
     }
-    
-    void save_and_die(const ci::gl::FboRef &fbo, std::string dest) {
-        CI_LOG_E("save_and_die dest:" << dest);
-        writeImage(dest, fbo->getColorTexture()->createSource());
-        CI_ASSERT(false);
-    }
-
 
 } // end namespace core

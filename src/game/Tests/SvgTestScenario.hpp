@@ -29,8 +29,6 @@ public:
 
     virtual void drawScreen(const render_state &state) override;
 
-    virtual bool keyDown(const app::KeyEvent &event) override;
-
     void reset();
 
 protected:

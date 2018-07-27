@@ -55,6 +55,29 @@ void IPTestsScenario::setup() {
             _channelTextures.push_back(gl::Texture2d::create(channel, fmt));
         }
     }
+    
+    
+    getStage()->addObject(Object::with("InputDelegation",{
+        elements::KeyboardDelegateComponent::create(0)->onPress([&](int keyCode)->bool{
+            switch(keyCode) {
+
+                case app::KeyEvent::KEY_r:
+                    this->reset();
+                    return true;
+
+                case app::KeyEvent::KEY_s:
+                    _seed++;
+                    CI_LOG_D("_seed: " << _seed);
+                    reset();
+                    return true;
+
+                default:
+                    return false;
+            }
+        })
+    }));
+
+    
 }
 
 void IPTestsScenario::cleanup() {
@@ -96,22 +119,6 @@ void IPTestsScenario::drawScreen(const render_state &state) {
     ss << std::setprecision(3) << "look (" << look.world.x << ", " << look.world.y << ") scale: " << scale << " up: (" << look.up.x << ", " << look.up.y << ")";
     gl::drawString(ss.str(), vec2(10, 40), Color(1, 1, 1));
 
-}
-
-bool IPTestsScenario::keyDown(const app::KeyEvent &event) {
-    
-    switch(event.getChar()) {
-        case 'r':
-            reset();
-            return true;
-        case 's':
-            _seed++;
-            CI_LOG_D("_seed: " << _seed);
-            reset();
-            return true;
-    }
-    
-    return false;
 }
 
 void IPTestsScenario::reset() {

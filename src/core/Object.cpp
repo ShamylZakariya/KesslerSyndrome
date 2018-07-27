@@ -102,13 +102,7 @@ namespace core {
 
     /*
      bool _attached;
-     bool _attached;
-     set<int> _monitoredKeyCodes, _pressedKeyCodes, _previousUpdatePressedKeyCodes;
      */
-
-    InputComponent::InputComponent() :
-            _attached(false) {
-    }
 
     InputComponent::InputComponent(int dispatchReceiptIndex) :
             InputListener(dispatchReceiptIndex),
@@ -121,79 +115,8 @@ namespace core {
         _attached = true;
     }
 
-    void InputComponent::preUpdate(const core::time_state &state) {
-        Component::preUpdate(state);
-    }
-
-    void InputComponent::postUpdate(const core::time_state &state) {
-        Component::postUpdate(state);
-        _previousUpdatePressedKeyCodes = _pressedKeyCodes;
-    }
-
     bool InputComponent::isListening() const {
         return _attached && InputListener::isListening();
-    }
-
-    void InputComponent::monitorKey(int keyCode) {
-        _monitoredKeyCodes.insert(keyCode);
-    }
-
-    void InputComponent::ignoreKey(int keyCode) {
-        _monitoredKeyCodes.erase(keyCode);
-    }
-
-    void InputComponent::monitorKeys(const initializer_list<int> &keyCodes) {
-        for (int kc : keyCodes) {
-            monitorKey(kc);
-        }
-    }
-
-    void InputComponent::ignoreKeys(const initializer_list<int> &keyCodes) {
-        for (int kc : keyCodes) {
-            ignoreKey(kc);
-        }
-    }
-
-    bool InputComponent::isMonitoredKeyDown(int keyCode) const {
-        return _pressedKeyCodes.count(keyCode) > 0;
-    }
-    
-    bool InputComponent::wasMonitoredKeyPressed(int keyCode) const {
-        bool previousState = _previousUpdatePressedKeyCodes.count(keyCode) > 0;
-        bool currentState = _pressedKeyCodes.count(keyCode) > 0;
-        return !previousState && currentState;
-    }
-    
-    bool InputComponent::wasMonitoredKeyReleased(int keyCode) const {
-        bool previousState = _previousUpdatePressedKeyCodes.count(keyCode) > 0;
-        bool currentState = _pressedKeyCodes.count(keyCode) > 0;
-        return previousState && !currentState;
-    }
-
-    bool InputComponent::keyDown(const app::KeyEvent &event) {
-        // if this is a key code we're monitoring, consume the event
-        int keyCode = event.getCode();
-        if (_monitoredKeyCodes.count(keyCode)) {
-            if (_pressedKeyCodes.count(keyCode) == 0) {
-                _pressedKeyCodes.insert(keyCode);
-                monitoredKeyDown(keyCode);
-            }
-            return true;
-        }
-        return false;
-    }
-
-    bool InputComponent::keyUp(const app::KeyEvent &event) {
-        // if this is a key code we're monitoring, consume the event
-        int keyCode = event.getCode();
-        if (_monitoredKeyCodes.count(keyCode)) {
-            if (_pressedKeyCodes.count(keyCode)) {
-                _pressedKeyCodes.erase(keyCode);
-                monitoredKeyUp(keyCode);
-            }
-            return true;
-        }
-        return false;
     }
 
 #pragma mark - PhysicsComponent

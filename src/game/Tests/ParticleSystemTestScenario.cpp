@@ -10,6 +10,7 @@
 
 #include "game/KesslerSyndrome/elements/CloudLayerParticleSystem.hpp"
 #include "core/filters/Filters.hpp"
+#include "core/util/ImageWriting.hpp"
 
 using namespace core;
 using namespace elements;
@@ -154,7 +155,24 @@ void ParticleSystemTestScenario::setup() {
     // build an object with a filter stack to test per-object filters
     buildObjectWithFilterStack();
 
-    auto mdc = MouseDelegateComponent::create(10)
+    
+    getStage()->addObject(Object::with("InputDelegation",{
+        KeyboardDelegateComponent::create(0)->onPress([&](int keyCode)->bool{
+            switch(keyCode) {
+                    
+                case app::KeyEvent::KEY_r:
+                    this->reset();
+                    return true;
+                    
+                case app::KeyEvent::KEY_p:
+                    util::saveScreenshot("~/Tmp", "ParticleSystemTestScenario");
+                    return true;
+                    
+                default:
+                    return false;
+            }
+        }),
+        MouseDelegateComponent::create(10)
             ->onPress([this](dvec2 screen, dvec2 world, const app::MouseEvent &event) {
                 if (event.isMetaDown()) {
                     _explosionEmitter->emit(world, dvec2(0, 1), 1, 120, ParticleEmitter::Sawtooth);
@@ -176,9 +194,8 @@ void ParticleSystemTestScenario::setup() {
                 dvec2 dir = normalize(deltaWorld);
                 _explosionEmitter->setEmissionPosition(_explosionEmissionId, world, dir);
                 return false;
-            });
-
-    getStage()->addObject(Object::with("Mouse Handling", {mdc}));
+            })
+    }));
 }
 
 void ParticleSystemTestScenario::cleanup() {
@@ -186,6 +203,19 @@ void ParticleSystemTestScenario::cleanup() {
 }
 
 void ParticleSystemTestScenario::update(const time_state &time) {
+    
+    if (InputDispatcher::get()->wasKeyPressed(app::KeyEvent::KEY_t)) {
+        CI_LOG_D("Pressed t");
+    }
+
+    if (InputDispatcher::get()->isKeyDown(app::KeyEvent::KEY_t)) {
+        CI_LOG_D("DOWN t");
+    }
+
+    if (InputDispatcher::get()->wasKeyReleased(app::KeyEvent::KEY_t)) {
+        CI_LOG_D("Released t");
+    }
+
     if (_explosionEmissionId != 0) {
         _viewportController->setTraumaBaseline(0.25);
     }
@@ -214,14 +244,6 @@ void ParticleSystemTestScenario::drawScreen(const render_state &state) {
     ss << std::setprecision(3) << "world (" << look.world.x << ", " << look.world.y << ") scale: " << scale << " up: ("
     << look.up.x << ", " << look.up.y << ") trauma: " << _viewportController->getCurrentTraumaLevel();
     gl::drawString(ss.str(), vec2(10, 40), Color(1, 1, 1));
-}
-
-bool ParticleSystemTestScenario::keyDown(const app::KeyEvent &event) {
-    if (event.getChar() == 'r') {
-        reset();
-        return true;
-    }
-    return false;
 }
 
 void ParticleSystemTestScenario::reset() {

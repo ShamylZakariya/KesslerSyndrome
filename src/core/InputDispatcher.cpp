@@ -12,7 +12,7 @@ namespace core {
     
     namespace {
         
-        ci::app::MouseEvent TranslateMouseEvent(const ci::app::MouseEvent &e, ScreenCoordinateSystem::origin origin) {
+        app::MouseEvent TranslateMouseEvent(const app::MouseEvent &e, ScreenCoordinateSystem::origin origin) {
             // cinder dispatches mouse events for a top-left system
             if (origin == ScreenCoordinateSystem::TopLeft) return e;
             
@@ -39,7 +39,7 @@ namespace core {
             if (e.isMetaDown()) modifiers |= MouseEvent::META_DOWN;
             if (e.isAccelDown()) modifiers |= MouseEvent::ACCEL_DOWN;
             
-            return ci::app::MouseEvent(e.getWindow(),
+            return app::MouseEvent(e.getWindow(),
                                        initiator,
                                        e.getX(),
                                        app::getWindowHeight() - e.getY(),
@@ -58,13 +58,10 @@ namespace core {
 #pragma InputDispatcher
     
     /*
-     static InputDispatcherRef _sInstance;
-     static ScreenCoordinateSystem::origin _screenOrigin;
-     
-     std::vector< InputListener* > _listeners;
-     std::map< int, bool > _keyPressState;
-     ci::app::MouseEvent _lastMouseEvent;
-     ci::app::KeyEvent _lastKeyEvent;
+     std::vector<InputListener *> _listeners;
+     std::set<int> _keyPressState, _keysPressed, _keysReleased;
+     app::MouseEvent _lastMouseEvent;
+     app::KeyEvent _lastKeyEvent;
      ivec2 *_lastMousePosition;
      cinder::signals::Connection _mouseDownId, _mouseUpId, _mouseWheelId, _mouseMoveId, _mouseDragId, _keyDownId, _keyUpId;
      bool _mouseHidden, _mouseLeftDown, _mouseMiddleDown, _mouseRightDown;
@@ -80,31 +77,31 @@ namespace core {
     _mouseLeftDown(false),
     _mouseMiddleDown(false),
     _mouseRightDown(false) {
-        _mouseDownId = window->getSignalMouseDown().connect([this](ci::app::MouseEvent &e) {
+        _mouseDownId = window->getSignalMouseDown().connect([this](app::MouseEvent &e) {
             _mouseDown(e);
         });
         
-        _mouseUpId = window->getSignalMouseUp().connect([this](ci::app::MouseEvent &e) {
+        _mouseUpId = window->getSignalMouseUp().connect([this](app::MouseEvent &e) {
             _mouseUp(e);
         });
         
-        _mouseWheelId = window->getSignalMouseWheel().connect([this](ci::app::MouseEvent &e) {
+        _mouseWheelId = window->getSignalMouseWheel().connect([this](app::MouseEvent &e) {
             _mouseWheel(e);
         });
         
-        _mouseMoveId = window->getSignalMouseMove().connect([this](ci::app::MouseEvent &e) {
+        _mouseMoveId = window->getSignalMouseMove().connect([this](app::MouseEvent &e) {
             _mouseMove(e);
         });
         
-        _mouseDragId = window->getSignalMouseDrag().connect([this](ci::app::MouseEvent &e) {
+        _mouseDragId = window->getSignalMouseDrag().connect([this](app::MouseEvent &e) {
             _mouseDrag(e);
         });
         
-        _keyDownId = window->getSignalKeyDown().connect([this](ci::app::KeyEvent &e) {
+        _keyDownId = window->getSignalKeyDown().connect([this](app::KeyEvent &e) {
             _keyDown(e);
         });
         
-        _keyUpId = window->getSignalKeyUp().connect([this](ci::app::KeyEvent &e) {
+        _keyUpId = window->getSignalKeyUp().connect([this](app::KeyEvent &e) {
             _keyUp(e);
         });
     }
@@ -117,6 +114,26 @@ namespace core {
         _mouseDragId.disconnect();
         _keyDownId.disconnect();
         _keyUpId.disconnect();
+    }
+    
+    bool InputDispatcher::isKeyDown(int keyCode) const {
+        return _keyPressState.count(keyCode) > 0;
+    }
+    
+    bool InputDispatcher::wasKeyPressed(int keyCode) const {
+        return _keysPressed.count(keyCode) > 0;
+    }
+    
+    bool InputDispatcher::wasKeyReleased(int keyCode) const {
+        return _keysReleased.count(keyCode) > 0;
+    }
+    
+    void InputDispatcher::update() {
+    }
+    
+    void InputDispatcher::postUpdate() {
+        _keysPressed.clear();
+        _keysReleased.clear();
     }
     
     void InputDispatcher::hideMouse() {
@@ -147,7 +164,7 @@ namespace core {
         sort(_listeners.begin(), _listeners.end(), inputListenerDispatchIndexSorter);
     }
     
-    ivec2 InputDispatcher::_mouseDelta(const ci::app::MouseEvent &event) {
+    ivec2 InputDispatcher::_mouseDelta(const app::MouseEvent &event) {
         ivec2 delta(0, 0);
         if (_lastMousePosition) {
             delta = event.getPos() - *_lastMousePosition;
@@ -159,20 +176,20 @@ namespace core {
         return delta;
     }
     
-    bool InputDispatcher::_mouseDown(ci::app::MouseEvent event) {
+    bool InputDispatcher::_mouseDown(app::MouseEvent event) {
         _lastMouseEvent = TranslateMouseEvent(event, _screenOrigin);
         _mouseLeftDown = _lastMouseEvent.isLeftDown();
         _mouseMiddleDown = _lastMouseEvent.isMiddleDown();
         _mouseRightDown = _lastMouseEvent.isRightDown();
         
         for (auto listener : _listeners) {
-            if (listener->isListening() && listener->mouseDown(_lastMouseEvent)) break;
+            if (listener->isListening() && listener->onMouseDown(_lastMouseEvent)) return true;
         }
         
         return false;
     }
     
-    bool InputDispatcher::_mouseUp(ci::app::MouseEvent event) {
+    bool InputDispatcher::_mouseUp(app::MouseEvent event) {
         _lastMouseEvent = TranslateMouseEvent(event, _screenOrigin);
         
         // this looks weird but the event isLeft, isRight etc mean is the up event on the left mouse, etc
@@ -181,61 +198,65 @@ namespace core {
         _mouseRightDown = _mouseRightDown && !_lastMouseEvent.isRight();
         
         for (auto listener : _listeners) {
-            if (listener->isListening() && listener->mouseUp(_lastMouseEvent)) break;
+            if (listener->isListening() && listener->onMouseUp(_lastMouseEvent)) return true;
         }
         
         return false;
     }
     
-    bool InputDispatcher::_mouseWheel(ci::app::MouseEvent event) {
+    bool InputDispatcher::_mouseWheel(app::MouseEvent event) {
         _lastMouseEvent = TranslateMouseEvent(event, _screenOrigin);
         
         for (auto listener : _listeners) {
-            if (listener->isListening() && listener->mouseWheel(_lastMouseEvent)) break;
+            if (listener->isListening() && listener->onMouseWheel(_lastMouseEvent)) return true;
         }
         
         return false;
     }
     
-    bool InputDispatcher::_mouseMove(ci::app::MouseEvent event) {
-        _lastMouseEvent = TranslateMouseEvent(event, _screenOrigin);
-        ivec2 delta = _mouseDelta(_lastMouseEvent);
-        
-        for (auto listener : _listeners) {
-            if (listener->isListening() && listener->mouseMove(_lastMouseEvent, delta)) break;
-        }
-        
-        return false;
-    }
-    
-    bool InputDispatcher::_mouseDrag(ci::app::MouseEvent event) {
+    bool InputDispatcher::_mouseMove(app::MouseEvent event) {
         _lastMouseEvent = TranslateMouseEvent(event, _screenOrigin);
         ivec2 delta = _mouseDelta(_lastMouseEvent);
         
         for (auto listener : _listeners) {
-            if (listener->isListening() && listener->mouseDrag(_lastMouseEvent, delta)) break;
+            if (listener->isListening() && listener->onMouseMove(_lastMouseEvent, delta)) return true;
         }
         
         return false;
     }
     
-    bool InputDispatcher::_keyDown(ci::app::KeyEvent event) {
-        _keyPressState[event.getCode()] = true;
-        _lastKeyEvent = event;
+    bool InputDispatcher::_mouseDrag(app::MouseEvent event) {
+        _lastMouseEvent = TranslateMouseEvent(event, _screenOrigin);
+        ivec2 delta = _mouseDelta(_lastMouseEvent);
         
         for (auto listener : _listeners) {
-            if (listener->isListening() && listener->keyDown(event)) break;
+            if (listener->isListening() && listener->onMouseDrag(_lastMouseEvent, delta)) return true;
         }
         
         return false;
     }
     
-    bool InputDispatcher::_keyUp(ci::app::KeyEvent event) {
-        _keyPressState[event.getCode()] = false;
+    bool InputDispatcher::_keyDown(app::KeyEvent event) {
+        const auto code = event.getCode();
+        _keysPressed.insert(code);
+        _keyPressState.insert(code);
         _lastKeyEvent = event;
         
         for (auto listener : _listeners) {
-            if (listener->isListening() && listener->keyUp(event)) break;
+            if (listener->isListening() && listener->onKeyDown(event)) return true;
+        }
+        
+        return false;
+    }
+    
+    bool InputDispatcher::_keyUp(app::KeyEvent event) {
+        const auto code = event.getCode();
+        _keysReleased.insert(code);
+        _keyPressState.erase(code);
+        _lastKeyEvent = event;
+        
+        for (auto listener : _listeners) {
+            if (listener->isListening() && listener->onKeyUp(event)) return true;
         }
         
         return false;
@@ -248,11 +269,6 @@ namespace core {
      bool _listening;
      int _dispatchReceiptIndex;
      */
-    InputListener::InputListener() :
-    _listening(false),
-    _dispatchReceiptIndex(0) {
-        InputDispatcher::get()->_addListener(this);
-    }
     
     InputListener::InputListener(int dispatchReceiptIndex) :
     _listening(false),
