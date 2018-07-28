@@ -586,23 +586,23 @@
 		63F93C321F86F96A00F537CA /* util */ = {
 			isa = PBXGroup;
 			children = (
+				63A9967020D807E000EF3785 /* Bezier.hpp */,
+				63F93C331F86F96A00F537CA /* ContourSimplification.hpp */,
+				632CBA21204B181B0008B94D /* Easing.hpp */,
+				63597BE920766F7700B65C2A /* GlslProgLoader.cpp */,
+				63597BEA20766F7700B65C2A /* GlslProgLoader.hpp */,
+				63A282711FD067E400962F8E /* ImageProcessing.cpp */,
+				63A282721FD067E400962F8E /* ImageProcessing.hpp */,
+				63A71FB7210B75F100B91188 /* ImageWriting.cpp */,
+				63A71FB8210B75F100B91188 /* ImageWriting.hpp */,
 				632622F51E7D9A630051ABE2 /* LineSegment.hpp */,
 				632622FB1E7D9A630051ABE2 /* SpatialIndex.hpp */,
-				63F93C331F86F96A00F537CA /* ContourSimplification.hpp */,
 				63F93C341F86F96A00F537CA /* Svg.cpp */,
 				63F93C3B1F86F96A00F537CA /* Svg.hpp */,
 				63F93C381F86F96A00F537CA /* SvgParsing.cpp */,
 				63F93C351F86F96A00F537CA /* SvgParsing.hpp */,
 				63F93C3A1F86F96A00F537CA /* Xml.cpp */,
 				63F93C371F86F96A00F537CA /* Xml.hpp */,
-				63A282711FD067E400962F8E /* ImageProcessing.cpp */,
-				63A282721FD067E400962F8E /* ImageProcessing.hpp */,
-				632CBA21204B181B0008B94D /* Easing.hpp */,
-				63597BE920766F7700B65C2A /* GlslProgLoader.cpp */,
-				63597BEA20766F7700B65C2A /* GlslProgLoader.hpp */,
-				63A9967020D807E000EF3785 /* Bezier.hpp */,
-				63A71FB7210B75F100B91188 /* ImageWriting.cpp */,
-				63A71FB8210B75F100B91188 /* ImageWriting.hpp */,
 			);
 			path = util;
 			sourceTree = "<group>";

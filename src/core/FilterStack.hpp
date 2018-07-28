@@ -217,7 +217,10 @@ namespace core {
          }
          */
         virtual const gl::FboRef &capture(const render_state &state, std::function<void(const render_state&)> renderFunc, ColorA clearColor = ColorA(0,0,0,0), const gl::Fbo::Format &fmt = gl::Fbo::Format().disableDepth());
-                
+        
+        /// return the capture buffer Fbo used by capture(); this will have the last value captured.
+        gl::FboRef getCaptureFbo() const { return _captureBuffer; }
+        
     protected:
         
         gl::FboRef _buffer, _captureBuffer;

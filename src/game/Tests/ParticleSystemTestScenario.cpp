@@ -164,7 +164,7 @@ void ParticleSystemTestScenario::setup() {
                     this->reset();
                     return true;
                     
-                case app::KeyEvent::KEY_p:
+                case app::KeyEvent::KEY_F12:
                     util::saveScreenshot("~/Tmp", "ParticleSystemTestScenario");
                     return true;
                     
