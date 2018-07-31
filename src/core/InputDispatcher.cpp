@@ -58,6 +58,9 @@ namespace core {
 #pragma InputDispatcher
     
     /*
+     static InputDispatcherRef _sInstance;
+     static ScreenCoordinateSystem::origin _screenOrigin;
+     
      std::vector<InputListener *> _listeners;
      std::set<int> _keyPressState, _keysPressed, _keysReleased;
      app::MouseEvent _lastMouseEvent;
@@ -65,6 +68,8 @@ namespace core {
      ivec2 *_lastMousePosition;
      cinder::signals::Connection _mouseDownId, _mouseUpId, _mouseWheelId, _mouseMoveId, _mouseDragId, _keyDownId, _keyUpId;
      bool _mouseHidden, _mouseLeftDown, _mouseMiddleDown, _mouseRightDown;
+     
+     shared_ptr<gainput::InputManager> _inputManager;
      */
     
     InputDispatcherRef InputDispatcher::_sInstance;
@@ -76,7 +81,9 @@ namespace core {
     _mouseHidden(false),
     _mouseLeftDown(false),
     _mouseMiddleDown(false),
-    _mouseRightDown(false) {
+    _mouseRightDown(false),
+    _inputManager(make_shared<gainput::InputManager>())
+    {
         _mouseDownId = window->getSignalMouseDown().connect([this](app::MouseEvent &e) {
             _mouseDown(e);
         });

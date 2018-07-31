@@ -15,6 +15,11 @@
 #include <cinder/app/KeyEvent.h>
 #include <cinder/app/FileDropEvent.h>
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wconversion"
+#include <gainput/gainput.h>
+#pragma clang diagnostic pop
+
 #include "core/Common.hpp"
 #include "core/MathHelpers.hpp"
 
@@ -181,7 +186,9 @@ namespace core {
         ivec2 *_lastMousePosition;
         cinder::signals::Connection _mouseDownId, _mouseUpId, _mouseWheelId, _mouseMoveId, _mouseDragId, _keyDownId, _keyUpId;
         bool _mouseHidden, _mouseLeftDown, _mouseMiddleDown, _mouseRightDown;
-
+        
+        shared_ptr<gainput::InputManager> _inputManager;
+        
     };
 
     /**

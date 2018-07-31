@@ -816,7 +816,6 @@
 		638F4DCF1F8BCFCE004437E8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CHIPMUNK_PATH = "../vendor/Chipmunk-7.0.1";
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
@@ -835,8 +834,9 @@
 				INFOPLIST_FILE = "Tests-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				OTHER_LDFLAGS = (
-					"\"$(CINDER_PATH)/lib/libcinder_d.a\"",
+					"$(CINDER_PATH)/lib/libcinder_d.a",
 					"$(CHIPMUNK_PATH)/xcode/build/Debug/libChipmunk-Mac.a",
+					"$(GAINPUT_PATH)/build/lib/libgainputstatic.a",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.zakariya.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -848,7 +848,6 @@
 		638F4DD01F8BCFCE004437E8 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CHIPMUNK_PATH = "../vendor/Chipmunk-7.0.1";
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEAD_CODE_STRIPPING = YES;
@@ -868,8 +867,9 @@
 				INFOPLIST_FILE = "Tests-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				OTHER_LDFLAGS = (
-					"\"$(CINDER_PATH)/lib/libcinder.a\"",
+					"$(CINDER_PATH)/lib/libcinder.a",
 					"$(CHIPMUNK_PATH)/xcode/build/Release/libChipmunk-Mac.a",
+					"$(GAINPUT_PATH)/build/lib/libgainputstatic.a",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.zakariya.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -882,8 +882,6 @@
 		63F93C6A1F8714B200F537CA /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CHIPMUNK_PATH = "../vendor/Chipmunk-7.0.1";
-				CINDER_PATH = ../vendor/cinder_0.9.0_mac;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
@@ -902,8 +900,9 @@
 				INFOPLIST_FILE = "KesslerSyndrome-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				OTHER_LDFLAGS = (
-					"\"$(CINDER_PATH)/lib/libcinder_d.a\"",
+					"$(CINDER_PATH)/lib/libcinder_d.a",
 					"$(CHIPMUNK_PATH)/xcode/build/Debug/libChipmunk-Mac.a",
+					"$(GAINPUT_PATH)/build/lib/libgainputstatic.a",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = org.zakariya.KesslerSyndrome;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -915,8 +914,6 @@
 		63F93C6B1F8714B200F537CA /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CHIPMUNK_PATH = "../vendor/Chipmunk-7.0.1";
-				CINDER_PATH = ../vendor/cinder_0.9.0_mac;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEAD_CODE_STRIPPING = YES;
@@ -936,8 +933,9 @@
 				INFOPLIST_FILE = "KesslerSyndrome-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				OTHER_LDFLAGS = (
-					"\"$(CINDER_PATH)/lib/libcinder.a\"",
+					"$(CINDER_PATH)/lib/libcinder.a",
 					"$(CHIPMUNK_PATH)/xcode/build/Release/libChipmunk-Mac.a",
+					"$(GAINPUT_PATH)/build/lib/libgainputstatic.a",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = org.zakariya.KesslerSyndrome;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -974,6 +972,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				GAINPUT_PATH = "../vendor/gainput-1.0.0";
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
@@ -982,10 +981,11 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
-					"\"$(CINDER_PATH)/include\"",
-					"$(CHIPMUNK_PATH)/include\"",
+					"$(CINDER_PATH)/include",
+					"$(CHIPMUNK_PATH)/include",
+					"$(GAINPUT_PATH)/lib/include",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = (
@@ -1021,6 +1021,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GAINPUT_PATH = "../vendor/gainput-1.0.0";
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
@@ -1029,10 +1030,11 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
-					"\"$(CINDER_PATH)/include\"",
-					"$(CHIPMUNK_PATH)/include\"",
+					"$(CINDER_PATH)/include",
+					"$(CHIPMUNK_PATH)/include",
+					"$(GAINPUT_PATH)/lib/include",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = (
 					../include,
