@@ -65,6 +65,8 @@ namespace core {
             pl.insert(std::make_pair(std::string("WINDOW"), std::to_string((size_t)nativeWindow)));
             return pl;
         }
+        
+        const double PS4DeadZone = 2000;
     }
     
 #pragma mark - Gamepad
@@ -82,44 +84,122 @@ namespace core {
     }
     
     bool Gamepad::buttonPressed(const OIS::JoyStickEvent& arg, int button) {
-        CI_LOG_D("Gamepad[" << getId() << "]::buttonPressed button: " << button);
+        switch(button) {
+            case 0:
+                _currentState.yButton = true;
+                break;
+            case 1:
+                _currentState.bButton = true;
+                break;
+            case 2:
+                _currentState.aButton = true;
+                break;
+            case 3:
+                _currentState.xButton = true;
+                break;
+            case 4:
+                _currentState.l1Button = true;
+                break;
+            case 5:
+                _currentState.r1Button = true;
+                break;
+            case 9:
+                _currentState.startButton = true;
+                break;
+            case 8:
+                _currentState.selectButton = true;
+                break;
+        }
+                
         return true;
     }
 
     bool Gamepad::buttonReleased(const OIS::JoyStickEvent& arg, int button) {
-        CI_LOG_D("Gamepad[" << getId() << "]::buttonReleased button: " << button);
+        switch(button) {
+            case 0:
+                _currentState.yButton = false;
+                break;
+            case 1:
+                _currentState.bButton = false;
+                break;
+            case 2:
+                _currentState.aButton = false;
+                break;
+            case 3:
+                _currentState.xButton = false;
+                break;
+            case 4:
+                _currentState.l1Button = false;
+                break;
+            case 5:
+                _currentState.r1Button = false;
+                break;
+            case 9:
+                _currentState.startButton = false;
+                break;
+            case 8:
+                _currentState.selectButton = false;
+                break;
+        }
+
         return true;
     }
 
     bool Gamepad::axisMoved(const OIS::JoyStickEvent& arg, int axis) {
-        int value = arg.state.mAxes[axis].abs;
-        if (value > 2000 || value < -2000) {
-            CI_LOG_D("Gamepad[" << getId() << "]::axisMoved axis: " << axis << " value: " << value);
+        double value = arg.state.mAxes[axis].abs;
+        if (value > -PS4DeadZone && value < PS4DeadZone) { value = 0; }
+        const double relativeValue = value / static_cast<double>(OIS::JoyStick::MAX_AXIS);
+        
+        switch (axis) {
+            case 0:
+                _currentState.leftStickValue.x = relativeValue;
+                break;
+            case 1:
+                _currentState.leftStickValue.y = -relativeValue;
+                break;
+            case 2:
+                _currentState.rightStickValue.x = relativeValue;
+                break;
+            case 3:
+                _currentState.rightStickValue.y = -relativeValue;
+                break;
+            case 4:
+                _currentState.l2Trigger = (relativeValue * 0.5) + 0.5;
+                break;
+            case 5:
+                _currentState.r2Trigger = (relativeValue * 0.5) + 0.5;
+                break;
         }
-        return true;
-    }
-
-    bool Gamepad::sliderMoved(const OIS::JoyStickEvent& arg, int index) {
-        return true;
-    }
-
-    bool Gamepad::povMoved(const OIS::JoyStickEvent& arg, int index) {
-        return true;
-    }
-
-    bool Gamepad::vector3Moved(const OIS::JoyStickEvent& arg, int index) {
+        
         return true;
     }
     
-    Gamepad::Gamepad(OIS::JoyStick *joystick) :
+    bool Gamepad::sliderMoved(const OIS::JoyStickEvent& arg, int index) {
+        CI_LOG_D("sliderMoved index:" << index);
+        return true;
+    }
+    bool Gamepad::povMoved(const OIS::JoyStickEvent& arg, int index) {
+        CI_LOG_D("povMoved index:" << index << " val: " << arg.state.mPOV[index].direction);
+        return true;
+    }
+    bool Gamepad::vector3Moved(const OIS::JoyStickEvent& arg, int index) {
+        CI_LOG_D("vector3Moved index: " << index);
+        return true;
+    }
+
+    
+    Gamepad::Gamepad(OIS::JoyStick *joystick):
             _joystick(joystick)
     {
         _joystick->setEventCallback(this);
     }
     
     void Gamepad::update() {
-        // TODO: Store previous joystick state
+        _previousState = _currentState;
         _joystick->capture();
+        
+//        CI_LOG_D("_currentState.aButton: " << _currentState.aButton);
+        
     }
     
 #pragma mark - InputDispatcher

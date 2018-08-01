@@ -37,13 +37,112 @@ namespace core {
         };
     }
     
+    /**
+     Gamepad
+     Represents a bog-standard PS3/4 type controller, with twin analog sticks, analog shoulder triggers,
+     and ABXY buttons, etc.
+
+     The Gamepad interface is designed for polling, not event subscription.
+     
+     Get a Gamepad from InputDispatcher::getGamepads()
+     */
     class Gamepad : public OIS::JoyStickListener {
     public:
         
         virtual ~Gamepad();
         
+        /// get the id of this controller, suitable for distinguishing between N attached controllers
         int getId() const;
+        
+        /// get the underlying IOS::JoyStick
         OIS::JoyStick *getJoystick() const { return _joystick; }
+        
+        // Current stick/trigger/button state
+        
+        dvec2 getLeftStickValue() const { return _currentState.leftStickValue; }
+        dvec2 getRightStickValue() const { return _currentState.rightStickValue; }
+        
+        bool getL1ButtonValue() const { return _currentState.l1Button; }
+        double getL2TriggerValue() const { return _currentState.l2Trigger; }
+
+        bool getR1ButtonValue() const { return _currentState.r1Button; }
+        double getR2TriggerValue() const { return _currentState.r2Trigger; }
+        
+        bool getAButtonValue() const { return _currentState.aButton; } // PS Circle Button
+        bool getBButtonValue() const { return _currentState.bButton; } // PS X Button
+        bool getXButtonValue() const { return _currentState.xButton; } // PS Triangle Button
+        bool getYButtonValue() const { return _currentState.yButton; } // PS Square Button
+
+        bool getStartButtonValue() const { return _currentState.startButton; } // PS Options Button
+        bool getSelectButtonValue() const { return _currentState.selectButton; } // PS Share Button
+        
+        // Check if buttons were pressed on this step but not before
+        
+        bool getL1ButtonWasPressed() const {
+            return _currentState.l1Button && !_previousState.l1Button;
+        }
+
+        bool getR1ButtonWasPressed() const {
+            return _currentState.r1Button && !_previousState.r1Button;
+        }
+        
+        bool getAButtonWasPressed() const {
+            return _currentState.aButton && !_previousState.aButton;
+        }
+
+        bool getBButtonWasPressed() const {
+            return _currentState.bButton && !_previousState.bButton;
+        }
+
+        bool getXButtonWasPressed() const {
+            return _currentState.xButton && !_previousState.xButton;
+        }
+
+        bool getYButtonWasPressed() const {
+            return _currentState.yButton && !_previousState.yButton;
+        }
+
+        bool getStartButtonWasPressed() const {
+            return _currentState.startButton && !_previousState.startButton;
+        }
+
+        bool getSelectButtonWasPressed() const {
+            return _currentState.selectButton && !_previousState.selectButton;
+        }
+        
+        // Check if buttons were release on this step but not before
+        
+        bool getL1ButtonWasReleased() const {
+            return !_currentState.l1Button && _previousState.l1Button;
+        }
+        
+        bool getR1ButtonWasReleased() const {
+            return !_currentState.r1Button && _previousState.r1Button;
+        }
+        
+        bool getAButtonWasReleased() const {
+            return !_currentState.aButton && _previousState.aButton;
+        }
+        
+        bool getBButtonWasReleased() const {
+            return !_currentState.bButton && _previousState.bButton;
+        }
+        
+        bool getXButtonWasReleased() const {
+            return !_currentState.xButton && _previousState.xButton;
+        }
+        
+        bool getYButtonWasReleased() const {
+            return !_currentState.yButton && _previousState.yButton;
+        }
+        
+        bool getStartButtonWasReleased() const {
+            return !_currentState.startButton && _previousState.startButton;
+        }
+        
+        bool getSelectButtonWasReleased() const {
+            return !_currentState.selectButton && _previousState.selectButton;
+        }
         
         // OIS::JoyStickListener
         
@@ -53,15 +152,23 @@ namespace core {
         bool sliderMoved(const OIS::JoyStickEvent& arg, int index) override;
         bool povMoved(const OIS::JoyStickEvent& arg, int index) override;
         bool vector3Moved(const OIS::JoyStickEvent& arg, int index) override;
-        
+
     protected:
+
         friend class InputDispatcher;
         Gamepad(OIS::JoyStick *joystick);
         void update();
         
     protected:
         
+        struct state {
+            dvec2 leftStickValue, rightStickValue;
+            bool l1Button, r1Button, aButton, bButton, xButton, yButton, startButton, selectButton;
+            double l2Trigger, r2Trigger;
+        };
+        
         OIS::JoyStick *_joystick;
+        state _currentState, _previousState;
         
     };
 
@@ -163,11 +270,17 @@ namespace core {
             return _lastMouseEvent;
         }
         
+        /**
+         InputDispatcher will create a Gamepad for each attached/detected/supported gamepad.
+         Right now this is only known to work with PS4 controllers attached over USB.
+         If no controllers are attached this vector will be empty.
+         **/
         const vector<GamepadRef> &getGamepads() const {
             return _gamepads;
         }
         
     private:
+
         friend class InputListener;
 
         /**

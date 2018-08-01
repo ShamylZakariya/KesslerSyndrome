@@ -80,6 +80,7 @@
 		63A71FB62107819500B91188 /* CloudLayerParticleSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63E29EF51F97A87300CAF39E /* CloudLayerParticleSystem.cpp */; };
 		63A71FB9210B75F100B91188 /* ImageWriting.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63A71FB7210B75F100B91188 /* ImageWriting.cpp */; };
 		63A71FBA210B75F100B91188 /* ImageWriting.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63A71FB7210B75F100B91188 /* ImageWriting.cpp */; };
+		63A72006211209FC00B91188 /* GamepadTestScenario.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63A72004211209FC00B91188 /* GamepadTestScenario.cpp */; };
 		63B8AF07202CA1A70021AC63 /* TerrainAttachmentsTestScenario.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63B8AF05202CA1A70021AC63 /* TerrainAttachmentsTestScenario.cpp */; };
 		63E29EF31F97A4C300CAF39E /* BaseParticleSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63E29EF01F97A4C300CAF39E /* BaseParticleSystem.cpp */; };
 		63E29EF41F97A4C300CAF39E /* BaseParticleSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63E29EF01F97A4C300CAF39E /* BaseParticleSystem.cpp */; };
@@ -214,6 +215,8 @@
 		63A71FB22104E85800B91188 /* Filters.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Filters.hpp; sourceTree = "<group>"; };
 		63A71FB7210B75F100B91188 /* ImageWriting.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ImageWriting.cpp; sourceTree = "<group>"; };
 		63A71FB8210B75F100B91188 /* ImageWriting.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ImageWriting.hpp; sourceTree = "<group>"; };
+		63A72004211209FC00B91188 /* GamepadTestScenario.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = GamepadTestScenario.cpp; sourceTree = "<group>"; };
+		63A72005211209FC00B91188 /* GamepadTestScenario.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = GamepadTestScenario.hpp; sourceTree = "<group>"; };
 		63A9967020D807E000EF3785 /* Bezier.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Bezier.hpp; sourceTree = "<group>"; };
 		63B8AF05202CA1A70021AC63 /* TerrainAttachmentsTestScenario.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TerrainAttachmentsTestScenario.cpp; sourceTree = "<group>"; };
 		63B8AF06202CA1A70021AC63 /* TerrainAttachmentsTestScenario.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TerrainAttachmentsTestScenario.hpp; sourceTree = "<group>"; };
@@ -579,6 +582,8 @@
 				63F93C2A1F86F84F00F537CA /* TerrainTestScenario.hpp */,
 				638F4DA31F8BCF53004437E8 /* TestsApp.cpp */,
 				631CBB6D2066FAB3006D3E31 /* util */,
+				63A72004211209FC00B91188 /* GamepadTestScenario.cpp */,
+				63A72005211209FC00B91188 /* GamepadTestScenario.hpp */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -724,6 +729,7 @@
 				638F4DD31F8BCFEA004437E8 /* SvgTestScenario.cpp in Sources */,
 				638F4DD41F8BCFEA004437E8 /* TerrainTestScenario.cpp in Sources */,
 				638F4DD51F8BCFEA004437E8 /* TestsApp.cpp in Sources */,
+				63A72006211209FC00B91188 /* GamepadTestScenario.cpp in Sources */,
 				638F4DA91F8BCFCE004437E8 /* Background.cpp in Sources */,
 				638BFB1D203F28DE004163A9 /* IPTestsScenario.cpp in Sources */,
 				631171361FAB72A50098069F /* ParticleSystemTestScenario.cpp in Sources */,

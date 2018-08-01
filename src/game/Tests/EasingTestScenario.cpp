@@ -6,7 +6,6 @@
 //
 
 #include "game/Tests/EasingTestScenario.hpp"
-#include "core/util/ImageProcessing.hpp"
 #include "core/util/Easing.hpp"
 #include "elements/Components/DevComponents.hpp"
 
