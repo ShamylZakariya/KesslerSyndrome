@@ -16,8 +16,8 @@
 #include <cinder/app/FileDropEvent.h>
 
 #pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wconversion"
-#include <gainput/gainput.h>
+#pragma clang diagnostic ignored "-Wunused-value"
+#include <OIS.h>
 #pragma clang diagnostic pop
 
 #include "core/Common.hpp"
@@ -28,15 +28,42 @@ namespace core {
     class InputListener;
 
     SMART_PTR(InputDispatcher);
+    SMART_PTR(Gamepad);
 
     namespace ScreenCoordinateSystem {
         enum origin {
-
             TopLeft,
             BottomLeft
-
         };
     }
+    
+    class Gamepad : public OIS::JoyStickListener {
+    public:
+        
+        virtual ~Gamepad();
+        
+        int getId() const;
+        OIS::JoyStick *getJoystick() const { return _joystick; }
+        
+        // OIS::JoyStickListener
+        
+        bool buttonPressed(const OIS::JoyStickEvent& arg, int button) override;
+        bool buttonReleased(const OIS::JoyStickEvent& arg, int button) override;
+        bool axisMoved(const OIS::JoyStickEvent& arg, int axis) override;
+        bool sliderMoved(const OIS::JoyStickEvent& arg, int index) override;
+        bool povMoved(const OIS::JoyStickEvent& arg, int index) override;
+        bool vector3Moved(const OIS::JoyStickEvent& arg, int index) override;
+        
+    protected:
+        friend class InputDispatcher;
+        Gamepad(OIS::JoyStick *joystick);
+        void update();
+        
+    protected:
+        
+        OIS::JoyStick *_joystick;
+        
+    };
 
 
     /**
@@ -135,7 +162,11 @@ namespace core {
         app::MouseEvent getLastMouseEvent() const {
             return _lastMouseEvent;
         }
-
+        
+        const vector<GamepadRef> &getGamepads() const {
+            return _gamepads;
+        }
+        
     private:
         friend class InputListener;
 
@@ -187,7 +218,8 @@ namespace core {
         cinder::signals::Connection _mouseDownId, _mouseUpId, _mouseWheelId, _mouseMoveId, _mouseDragId, _keyDownId, _keyUpId;
         bool _mouseHidden, _mouseLeftDown, _mouseMiddleDown, _mouseRightDown;
         
-        shared_ptr<gainput::InputManager> _inputManager;
+        OIS::InputManager *_oisInputManager;
+        vector<GamepadRef> _gamepads;
         
     };
 

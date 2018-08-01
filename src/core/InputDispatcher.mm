@@ -7,6 +7,7 @@
 //
 
 #include "core/InputDispatcher.hpp"
+#import <AppKit/AppKit.h>
 
 namespace core {
     
@@ -52,10 +53,76 @@ namespace core {
         bool inputListenerDispatchIndexSorter(InputListener *a, InputListener *b) {
             return a->getDispatchReceiptIndex() < b->getDispatchReceiptIndex();
         }
+        
+        NSWindow* get_native_window(app::WindowRef window) {
+            NSView *view = (NSView*)window->getNative();
+            return [view window];
+        }
+        
+        OIS::ParamList get_native_window_paramlist(app::WindowRef window) {
+            NSWindow *nativeWindow = get_native_window(window);
+            OIS::ParamList pl;
+            pl.insert(std::make_pair(std::string("WINDOW"), std::to_string((size_t)nativeWindow)));
+            return pl;
+        }
     }
     
-#pragma mark -
-#pragma InputDispatcher
+#pragma mark - Gamepad
+   
+    /*
+     OIS::JoyStick *_joystick;
+     */
+    Gamepad::~Gamepad()
+    {
+        _joystick->setEventCallback(nullptr);
+    }
+    
+    int Gamepad::getId() const {
+        return _joystick->getID();
+    }
+    
+    bool Gamepad::buttonPressed(const OIS::JoyStickEvent& arg, int button) {
+        CI_LOG_D("Gamepad[" << getId() << "]::buttonPressed button: " << button);
+        return true;
+    }
+
+    bool Gamepad::buttonReleased(const OIS::JoyStickEvent& arg, int button) {
+        CI_LOG_D("Gamepad[" << getId() << "]::buttonReleased button: " << button);
+        return true;
+    }
+
+    bool Gamepad::axisMoved(const OIS::JoyStickEvent& arg, int axis) {
+        int value = arg.state.mAxes[axis].abs;
+        if (value > 2000 || value < -2000) {
+            CI_LOG_D("Gamepad[" << getId() << "]::axisMoved axis: " << axis << " value: " << value);
+        }
+        return true;
+    }
+
+    bool Gamepad::sliderMoved(const OIS::JoyStickEvent& arg, int index) {
+        return true;
+    }
+
+    bool Gamepad::povMoved(const OIS::JoyStickEvent& arg, int index) {
+        return true;
+    }
+
+    bool Gamepad::vector3Moved(const OIS::JoyStickEvent& arg, int index) {
+        return true;
+    }
+    
+    Gamepad::Gamepad(OIS::JoyStick *joystick) :
+            _joystick(joystick)
+    {
+        _joystick->setEventCallback(this);
+    }
+    
+    void Gamepad::update() {
+        // TODO: Store previous joystick state
+        _joystick->capture();
+    }
+    
+#pragma mark - InputDispatcher
     
     /*
      static InputDispatcherRef _sInstance;
@@ -69,7 +136,8 @@ namespace core {
      cinder::signals::Connection _mouseDownId, _mouseUpId, _mouseWheelId, _mouseMoveId, _mouseDragId, _keyDownId, _keyUpId;
      bool _mouseHidden, _mouseLeftDown, _mouseMiddleDown, _mouseRightDown;
      
-     shared_ptr<gainput::InputManager> _inputManager;
+     OIS::InputManager *_oisInputManager;
+     vector<GamepadRef> _gamepads;
      */
     
     InputDispatcherRef InputDispatcher::_sInstance;
@@ -81,8 +149,7 @@ namespace core {
     _mouseHidden(false),
     _mouseLeftDown(false),
     _mouseMiddleDown(false),
-    _mouseRightDown(false),
-    _inputManager(make_shared<gainput::InputManager>())
+    _mouseRightDown(false)
     {
         _mouseDownId = window->getSignalMouseDown().connect([this](app::MouseEvent &e) {
             _mouseDown(e);
@@ -111,6 +178,28 @@ namespace core {
         _keyUpId = window->getSignalKeyUp().connect([this](app::KeyEvent &e) {
             _keyUp(e);
         });
+        
+        //
+        //  Build OIS InputManager to corral our joysticks - and print info to console
+        //
+        
+        OIS::ParamList params = get_native_window_paramlist(window);
+        _oisInputManager = OIS::InputManager::createInputSystem(params);
+        _oisInputManager->enableAddOnFactory(OIS::InputManager::AddOn_All);
+        
+        unsigned int v = _oisInputManager->getVersionNumber();
+        cout << "OIS Version: " << (v >> 16) << "." << ((v >> 8) & 0x000000FF) << "." << (v & 0x000000FF) << ", "
+                 << "Release Name: " << _oisInputManager->getVersionName() << ", "
+                 << "Manager: " << _oisInputManager->inputSystemName() << ", "
+                 << "Total Keyboards: " << _oisInputManager->getNumberOfDevices(OIS::OISKeyboard) << ", "
+                 << "Total Mice: " << _oisInputManager->getNumberOfDevices(OIS::OISMouse) << ", "
+                 << "Total JoySticks: " << _oisInputManager->getNumberOfDevices(OIS::OISJoyStick) << endl;
+        
+        const size_t numJoysticks = _oisInputManager->getNumberOfDevices(OIS::OISJoyStick);
+        for (int i = 0; i < numJoysticks; i++) {
+            OIS::JoyStick *joystick = (OIS::JoyStick*)_oisInputManager->createInputObject(OIS::OISJoyStick, true);
+            _gamepads.push_back(shared_ptr<Gamepad>(new Gamepad(joystick)));
+        }
     }
     
     InputDispatcher::~InputDispatcher() {
@@ -121,6 +210,14 @@ namespace core {
         _mouseDragId.disconnect();
         _keyDownId.disconnect();
         _keyUpId.disconnect();
+
+        //
+        // destroying _oisInputManager frees our joysticks
+        //
+
+        _gamepads.clear();
+        OIS::InputManager::destroyInputSystem(_oisInputManager);
+        _oisInputManager = nullptr;
     }
     
     bool InputDispatcher::isKeyDown(int keyCode) const {
@@ -136,6 +233,9 @@ namespace core {
     }
     
     void InputDispatcher::update() {
+        for (auto gamepad : _gamepads) {
+            gamepad->update();
+        }
     }
     
     void InputDispatcher::postUpdate() {
