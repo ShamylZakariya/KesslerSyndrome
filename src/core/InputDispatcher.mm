@@ -84,6 +84,10 @@ namespace core {
         return _joystick->getID();
     }
     
+    string Gamepad::getVendor() const {
+        return _joystick->vendor();
+    }
+    
     bool Gamepad::buttonPressed(const OIS::JoyStickEvent& arg, int button) {
         switch(button) {
             case 0:

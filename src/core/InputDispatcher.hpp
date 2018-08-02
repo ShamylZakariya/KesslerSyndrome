@@ -54,6 +54,8 @@ namespace core {
         /// get the id of this controller, suitable for distinguishing between N attached controllers
         int getId() const;
         
+        string getVendor() const;
+        
         /// get the underlying IOS::JoyStick
         OIS::JoyStick *getJoystick() const { return _joystick; }
         

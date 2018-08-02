@@ -17,8 +17,8 @@ namespace {
     
     class GamepadRenderer : public util::svg::SvgDrawComponent {
     public:
-        GamepadRenderer(GamepadRef gamepad, dvec2 pos):
-                SvgDrawComponent(util::svg::Group::loadSvgDocument(app::loadAsset("tests/gamepad.svg"), 1)),
+        GamepadRenderer(GamepadRef gamepad, dvec2 pos, int drawLayer):
+                SvgDrawComponent(util::svg::Group::loadSvgDocument(app::loadAsset("tests/gamepad.svg"), 1), drawLayer),
                 _gamepad(gamepad)
         {
             auto svg = getSvg();
@@ -68,6 +68,20 @@ namespace {
             saveDefaults(_buttonL2Base);
             saveDefaults(_buttonStartBase);
             saveDefaults(_buttonSelectBase);
+            
+            _label = str(_gamepad->getId()) + " : " + _gamepad->getVendor();
+        }
+        
+        void draw(const render_state &state) override {
+            SvgDrawComponent::draw(state);
+            
+            {
+                gl::ScopedModelMatrix smm3;
+                gl::translate(getSvg()->getPosition() + dvec2(-256,-140));
+                gl::scale(state.viewport->getReciprocalScale(), -state.viewport->getReciprocalScale());
+                gl::drawString(_label, dvec2(0,0), ColorA(0,0,0,1));
+            }
+
         }
         
         void update(const time_state &time) override {
@@ -119,11 +133,14 @@ namespace {
         
         map<util::svg::ShapeRef, ColorA> _defaultColors;
         map<util::svg::GroupRef, dvec2> _defaultPositions;
+        string _label;
         
     };
     
     ObjectRef GamepadObject(dvec2 pos, GamepadRef gamepad) {
-        return Object::with("Gamepad", {make_shared<GamepadRenderer>(gamepad, pos)});
+        return Object::with("Gamepad", {
+            make_shared<GamepadRenderer>(gamepad, pos, 10)
+        });
     }
     
 }
