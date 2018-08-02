@@ -65,28 +65,56 @@ namespace core {
         
         // Current stick/trigger/button state
         
+        /// get position of left analog stick
         dvec2 getLeftStick() const { return dvec2(_currentState[LeftStickX], _currentState[LeftStickY]); }
+        
+        /// get position of right analog stick
         dvec2 getRightStick() const { return dvec2(_currentState[RightStickX], _currentState[RightStickY]); }
+        
+        /// get position of d pad
         dvec2 getDPad() const { return dvec2(_currentState[DPadX], _currentState[DPadY]); }
         
+        /// get the left shoulder button state, L1 on PS4 controller
         bool getLeftShoulderButton() const { return _currentState[LeftShoulderButton] > 0.5; }
+
+        /// get the second left shoulder button state, L2 on PS4 controller
         bool getLeftShoulderButton2() const { return _currentState[LeftShoulderButton2] > 0.5; }
+        
+        /// get amount the left trigger is pressed, L2 on PS4 controller
         double getLeftTrigger() const { return _currentState[LeftTrigger]; }
 
+        /// get the right shoulder button state, R1 on PS4 controller
         bool getRightShoulderButton() const { return _currentState[RightShoulderButton] > 0.5; }
+        
+        /// get the second right shoulder button state, R2 on PS4 controller
         bool getRightShoulderButton2() const { return _currentState[RightShoulderButton2] > 0.5; }
+        
+        /// get amount the right trigger is pressed, L2 on PS4 controller
         double getRightTrigger() const { return _currentState[RightTrigger]; }
         
+        /// get the left stick button press state, L3 on PS4 controller
         bool getLeftStickButton() const { return _currentState[LeftStickButton] > 0.5; }
+
+        /// get the right stick button press state, R3 on PS4 controller
         bool getRightStickButton() const { return _currentState[RightStickButton] > 0.5; }
         
-        bool getAButton() const { return _currentState[AButton] > 0.5; } // PS Circle Button
-        bool getBButton() const { return _currentState[BButton] > 0.5; } // PS X Button
-        bool getXButton() const { return _currentState[XButton] > 0.5; } // PS Triangle Button
-        bool getYButton() const { return _currentState[YButton] > 0.5; } // PS Square Button
+        /// get the A button state, Circle on PS4 controller
+        bool getAButton() const { return _currentState[AButton] > 0.5; }
+        
+        /// get the B button state, X on PS4 controller
+        bool getBButton() const { return _currentState[BButton] > 0.5; }
+        
+        /// get the X button state, Triangle on PS4 controller
+        bool getXButton() const { return _currentState[XButton] > 0.5; }
 
-        bool getStartButton() const { return _currentState[StartButton] > 0.5; } // PS Options Button
-        bool getSelectButton() const { return _currentState[SelectButton] > 0.5; } // PS Share Button
+        /// get the Y button state, Square on PS4 controller
+        bool getYButton() const { return _currentState[YButton] > 0.5; }
+
+        /// get the start button state, Options on PS4 controller
+        bool getStartButton() const { return _currentState[StartButton] > 0.5; }
+
+        /// get the select button state, Share on PS4 controller
+        bool getSelectButton() const { return _currentState[SelectButton] > 0.5; }
         
         // Check if buttons were pressed on this step but not before
         

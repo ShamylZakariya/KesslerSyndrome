@@ -68,6 +68,10 @@ namespace {
             saveDefaults(_buttonL2Base);
             saveDefaults(_buttonStartBase);
             saveDefaults(_buttonSelectBase);
+            saveDefaults(_dPadUp);
+            saveDefaults(_dPadRight);
+            saveDefaults(_dPadDown);
+            saveDefaults(_dPadLeft);
             
             _label = str(_gamepad->getId()) + " : " + _gamepad->getVendor();
         }
@@ -97,8 +101,13 @@ namespace {
                 activate(_buttonSelectBase, activateColor, _gamepad->getSelectButton() ? 1 : 0);
                 activate(_buttonL1Base, activateColor, _gamepad->getLeftShoulderButton() ? 1 : 0);
                 activate(_buttonR1Base, activateColor, _gamepad->getRightShoulderButton() ? 1 : 0);
-                activate(_buttonL2Base, activateColor, _gamepad->getLeftTrigger());
-                activate(_buttonR2Base, activateColor, _gamepad->getRightTrigger());
+                activate(_dPadUp, activateColor, _gamepad->getDPad().y > 0.5);
+                activate(_dPadDown, activateColor, _gamepad->getDPad().y < -0.5);
+                activate(_dPadRight, activateColor, _gamepad->getDPad().x > 0.5);
+                activate(_dPadLeft, activateColor, _gamepad->getDPad().x < -0.5);
+
+                activate(_buttonL2Base, activateColor, max<double>(_gamepad->getLeftShoulderButton2() ? 1 : 0, _gamepad->getLeftTrigger()));
+                activate(_buttonR2Base, activateColor, max<double>(_gamepad->getRightShoulderButton2() ? 1 : 0, _gamepad->getRightTrigger()));
                 
                 const auto leftStickBB = _leftStickBase->getLocalBB();
                 const auto leftStickRange = dvec2(cpBBWidth(leftStickBB),cpBBHeight(leftStickBB)) * 0.4;
@@ -190,6 +199,19 @@ void GamepadTestScenario::setup() {
     } else {
         CI_LOG_D("Found no gamepads");
     }
+    
+    getStage()->addObject(Object::with("InputDelegation",{
+        elements::KeyboardDelegateComponent::create(0)->onPress([&](int keyCode)->bool{
+            switch(keyCode) {
+                    // track 'r' for resetting scenario
+                case app::KeyEvent::KEY_r:
+                    this->reset();
+                    return true;
+                default:
+                    return false;
+            }
+        })
+    }));
 }
 
 void GamepadTestScenario::cleanup() {

@@ -118,45 +118,47 @@ namespace core {
 
     bool Gamepad::axisMoved(const OIS::JoyStickEvent& arg, int axis) {
         const auto map = _deviceAxisToComponentsMap[axis];
-        if (!componentIsAxis(map.component)) { return false; }
+        double relativeValue = 0;
+        if (componentIsAxis(map.component)) {
 
-        double value = arg.state.mAxes[axis].abs;
+            double value = arg.state.mAxes[axis].abs;
 
-        //
-        //  Handle the Dead Zone
-        //
+            //
+            //  Handle the Dead Zone
+            //
 
-        const double Range = static_cast<double>(OIS::JoyStick::MAX_AXIS);
-        if (map.positiveUnitRange) {
-            if (value < -Range + _deviceAxisDeadZone ) {
-                value = -Range;
+            const double Range = static_cast<double>(OIS::JoyStick::MAX_AXIS);
+            if (map.positiveUnitRange) {
+                if (value < -Range + _deviceAxisDeadZone ) {
+                    value = -Range;
+                }
+            } else {
+                if (value > -_deviceAxisDeadZone && value < _deviceAxisDeadZone) {
+                    value = 0;
+                }
             }
-        } else {
-            if (value > -_deviceAxisDeadZone && value < _deviceAxisDeadZone) {
-                value = 0;
+
+            //
+            //  Compute normalize value
+            //
+
+            relativeValue = value / Range;
+            
+            if (map.positiveUnitRange) {
+                relativeValue = (relativeValue * 0.5) + 0.5;
             }
+            
+            if (map.invert) {
+                relativeValue *= -1;
+            }
+        
+            _currentState[map.component] = relativeValue;
         }
 
-        //
-        //  Compute normalize value
-        //
-
-        double relativeValue = value / Range;
-        
-        if (map.positiveUnitRange) {
-            relativeValue = (relativeValue * 0.5) + 0.5;
-        }
-        
-        if (map.invert) {
-            relativeValue *= -1;
-        }
-        
-        if (_logEvents && value != 0) {
+        if (_logEvents) {
             CI_LOG_D("axisMoved device: " << getId() << " device axis: " << axis << " component: " << map.component << " relativeValue: " << relativeValue);
         }
         
-        _currentState[map.component] = relativeValue;
-
         return true;
     }
     

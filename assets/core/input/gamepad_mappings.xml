@@ -6,9 +6,9 @@
         <button index="2">AButton</button>
         <button index="3">XButton</button>
         <button index="4">LeftShoulderButton</button>
-        <button index="6">LeftShoulderButton2</button>
+        <!-- <button index="6">LeftShoulderButton2</button> -->
         <button index="5">RightShoulderButton</button>
-        <button index="7">RightShoulderButton2</button>
+        <!-- <button index="7">RightShoulderButton2</button> -->
         <button index="8">SelectButton</button>
         <button index="9">StartButton</button>
         <button index="10">LeftStickButton</button>
@@ -22,4 +22,38 @@
         <axis index="5" remapToPositiveUnitRange="true">RightTrigger</axis>
 
     </mapping>
+    <mapping vendor="NES30              NES30 Joystick">
+        <button index="0">AButton</button>
+        <button index="1">BButton</button>
+        <button index="3">XButton</button>
+        <button index="4">YButton</button>
+        <button index="6">LeftShoulderButton</button>
+        <button index="7">RightShoulderButton</button>
+        <button index="10">SelectButton</button>
+        <button index="11">StartButton</button>
+        <axis index="0">DPadX</axis>
+        <axis index="1" invert="true">DPadY</axis>
+
+    </mapping>
+        <mapping vendor="8Bitdo NES30 Pro   8Bitdo NES30 Pro">
+        <button index="0">AButton</button>
+        <button index="1">BButton</button>
+        <button index="3">XButton</button>
+        <button index="4">YButton</button>
+        <button index="6">LeftShoulderButton</button>
+        <button index="7">RightShoulderButton</button>
+        <button index="8">LeftShoulderButton2</button>
+        <button index="9">RightShoulderButton2</button>
+        <button index="10">SelectButton</button>
+        <button index="11">StartButton</button>
+        <button index="13">LeftStickButton</button>
+        <button index="14">RightStickButton</button>
+
+        <axis index="0">LeftStickX</axis>
+        <axis index="1" invert="true">LeftStickY</axis>
+        <axis index="2">RightStickX</axis>
+        <axis index="3" invert="true">RightStickY</axis>
+
+    </mapping>
+    
 </mapping>
