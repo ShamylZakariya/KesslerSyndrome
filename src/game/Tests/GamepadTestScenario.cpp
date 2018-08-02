@@ -112,6 +112,9 @@ namespace {
 
                 _leftStickKnobGroup->setPosition(leftStickPosition);
                 _rightStickKnobGroup->setPosition(rightStickPosition);
+                
+                activate(_leftStickKnob, activateColor, _gamepad->getLeftStickButton());
+                activate(_rightStickKnob, activateColor, _gamepad->getRightStickButton());
             }
         }
 

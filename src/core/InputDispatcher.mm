@@ -192,7 +192,11 @@ namespace core {
         if (componentString == "RightTrigger") return RightTrigger;
         
         if (componentString == "LeftShoulderButton") return LeftShoulderButton;
+        if (componentString == "LeftShoulderButton2") return LeftShoulderButton2;
         if (componentString == "RightShoulderButton") return RightShoulderButton;
+        if (componentString == "RightShoulderButton2") return RightShoulderButton2;
+        if (componentString == "LeftStickButton") return LeftStickButton;
+        if (componentString == "RightStickButton") return RightStickButton;
 
         if (componentString == "AButton") return AButton;
         if (componentString == "BButton") return BButton;

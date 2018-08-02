@@ -70,10 +70,15 @@ namespace core {
         dvec2 getDPad() const { return dvec2(_currentState[DPadX], _currentState[DPadY]); }
         
         bool getLeftShoulderButton() const { return _currentState[LeftShoulderButton] > 0.5; }
+        bool getLeftShoulderButton2() const { return _currentState[LeftShoulderButton2] > 0.5; }
         double getLeftTrigger() const { return _currentState[LeftTrigger]; }
 
         bool getRightShoulderButton() const { return _currentState[RightShoulderButton] > 0.5; }
+        bool getRightShoulderButton2() const { return _currentState[RightShoulderButton2] > 0.5; }
         double getRightTrigger() const { return _currentState[RightTrigger]; }
+        
+        bool getLeftStickButton() const { return _currentState[LeftStickButton] > 0.5; }
+        bool getRightStickButton() const { return _currentState[RightStickButton] > 0.5; }
         
         bool getAButton() const { return _currentState[AButton] > 0.5; } // PS Circle Button
         bool getBButton() const { return _currentState[BButton] > 0.5; } // PS X Button
@@ -89,10 +94,26 @@ namespace core {
             return wasPressed(LeftShoulderButton);
         }
 
+        bool getLeftShoulderButton2WasPressed() const {
+            return wasPressed(LeftShoulderButton2);
+        }
+
         bool getRightShoulderButtonWasPressed() const {
             return wasPressed(RightShoulderButton);
         }
+
+        bool getRightShoulderButton2WasPressed() const {
+            return wasPressed(RightShoulderButton2);
+        }
         
+        bool getLeftStickButtonWasPressed() const {
+            return wasPressed(LeftStickButton);
+        }
+
+        bool getRightStickButtonWasPressed() const {
+            return wasPressed(RightStickButton);
+        }
+
         bool getAButtonWasPressed() const {
             return wasPressed(AButton);
         }
@@ -122,9 +143,25 @@ namespace core {
         bool getLeftShoulderButtonWasReleased() const {
             return wasReleased(LeftShoulderButton);
         }
-        
+
+        bool getLeftShoulderButton2WasReleased() const {
+            return wasReleased(LeftShoulderButton2);
+        }
+
         bool getRightShoulderButtonWasReleased() const {
             return wasReleased(RightShoulderButton);
+        }
+
+        bool getRightShoulderButton2WasReleased() const {
+            return wasReleased(RightShoulderButton2);
+        }
+
+        bool getLeftStickButtonWasReleased() const {
+            return wasReleased(LeftStickButton);
+        }
+        
+        bool getRightStickButtonWasReleased() const {
+            return wasReleased(RightStickButton);
         }
         
         bool getAButtonWasReleased() const {
@@ -172,7 +209,11 @@ namespace core {
             LeftTrigger,
             RightTrigger,
             LeftShoulderButton,
+            LeftShoulderButton2,
             RightShoulderButton,
+            RightShoulderButton2,
+            LeftStickButton,
+            RightStickButton,
             AButton,
             BButton,
             XButton,
@@ -182,7 +223,7 @@ namespace core {
             Unknown // not counted in ComponentCount
         };
         
-        static const int ComponentCount = 16;
+        static const int ComponentCount = 20;
 
         static Components stringToComponents(const string &componentString);
         static bool componentIsButton(Components component);

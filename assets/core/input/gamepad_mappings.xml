@@ -6,9 +6,13 @@
         <button index="2">AButton</button>
         <button index="3">XButton</button>
         <button index="4">LeftShoulderButton</button>
+        <button index="6">LeftShoulderButton2</button>
         <button index="5">RightShoulderButton</button>
+        <button index="7">RightShoulderButton2</button>
         <button index="8">SelectButton</button>
         <button index="9">StartButton</button>
+        <button index="10">LeftStickButton</button>
+        <button index="11">RightStickButton</button>
 
         <axis index="0">LeftStickX</axis>
         <axis index="1" invert="true">LeftStickY</axis>
