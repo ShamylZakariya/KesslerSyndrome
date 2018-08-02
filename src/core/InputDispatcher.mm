@@ -89,14 +89,14 @@ namespace core {
     bool Gamepad::buttonPressed(const OIS::JoyStickEvent& arg, int button) {
         const auto component = _deviceButtonToComponentsMap[button];
         
-        // bail if we have a nonsense input
+        if (_logEvents) {
+            CI_LOG_D("buttonPressed device: " << getId() << " device button: " << button << " component: " << component);
+        }
+
+        // bail if we have a recognized input
         if (!componentIsButton(component)) { return false; }
         
         _currentState[component] = true;
-        
-        if (_logEvents) {
-            CI_LOG_D("buttonPressed device: " << getId() << " device button index: " << index << " component: " << component);
-        }
         
         return true;
     }
@@ -104,14 +104,14 @@ namespace core {
     bool Gamepad::buttonReleased(const OIS::JoyStickEvent& arg, int button) {
         const auto component = _deviceButtonToComponentsMap[button];
 
-        // bail if we have a nonsense input
+        if (_logEvents) {
+            CI_LOG_D("buttonRelease device: " << getId() << " device button: " << button << " component: " << component);
+        }
+
+        // bail if we have a recognized input
         if (!componentIsButton(component)) { return false; }
 
         _currentState[component] = false;
-        
-        if (_logEvents) {
-            CI_LOG_D("buttonRelease device: " << getId() << " device button index: " << index << " component: " << component);
-        }
         
         return true;
     }
@@ -152,7 +152,7 @@ namespace core {
         }
         
         if (_logEvents && value != 0) {
-            CI_LOG_D("axisMoved device: " << getId() << " device axis index: " << index << " component: " << map.component << " relativeValue: " << relativeValue);
+            CI_LOG_D("axisMoved device: " << getId() << " device axis: " << axis << " component: " << map.component << " relativeValue: " << relativeValue);
         }
         
         _currentState[map.component] = relativeValue;
@@ -230,8 +230,8 @@ namespace core {
         _joystick->setEventCallback(this);
         _currentState.resize(ComponentCount, 0);
         _previousState.resize(ComponentCount, 0);
-        _deviceButtonToComponentsMap.resize(ComponentCount);
-        _deviceAxisToComponentsMap.resize(ComponentCount);
+        _deviceButtonToComponentsMap.resize(ComponentCount, Unknown);
+        _deviceAxisToComponentsMap.resize(ComponentCount, { Unknown, false, false });
         loadDeviceSemanticMapping();
     }
     
@@ -265,7 +265,7 @@ namespace core {
                 
                 if (node->getTag() == "button") {
                     // this is a button
-                    CI_LOG_D("mapping button name: " << node->getValue() << "(" << component << ") to: " << idx);
+                    CI_LOG_D("mapping button name: " << node->getValue() << " to: " << idx);
                     _deviceButtonToComponentsMap[idx] = component;
                 } else if (node->getTag() == "axis") {
                     // this is an axis
