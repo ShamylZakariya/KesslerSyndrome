@@ -73,6 +73,7 @@ namespace core {
    
     /*
      OIS::JoyStick *_joystick;
+     vector<double> _currentState, _previousState;
      */
     Gamepad::~Gamepad()
     {
@@ -86,28 +87,28 @@ namespace core {
     bool Gamepad::buttonPressed(const OIS::JoyStickEvent& arg, int button) {
         switch(button) {
             case 0:
-                _currentState.yButton = true;
+                _currentState[YButton] = true;
                 break;
             case 1:
-                _currentState.bButton = true;
+                _currentState[BButton] = true;
                 break;
             case 2:
-                _currentState.aButton = true;
+                _currentState[AButton] = true;
                 break;
             case 3:
-                _currentState.xButton = true;
+                _currentState[XButton] = true;
                 break;
             case 4:
-                _currentState.l1Button = true;
+                _currentState[LeftShoulderButton] = true;
                 break;
             case 5:
-                _currentState.r1Button = true;
+                _currentState[RightShoulderButton] = true;
                 break;
             case 9:
-                _currentState.startButton = true;
+                _currentState[StartButton] = true;
                 break;
             case 8:
-                _currentState.selectButton = true;
+                _currentState[SelectButton] = true;
                 break;
         }
                 
@@ -117,28 +118,28 @@ namespace core {
     bool Gamepad::buttonReleased(const OIS::JoyStickEvent& arg, int button) {
         switch(button) {
             case 0:
-                _currentState.yButton = false;
+                _currentState[YButton] = false;
                 break;
             case 1:
-                _currentState.bButton = false;
+                _currentState[BButton] = false;
                 break;
             case 2:
-                _currentState.aButton = false;
+                _currentState[AButton] = false;
                 break;
             case 3:
-                _currentState.xButton = false;
+                _currentState[XButton] = false;
                 break;
             case 4:
-                _currentState.l1Button = false;
+                _currentState[LeftShoulderButton] = false;
                 break;
             case 5:
-                _currentState.r1Button = false;
+                _currentState[RightShoulderButton] = false;
                 break;
             case 9:
-                _currentState.startButton = false;
+                _currentState[StartButton] = false;
                 break;
             case 8:
-                _currentState.selectButton = false;
+                _currentState[SelectButton] = false;
                 break;
         }
 
@@ -152,22 +153,22 @@ namespace core {
         
         switch (axis) {
             case 0:
-                _currentState.leftStickValue.x = relativeValue;
+                _currentState[LeftStickX] = relativeValue;
                 break;
             case 1:
-                _currentState.leftStickValue.y = -relativeValue;
+                _currentState[LeftStickY] = -relativeValue;
                 break;
             case 2:
-                _currentState.rightStickValue.x = relativeValue;
+                _currentState[RightStickX] = relativeValue;
                 break;
             case 3:
-                _currentState.rightStickValue.y = -relativeValue;
+                _currentState[RightStickY] = -relativeValue;
                 break;
             case 4:
-                _currentState.l2Trigger = (relativeValue * 0.5) + 0.5;
+                _currentState[LeftTrigger] = (relativeValue * 0.5) + 0.5;
                 break;
             case 5:
-                _currentState.r2Trigger = (relativeValue * 0.5) + 0.5;
+                _currentState[RightTrigger] = (relativeValue * 0.5) + 0.5;
                 break;
         }
         
@@ -192,14 +193,13 @@ namespace core {
             _joystick(joystick)
     {
         _joystick->setEventCallback(this);
+        _currentState.resize(ComponentCount, 0);
+        _previousState.resize(ComponentCount, 0);
     }
     
     void Gamepad::update() {
         _previousState = _currentState;
         _joystick->capture();
-        
-//        CI_LOG_D("_currentState.aButton: " << _currentState.aButton);
-        
     }
     
 #pragma mark - InputDispatcher

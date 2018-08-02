@@ -47,7 +47,12 @@ namespace {
             _buttonL2Base = svg->findGroupById("button_l2_base")->getChildShapes().front();
 
             _buttonStartBase = svg->findGroupById("button_start_base")->getChildShapes().front();
-            _buttonSelectBase = svg->findGroupById("button_select_base")->getChildShapes().front()  ;
+            _buttonSelectBase = svg->findGroupById("button_select_base")->getChildShapes().front();
+            
+            _dPadUp = svg->findGroupById("d_pad_up")->getChildShapes().front();
+            _dPadRight = svg->findGroupById("d_pad_right")->getChildShapes().front();
+            _dPadDown = svg->findGroupById("d_pad_down")->getChildShapes().front();
+            _dPadLeft = svg->findGroupById("d_pad_left")->getChildShapes().front();
 
             saveDefaults(_leftStickKnob);
             saveDefaults(_leftStickBase);
@@ -70,16 +75,16 @@ namespace {
             
             if (_gamepad) {
                 const auto activateColor = ColorA(0,1,1,1);
-                activate(_buttonABase, activateColor, _gamepad->getAButtonValue() ? 1 : 0);
-                activate(_buttonBBase, activateColor, _gamepad->getBButtonValue() ? 1 : 0);
-                activate(_buttonXBase, activateColor, _gamepad->getXButtonValue() ? 1 : 0);
-                activate(_buttonYBase, activateColor, _gamepad->getYButtonValue() ? 1 : 0);
-                activate(_buttonStartBase, activateColor, _gamepad->getStartButtonValue() ? 1 : 0);
-                activate(_buttonSelectBase, activateColor, _gamepad->getSelectButtonValue() ? 1 : 0);
-                activate(_buttonL1Base, activateColor, _gamepad->getL1ButtonValue() ? 1 : 0);
-                activate(_buttonR1Base, activateColor, _gamepad->getR1ButtonValue() ? 1 : 0);
-                activate(_buttonL2Base, activateColor, _gamepad->getL2TriggerValue());
-                activate(_buttonR2Base, activateColor, _gamepad->getR2TriggerValue());
+                activate(_buttonABase, activateColor, _gamepad->getAButton() ? 1 : 0);
+                activate(_buttonBBase, activateColor, _gamepad->getBButton() ? 1 : 0);
+                activate(_buttonXBase, activateColor, _gamepad->getXButton() ? 1 : 0);
+                activate(_buttonYBase, activateColor, _gamepad->getYButton() ? 1 : 0);
+                activate(_buttonStartBase, activateColor, _gamepad->getStartButton() ? 1 : 0);
+                activate(_buttonSelectBase, activateColor, _gamepad->getSelectButton() ? 1 : 0);
+                activate(_buttonL1Base, activateColor, _gamepad->getLeftShoulderButton() ? 1 : 0);
+                activate(_buttonR1Base, activateColor, _gamepad->getRightShoulderButton() ? 1 : 0);
+                activate(_buttonL2Base, activateColor, _gamepad->getLeftTrigger());
+                activate(_buttonR2Base, activateColor, _gamepad->getRightTrigger());
                 
                 const auto leftStickBB = _leftStickBase->getLocalBB();
                 const auto leftStickRange = dvec2(cpBBWidth(leftStickBB),cpBBHeight(leftStickBB)) * 0.4;
@@ -88,8 +93,8 @@ namespace {
                 const auto leftStickDefaultPosition = _defaultPositions[_leftStickKnobGroup];
                 const auto rightStickDefaultPosition = _defaultPositions[_rightStickKnobGroup];
                 
-                const auto leftStickPosition = leftStickDefaultPosition + _gamepad->getLeftStickValue() * leftStickRange;
-                const auto rightStickPosition = rightStickDefaultPosition + _gamepad->getRightStickValue() * rightStickRange;
+                const auto leftStickPosition = leftStickDefaultPosition + _gamepad->getLeftStick() * leftStickRange;
+                const auto rightStickPosition = rightStickDefaultPosition + _gamepad->getRightStick() * rightStickRange;
 
                 _leftStickKnobGroup->setPosition(leftStickPosition);
                 _rightStickKnobGroup->setPosition(rightStickPosition);
@@ -100,9 +105,6 @@ namespace {
         
         void saveDefaults(util::svg::ShapeRef shape) {
             _defaultColors[shape] = shape->getAppearance()->getFillColor();
-            
-            // SVG has no way to assign an offset transform to a Shape, only to groups!
-//            _defaultPositions[shape] = shape->getP
         }
         
         void activate(util::svg::ShapeRef shape, ColorA activateColor, double amount) {
@@ -113,7 +115,7 @@ namespace {
         
         GamepadRef _gamepad;
         util::svg::GroupRef _leftStickKnobGroup, _rightStickKnobGroup;
-        util::svg::ShapeRef _leftStickKnob, _leftStickBase, _rightStickKnob, _rightStickBase, _buttonABase, _buttonBBase, _buttonXBase, _buttonYBase, _buttonR1Base, _buttonR2Base, _buttonL1Base, _buttonL2Base, _buttonStartBase, _buttonSelectBase;
+        util::svg::ShapeRef _leftStickKnob, _leftStickBase, _rightStickKnob, _rightStickBase, _buttonABase, _buttonBBase, _buttonXBase, _buttonYBase, _buttonR1Base, _buttonR2Base, _buttonL1Base, _buttonL2Base, _buttonStartBase, _buttonSelectBase, _dPadUp, _dPadRight, _dPadDown, _dPadLeft;
         
         map<util::svg::ShapeRef, ColorA> _defaultColors;
         map<util::svg::GroupRef, dvec2> _defaultPositions;
@@ -125,8 +127,6 @@ namespace {
     }
     
 }
-
-#define EASE_DESC(fn_name) {#fn_name, util::easing::fn_name<double>}
 
 GamepadTestScenario::GamepadTestScenario()
 {

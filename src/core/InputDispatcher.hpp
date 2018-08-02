@@ -59,89 +59,90 @@ namespace core {
         
         // Current stick/trigger/button state
         
-        dvec2 getLeftStickValue() const { return _currentState.leftStickValue; }
-        dvec2 getRightStickValue() const { return _currentState.rightStickValue; }
+        dvec2 getLeftStick() const { return dvec2(_currentState[LeftStickX], _currentState[LeftStickY]); }
+        dvec2 getRightStick() const { return dvec2(_currentState[RightStickX], _currentState[RightStickY]); }
+        dvec2 getDPad() const { return dvec2(_currentState[DPadX], _currentState[DPadY]); }
         
-        bool getL1ButtonValue() const { return _currentState.l1Button; }
-        double getL2TriggerValue() const { return _currentState.l2Trigger; }
+        bool getLeftShoulderButton() const { return _currentState[LeftShoulderButton] > 0.5; }
+        double getLeftTrigger() const { return _currentState[LeftTrigger]; }
 
-        bool getR1ButtonValue() const { return _currentState.r1Button; }
-        double getR2TriggerValue() const { return _currentState.r2Trigger; }
+        bool getRightShoulderButton() const { return _currentState[RightShoulderButton] > 0.5; }
+        double getRightTrigger() const { return _currentState[RightTrigger]; }
         
-        bool getAButtonValue() const { return _currentState.aButton; } // PS Circle Button
-        bool getBButtonValue() const { return _currentState.bButton; } // PS X Button
-        bool getXButtonValue() const { return _currentState.xButton; } // PS Triangle Button
-        bool getYButtonValue() const { return _currentState.yButton; } // PS Square Button
+        bool getAButton() const { return _currentState[AButton] > 0.5; } // PS Circle Button
+        bool getBButton() const { return _currentState[BButton] > 0.5; } // PS X Button
+        bool getXButton() const { return _currentState[XButton] > 0.5; } // PS Triangle Button
+        bool getYButton() const { return _currentState[YButton] > 0.5; } // PS Square Button
 
-        bool getStartButtonValue() const { return _currentState.startButton; } // PS Options Button
-        bool getSelectButtonValue() const { return _currentState.selectButton; } // PS Share Button
+        bool getStartButton() const { return _currentState[StartButton] > 0.5; } // PS Options Button
+        bool getSelectButton() const { return _currentState[SelectButton] > 0.5; } // PS Share Button
         
         // Check if buttons were pressed on this step but not before
         
-        bool getL1ButtonWasPressed() const {
-            return _currentState.l1Button && !_previousState.l1Button;
+        bool getLeftShoulderButtonWasPressed() const {
+            return wasPressed(LeftShoulderButton);
         }
 
-        bool getR1ButtonWasPressed() const {
-            return _currentState.r1Button && !_previousState.r1Button;
+        bool getRightShoulderButtonWasPressed() const {
+            return wasPressed(RightShoulderButton);
         }
         
         bool getAButtonWasPressed() const {
-            return _currentState.aButton && !_previousState.aButton;
+            return wasPressed(AButton);
         }
 
         bool getBButtonWasPressed() const {
-            return _currentState.bButton && !_previousState.bButton;
+            return wasPressed(BButton);
         }
 
         bool getXButtonWasPressed() const {
-            return _currentState.xButton && !_previousState.xButton;
+            return wasPressed(XButton);
         }
 
         bool getYButtonWasPressed() const {
-            return _currentState.yButton && !_previousState.yButton;
+            return wasPressed(YButton);
         }
 
         bool getStartButtonWasPressed() const {
-            return _currentState.startButton && !_previousState.startButton;
+            return wasPressed(StartButton);
         }
 
         bool getSelectButtonWasPressed() const {
-            return _currentState.selectButton && !_previousState.selectButton;
+            return wasPressed(SelectButton);
         }
         
         // Check if buttons were release on this step but not before
         
-        bool getL1ButtonWasReleased() const {
-            return !_currentState.l1Button && _previousState.l1Button;
+        bool getLeftShoulderButtonWasReleased() const {
+            return wasReleased(LeftShoulderButton);
         }
         
-        bool getR1ButtonWasReleased() const {
-            return !_currentState.r1Button && _previousState.r1Button;
+        bool getRightShoulderButtonWasReleased() const {
+            return wasReleased(RightShoulderButton);
         }
         
         bool getAButtonWasReleased() const {
-            return !_currentState.aButton && _previousState.aButton;
+            return wasReleased(AButton);
         }
         
         bool getBButtonWasReleased() const {
-            return !_currentState.bButton && _previousState.bButton;
+            return wasReleased(BButton);
         }
         
         bool getXButtonWasReleased() const {
-            return !_currentState.xButton && _previousState.xButton;
+            return wasReleased(XButton);
         }
         
         bool getYButtonWasReleased() const {
-            return !_currentState.yButton && _previousState.yButton;
+            return wasReleased(YButton);
         }
         
         bool getStartButtonWasReleased() const {
-            return !_currentState.startButton && _previousState.startButton;
+            return wasReleased(StartButton);
         }
         
         bool getSelectButtonWasReleased() const {
-            return !_currentState.selectButton && _previousState.selectButton;
+            return wasReleased(SelectButton);
         }
         
         // OIS::JoyStickListener
@@ -154,6 +155,35 @@ namespace core {
         bool vector3Moved(const OIS::JoyStickEvent& arg, int index) override;
 
     protected:
+        
+        enum Components {
+            LeftStickX = 0,
+            LeftStickY,
+            RightStickX,
+            RightStickY,
+            DPadX,
+            DPadY,
+            LeftTrigger,
+            RightTrigger,
+            LeftShoulderButton,
+            RightShoulderButton,
+            AButton,
+            BButton,
+            XButton,
+            YButton,
+            StartButton,
+            SelectButton
+        };
+        
+        static const int ComponentCount = 16;
+        
+        bool wasPressed(Components component) const {
+            return _currentState[component] > 0.5 && _previousState[component] < 0.5;
+        }
+
+        bool wasReleased(Components component) const {
+            return _currentState[component] > 0.5 && _previousState[component] < 0.5;
+        }
 
         friend class InputDispatcher;
         Gamepad(OIS::JoyStick *joystick);
@@ -161,14 +191,8 @@ namespace core {
         
     protected:
         
-        struct state {
-            dvec2 leftStickValue, rightStickValue;
-            bool l1Button, r1Button, aButton, bButton, xButton, yButton, startButton, selectButton;
-            double l2Trigger, r2Trigger;
-        };
-        
         OIS::JoyStick *_joystick;
-        state _currentState, _previousState;
+        vector<double> _currentState, _previousState;
         
     };
 
