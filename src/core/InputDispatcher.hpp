@@ -14,6 +14,7 @@
 #include <cinder/app/MouseEvent.h>
 #include <cinder/app/KeyEvent.h>
 #include <cinder/app/FileDropEvent.h>
+#include <cinder/Xml.h>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-value"
@@ -58,6 +59,9 @@ namespace core {
         
         /// get the underlying IOS::JoyStick
         OIS::JoyStick *getJoystick() const { return _joystick; }
+        
+        void setLogEvents(bool logEvents) { _logEvents = logEvents; }
+        bool logEvents() const { return _logEvents; }
         
         // Current stick/trigger/button state
         
@@ -174,28 +178,43 @@ namespace core {
             XButton,
             YButton,
             StartButton,
-            SelectButton
+            SelectButton,
+            Unknown // not counted in ComponentCount
         };
         
         static const int ComponentCount = 16;
+
+        static Components stringToComponents(const string &componentString);
+        static bool componentIsButton(Components component);
+        static bool componentIsAxis(Components component);
         
         bool wasPressed(Components component) const {
             return _currentState[component] > 0.5 && _previousState[component] < 0.5;
         }
 
         bool wasReleased(Components component) const {
-            return _currentState[component] > 0.5 && _previousState[component] < 0.5;
+            return _currentState[component] < 0.5 && _previousState[component] > 0.5;
         }
 
         friend class InputDispatcher;
         Gamepad(OIS::JoyStick *joystick);
         void update();
+        void loadDeviceSemanticMapping();
         
     protected:
         
-        OIS::JoyStick *_joystick;
-        vector<double> _currentState, _previousState;
+        struct axis_mapping {
+            Components component;
+            bool invert;
+            bool positiveUnitRange;
+        };
         
+        OIS::JoyStick *_joystick;
+        bool _logEvents;
+        vector<double> _currentState, _previousState;
+        vector<Components> _deviceButtonToComponentsMap;
+        vector<axis_mapping> _deviceAxisToComponentsMap;
+        double _deviceAxisDeadZone;
     };
 
 

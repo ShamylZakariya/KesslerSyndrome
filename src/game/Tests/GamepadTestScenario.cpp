@@ -175,6 +175,9 @@ void GamepadTestScenario::setup() {
     if (!input->getGamepads().empty()) {
         double x = 0;
         for (auto gamepad : input->getGamepads()) {
+            CI_LOG_D("Creating gamepad with vendor: \"" << gamepad->getVendor() << "\"");
+            gamepad->setLogEvents(true);
+
             auto obj = GamepadObject(dvec2(x,0), gamepad);
             stage->addObject(obj);
             

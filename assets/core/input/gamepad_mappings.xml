@@ -1,0 +1,21 @@
+<mappings>
+    <mapping vendor="Sony Computer Entertainment Wireless Controller" deadzone="2000">
+
+        <button index="0">YButton</button>
+        <button index="1">BButton</button>
+        <button index="2">AButton</button>
+        <button index="3">XButton</button>
+        <button index="4">LeftShoulderButton</button>
+        <button index="5">RightShoulderButton</button>
+        <button index="8">SelectButton</button>
+        <button index="9">StartButton</button>
+
+        <axis index="0">LeftStickX</axis>
+        <axis index="1" invert="true">LeftStickY</axis>
+        <axis index="2">RightStickX</axis>
+        <axis index="3" invert="true">RightStickY</axis>
+        <axis index="4" remapToPositiveUnitRange="true">LeftTrigger</axis>
+        <axis index="5" remapToPositiveUnitRange="true">RightTrigger</axis>
+
+    </mapping>
+</mapping>

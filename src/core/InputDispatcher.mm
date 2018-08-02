@@ -7,7 +7,10 @@
 //
 
 #include "core/InputDispatcher.hpp"
+
 #import <AppKit/AppKit.h>
+
+#import "core/util/Xml.hpp"
 
 namespace core {
     
@@ -66,15 +69,10 @@ namespace core {
             return pl;
         }
         
-        const double PS4DeadZone = 2000;
     }
     
 #pragma mark - Gamepad
    
-    /*
-     OIS::JoyStick *_joystick;
-     vector<double> _currentState, _previousState;
-     */
     Gamepad::~Gamepad()
     {
         _joystick->setEventCallback(nullptr);
@@ -89,121 +87,197 @@ namespace core {
     }
     
     bool Gamepad::buttonPressed(const OIS::JoyStickEvent& arg, int button) {
-        switch(button) {
-            case 0:
-                _currentState[YButton] = true;
-                break;
-            case 1:
-                _currentState[BButton] = true;
-                break;
-            case 2:
-                _currentState[AButton] = true;
-                break;
-            case 3:
-                _currentState[XButton] = true;
-                break;
-            case 4:
-                _currentState[LeftShoulderButton] = true;
-                break;
-            case 5:
-                _currentState[RightShoulderButton] = true;
-                break;
-            case 9:
-                _currentState[StartButton] = true;
-                break;
-            case 8:
-                _currentState[SelectButton] = true;
-                break;
+        const auto component = _deviceButtonToComponentsMap[button];
+        
+        // bail if we have a nonsense input
+        if (!componentIsButton(component)) { return false; }
+        
+        _currentState[component] = true;
+        
+        if (_logEvents) {
+            CI_LOG_D("buttonPressed device: " << getId() << " device button index: " << index << " component: " << component);
         }
-                
+        
         return true;
     }
 
     bool Gamepad::buttonReleased(const OIS::JoyStickEvent& arg, int button) {
-        switch(button) {
-            case 0:
-                _currentState[YButton] = false;
-                break;
-            case 1:
-                _currentState[BButton] = false;
-                break;
-            case 2:
-                _currentState[AButton] = false;
-                break;
-            case 3:
-                _currentState[XButton] = false;
-                break;
-            case 4:
-                _currentState[LeftShoulderButton] = false;
-                break;
-            case 5:
-                _currentState[RightShoulderButton] = false;
-                break;
-            case 9:
-                _currentState[StartButton] = false;
-                break;
-            case 8:
-                _currentState[SelectButton] = false;
-                break;
-        }
+        const auto component = _deviceButtonToComponentsMap[button];
 
+        // bail if we have a nonsense input
+        if (!componentIsButton(component)) { return false; }
+
+        _currentState[component] = false;
+        
+        if (_logEvents) {
+            CI_LOG_D("buttonRelease device: " << getId() << " device button index: " << index << " component: " << component);
+        }
+        
         return true;
     }
 
     bool Gamepad::axisMoved(const OIS::JoyStickEvent& arg, int axis) {
+        const auto map = _deviceAxisToComponentsMap[axis];
+        if (!componentIsAxis(map.component)) { return false; }
+
         double value = arg.state.mAxes[axis].abs;
-        if (value > -PS4DeadZone && value < PS4DeadZone) { value = 0; }
-        const double relativeValue = value / static_cast<double>(OIS::JoyStick::MAX_AXIS);
+
+        //
+        //  Handle the Dead Zone
+        //
+
+        const double Range = static_cast<double>(OIS::JoyStick::MAX_AXIS);
+        if (map.positiveUnitRange) {
+            if (value < -Range + _deviceAxisDeadZone ) {
+                value = -Range;
+            }
+        } else {
+            if (value > -_deviceAxisDeadZone && value < _deviceAxisDeadZone) {
+                value = 0;
+            }
+        }
+
+        //
+        //  Compute normalize value
+        //
+
+        double relativeValue = value / Range;
         
-        switch (axis) {
-            case 0:
-                _currentState[LeftStickX] = relativeValue;
-                break;
-            case 1:
-                _currentState[LeftStickY] = -relativeValue;
-                break;
-            case 2:
-                _currentState[RightStickX] = relativeValue;
-                break;
-            case 3:
-                _currentState[RightStickY] = -relativeValue;
-                break;
-            case 4:
-                _currentState[LeftTrigger] = (relativeValue * 0.5) + 0.5;
-                break;
-            case 5:
-                _currentState[RightTrigger] = (relativeValue * 0.5) + 0.5;
-                break;
+        if (map.positiveUnitRange) {
+            relativeValue = (relativeValue * 0.5) + 0.5;
         }
         
+        if (map.invert) {
+            relativeValue *= -1;
+        }
+        
+        if (_logEvents && value != 0) {
+            CI_LOG_D("axisMoved device: " << getId() << " device axis index: " << index << " component: " << map.component << " relativeValue: " << relativeValue);
+        }
+        
+        _currentState[map.component] = relativeValue;
+
         return true;
     }
     
     bool Gamepad::sliderMoved(const OIS::JoyStickEvent& arg, int index) {
-        CI_LOG_D("sliderMoved index:" << index);
+        if (_logEvents) {
+            CI_LOG_D("sliderMoved device: " << getId() << " device index:" << index);
+        }
         return true;
     }
     bool Gamepad::povMoved(const OIS::JoyStickEvent& arg, int index) {
-        CI_LOG_D("povMoved index:" << index << " val: " << arg.state.mPOV[index].direction);
+        if (_logEvents) {
+            CI_LOG_D("povMoved device: " << getId() << " device index:" << index);
+        }
         return true;
     }
     bool Gamepad::vector3Moved(const OIS::JoyStickEvent& arg, int index) {
-        CI_LOG_D("vector3Moved index: " << index);
+        if (_logEvents) {
+            CI_LOG_D("vector3Moved device: " << getId() << " device index:" << index);
+        }
         return true;
     }
 
+    Gamepad::Components Gamepad::stringToComponents(const string &componentString) {
+        if (componentString == "LeftStickX") return LeftStickX;
+        if (componentString == "LeftStickY") return LeftStickY;
+        if (componentString == "RightStickX") return RightStickX;
+        if (componentString == "RightStickY") return RightStickY;
+
+        if (componentString == "DPadX") return DPadX;
+        if (componentString == "DPadY") return DPadY;
+
+        if (componentString == "LeftTrigger") return LeftTrigger;
+        if (componentString == "RightTrigger") return RightTrigger;
+        
+        if (componentString == "LeftShoulderButton") return LeftShoulderButton;
+        if (componentString == "RightShoulderButton") return RightShoulderButton;
+
+        if (componentString == "AButton") return AButton;
+        if (componentString == "BButton") return BButton;
+        if (componentString == "XButton") return XButton;
+        if (componentString == "YButton") return YButton;
+        if (componentString == "StartButton") return StartButton;
+        if (componentString == "SelectButton") return SelectButton;
+
+        return Unknown;
+    }
+    
+    bool Gamepad::componentIsButton(Components component) {
+        return component >= LeftShoulderButton && component < Unknown;
+    }
+
+    bool Gamepad::componentIsAxis(Components component) {
+        return component >= LeftStickX && component <= RightTrigger;
+    }
+
+    
+    /*
+     OIS::JoyStick *_joystick;
+     bool _logEvents;
+     vector<double> _currentState, _previousState;
+     vector<Components> _deviceButtonToComponentsMap;
+     vector<pair<Components,axis_mapping>> _deviceAxisToComponentsMap;
+     double _deviceAxisDeadZone;
+     */
     
     Gamepad::Gamepad(OIS::JoyStick *joystick):
-            _joystick(joystick)
+            _joystick(joystick),
+            _logEvents(false),
+            _deviceAxisDeadZone(2000)
     {
         _joystick->setEventCallback(this);
         _currentState.resize(ComponentCount, 0);
         _previousState.resize(ComponentCount, 0);
+        _deviceButtonToComponentsMap.resize(ComponentCount);
+        _deviceAxisToComponentsMap.resize(ComponentCount);
+        loadDeviceSemanticMapping();
     }
     
     void Gamepad::update() {
         _previousState = _currentState;
         _joystick->capture();
+    }
+    
+    void Gamepad::loadDeviceSemanticMapping() {
+        const string vendor = getVendor();
+        XmlTree mappingDoc = XmlTree(app::loadAsset("core/input/gamepad_mappings.xml"));
+
+        auto maybeDeviceMapping = util::xml::findElement(mappingDoc, "mapping", "vendor", vendor);
+        if (maybeDeviceMapping) {
+            auto deviceMapping = *maybeDeviceMapping;
+
+            CI_LOG_D("Loading mappings for device: " << getId() << " vendor: " << vendor);
+            
+            if (deviceMapping.hasAttribute("deadzone")) {
+                _deviceAxisDeadZone = deviceMapping.getAttributeValue<double>("deadzone");
+            }
+            
+            for (const auto &node : deviceMapping.getChildren()) {
+                
+                // load the component type
+                const Components component = stringToComponents(node->getValue());
+                CI_ASSERT_MSG(component != Unknown, (string("Unrecognized component type \"") + node->getValue() + string("\"")).c_str());
+                
+                // load the index to map from
+                size_t idx = node->getAttributeValue<size_t>("index");
+                
+                if (node->getTag() == "button") {
+                    // this is a button
+                    CI_LOG_D("mapping button name: " << node->getValue() << "(" << component << ") to: " << idx);
+                    _deviceButtonToComponentsMap[idx] = component;
+                } else if (node->getTag() == "axis") {
+                    // this is an axis
+                    const bool remap = node->hasAttribute("remapToPositiveUnitRange") && (node->getAttribute("remapToPositiveUnitRange") == "true");
+                    const bool invert = node->hasAttribute("invert") && (node->getAttribute("invert") == "true");
+                    CI_LOG_D("mapping axis name: " << node->getValue() << "(" << component << ") to: " << idx << " remapToPositiveUnitRange: " << remap << " invert: " << invert);
+                    _deviceAxisToComponentsMap[idx] = axis_mapping { component, invert, remap };
+                }
+            }
+        } else {
+            CI_LOG_E("Unrecognized device with vendor: \"" << vendor << "\"");
+        }
     }
     
 #pragma mark - InputDispatcher
