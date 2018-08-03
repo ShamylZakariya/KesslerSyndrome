@@ -86,6 +86,18 @@ namespace core {
         return _joystick->vendor();
     }
     
+    void Gamepad::reloadDeviceMappings() {
+        for (auto &c : _deviceButtonToComponentsMap) {
+            c = Unknown;
+        }
+        
+        for (auto &am : _deviceAxisToComponentsMap) {
+            am = { Unknown, false, false };
+        }
+        
+        loadDeviceMapping();
+    }
+    
     bool Gamepad::buttonPressed(const OIS::JoyStickEvent& arg, int button) {
         const auto component = _deviceButtonToComponentsMap[button];
         
@@ -238,7 +250,7 @@ namespace core {
         _previousState.resize(ComponentCount, 0);
         _deviceButtonToComponentsMap.resize(ComponentCount, Unknown);
         _deviceAxisToComponentsMap.resize(ComponentCount, { Unknown, false, false });
-        loadDeviceSemanticMapping();
+        loadDeviceMapping();
     }
     
     void Gamepad::update() {
@@ -246,7 +258,7 @@ namespace core {
         _joystick->capture();
     }
     
-    void Gamepad::loadDeviceSemanticMapping() {
+    void Gamepad::loadDeviceMapping() {
         const string vendor = getVendor();
         XmlTree mappingDoc = XmlTree(app::loadAsset("core/input/gamepad_mappings.xml"));
 

@@ -55,7 +55,11 @@ namespace core {
         /// get the id of this controller, suitable for distinguishing between N attached controllers
         int getId() const;
         
+        /// get the vendor name of this controller, suitable for display in UI
         string getVendor() const;
+        
+        /// for development, reloads the bindings for this controller from core/input/gamepad_mappings.xml
+        void reloadDeviceMappings();
         
         /// get the underlying IOS::JoyStick
         OIS::JoyStick *getJoystick() const { return _joystick; }
@@ -268,7 +272,7 @@ namespace core {
         friend class InputDispatcher;
         Gamepad(OIS::JoyStick *joystick);
         void update();
-        void loadDeviceSemanticMapping();
+        void loadDeviceMapping();
         
     protected:
         

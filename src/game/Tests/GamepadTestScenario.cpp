@@ -205,7 +205,10 @@ void GamepadTestScenario::setup() {
             switch(keyCode) {
                     // track 'r' for resetting scenario
                 case app::KeyEvent::KEY_r:
-                    this->reset();
+                    CI_LOG_D("Reloading device mappings");
+                    for (const auto &gamepad : InputDispatcher::get()->getGamepads()) {
+                        gamepad->reloadDeviceMappings();
+                    }
                     return true;
                 default:
                     return false;
