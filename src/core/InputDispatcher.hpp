@@ -14,6 +14,12 @@
 #include <cinder/app/MouseEvent.h>
 #include <cinder/app/KeyEvent.h>
 #include <cinder/app/FileDropEvent.h>
+#include <cinder/Xml.h>
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-value"
+#include <OIS.h>
+#pragma clang diagnostic pop
 
 #include "core/Common.hpp"
 #include "core/MathHelpers.hpp"
@@ -23,15 +29,266 @@ namespace core {
     class InputListener;
 
     SMART_PTR(InputDispatcher);
+    SMART_PTR(Gamepad);
 
     namespace ScreenCoordinateSystem {
         enum origin {
-
             TopLeft,
             BottomLeft
-
         };
     }
+    
+    /**
+     Gamepad
+     Represents a bog-standard PS3/4 type controller, with twin analog sticks, analog shoulder triggers,
+     and ABXY buttons, etc.
+
+     The Gamepad interface is designed for polling, not event subscription.
+     
+     Get a Gamepad from InputDispatcher::getGamepads()
+     */
+    class Gamepad : public OIS::JoyStickListener {
+    public:
+        
+        virtual ~Gamepad();
+        
+        /// get the id of this controller, suitable for distinguishing between N attached controllers
+        int getId() const;
+        
+        /// get the vendor name of this controller, suitable for display in UI
+        string getVendor() const;
+        
+        /// for development, reloads the bindings for this controller from core/input/gamepad_mappings.xml
+        void reloadDeviceMappings();
+        
+        /// get the underlying IOS::JoyStick
+        OIS::JoyStick *getJoystick() const { return _joystick; }
+        
+        void setLogEvents(bool logEvents) { _logEvents = logEvents; }
+        bool logEvents() const { return _logEvents; }
+        
+        // Current stick/trigger/button state
+        
+        /// get position of left analog stick
+        dvec2 getLeftStick() const { return dvec2(_currentState[LeftStickX], _currentState[LeftStickY]); }
+        
+        /// get position of right analog stick
+        dvec2 getRightStick() const { return dvec2(_currentState[RightStickX], _currentState[RightStickY]); }
+        
+        /// get position of d pad
+        dvec2 getDPad() const { return dvec2(_currentState[DPadX], _currentState[DPadY]); }
+        
+        /// get the left shoulder button state, L1 on PS4 controller
+        bool getLeftShoulderButton() const { return _currentState[LeftShoulderButton] > 0.5; }
+
+        /// get the second left shoulder button state, L2 on PS4 controller
+        bool getLeftShoulderButton2() const { return _currentState[LeftShoulderButton2] > 0.5; }
+        
+        /// get amount the left trigger is pressed, L2 on PS4 controller
+        double getLeftTrigger() const { return _currentState[LeftTrigger]; }
+
+        /// get the right shoulder button state, R1 on PS4 controller
+        bool getRightShoulderButton() const { return _currentState[RightShoulderButton] > 0.5; }
+        
+        /// get the second right shoulder button state, R2 on PS4 controller
+        bool getRightShoulderButton2() const { return _currentState[RightShoulderButton2] > 0.5; }
+        
+        /// get amount the right trigger is pressed, L2 on PS4 controller
+        double getRightTrigger() const { return _currentState[RightTrigger]; }
+        
+        /// get the left stick button press state, L3 on PS4 controller
+        bool getLeftStickButton() const { return _currentState[LeftStickButton] > 0.5; }
+
+        /// get the right stick button press state, R3 on PS4 controller
+        bool getRightStickButton() const { return _currentState[RightStickButton] > 0.5; }
+        
+        /// get the A button state, Circle on PS4 controller
+        bool getAButton() const { return _currentState[AButton] > 0.5; }
+        
+        /// get the B button state, X on PS4 controller
+        bool getBButton() const { return _currentState[BButton] > 0.5; }
+        
+        /// get the X button state, Triangle on PS4 controller
+        bool getXButton() const { return _currentState[XButton] > 0.5; }
+
+        /// get the Y button state, Square on PS4 controller
+        bool getYButton() const { return _currentState[YButton] > 0.5; }
+
+        /// get the start button state, Options on PS4 controller
+        bool getStartButton() const { return _currentState[StartButton] > 0.5; }
+
+        /// get the select button state, Share on PS4 controller
+        bool getSelectButton() const { return _currentState[SelectButton] > 0.5; }
+        
+        // Check if buttons were pressed on this step but not before
+        
+        bool getLeftShoulderButtonWasPressed() const {
+            return wasPressed(LeftShoulderButton);
+        }
+
+        bool getLeftShoulderButton2WasPressed() const {
+            return wasPressed(LeftShoulderButton2);
+        }
+
+        bool getRightShoulderButtonWasPressed() const {
+            return wasPressed(RightShoulderButton);
+        }
+
+        bool getRightShoulderButton2WasPressed() const {
+            return wasPressed(RightShoulderButton2);
+        }
+        
+        bool getLeftStickButtonWasPressed() const {
+            return wasPressed(LeftStickButton);
+        }
+
+        bool getRightStickButtonWasPressed() const {
+            return wasPressed(RightStickButton);
+        }
+
+        bool getAButtonWasPressed() const {
+            return wasPressed(AButton);
+        }
+
+        bool getBButtonWasPressed() const {
+            return wasPressed(BButton);
+        }
+
+        bool getXButtonWasPressed() const {
+            return wasPressed(XButton);
+        }
+
+        bool getYButtonWasPressed() const {
+            return wasPressed(YButton);
+        }
+
+        bool getStartButtonWasPressed() const {
+            return wasPressed(StartButton);
+        }
+
+        bool getSelectButtonWasPressed() const {
+            return wasPressed(SelectButton);
+        }
+        
+        // Check if buttons were release on this step but not before
+        
+        bool getLeftShoulderButtonWasReleased() const {
+            return wasReleased(LeftShoulderButton);
+        }
+
+        bool getLeftShoulderButton2WasReleased() const {
+            return wasReleased(LeftShoulderButton2);
+        }
+
+        bool getRightShoulderButtonWasReleased() const {
+            return wasReleased(RightShoulderButton);
+        }
+
+        bool getRightShoulderButton2WasReleased() const {
+            return wasReleased(RightShoulderButton2);
+        }
+
+        bool getLeftStickButtonWasReleased() const {
+            return wasReleased(LeftStickButton);
+        }
+        
+        bool getRightStickButtonWasReleased() const {
+            return wasReleased(RightStickButton);
+        }
+        
+        bool getAButtonWasReleased() const {
+            return wasReleased(AButton);
+        }
+        
+        bool getBButtonWasReleased() const {
+            return wasReleased(BButton);
+        }
+        
+        bool getXButtonWasReleased() const {
+            return wasReleased(XButton);
+        }
+        
+        bool getYButtonWasReleased() const {
+            return wasReleased(YButton);
+        }
+        
+        bool getStartButtonWasReleased() const {
+            return wasReleased(StartButton);
+        }
+        
+        bool getSelectButtonWasReleased() const {
+            return wasReleased(SelectButton);
+        }
+        
+        // OIS::JoyStickListener
+        
+        bool buttonPressed(const OIS::JoyStickEvent& arg, int button) override;
+        bool buttonReleased(const OIS::JoyStickEvent& arg, int button) override;
+        bool axisMoved(const OIS::JoyStickEvent& arg, int axis) override;
+        bool sliderMoved(const OIS::JoyStickEvent& arg, int index) override;
+        bool povMoved(const OIS::JoyStickEvent& arg, int index) override;
+        bool vector3Moved(const OIS::JoyStickEvent& arg, int index) override;
+
+    protected:
+        
+        enum Components {
+            LeftStickX = 0,
+            LeftStickY,
+            RightStickX,
+            RightStickY,
+            DPadX,
+            DPadY,
+            LeftTrigger,
+            RightTrigger,
+            LeftShoulderButton,
+            LeftShoulderButton2,
+            RightShoulderButton,
+            RightShoulderButton2,
+            LeftStickButton,
+            RightStickButton,
+            AButton,
+            BButton,
+            XButton,
+            YButton,
+            StartButton,
+            SelectButton,
+            Unknown // not counted in ComponentCount
+        };
+        
+        static const int ComponentCount = 20;
+
+        static Components stringToComponents(const string &componentString);
+        static bool componentIsButton(Components component);
+        static bool componentIsAxis(Components component);
+        
+        bool wasPressed(Components component) const {
+            return _currentState[component] > 0.5 && _previousState[component] < 0.5;
+        }
+
+        bool wasReleased(Components component) const {
+            return _currentState[component] < 0.5 && _previousState[component] > 0.5;
+        }
+
+        friend class InputDispatcher;
+        Gamepad(OIS::JoyStick *joystick);
+        void update();
+        void loadDeviceMapping();
+        
+    protected:
+        
+        struct axis_mapping {
+            Components component;
+            bool invert;
+            bool positiveUnitRange;
+        };
+        
+        OIS::JoyStick *_joystick;
+        bool _logEvents;
+        vector<double> _currentState, _previousState;
+        vector<Components> _deviceButtonToComponentsMap;
+        vector<axis_mapping> _deviceAxisToComponentsMap;
+        double _deviceAxisDeadZone;
+    };
 
 
     /**
@@ -130,8 +387,18 @@ namespace core {
         app::MouseEvent getLastMouseEvent() const {
             return _lastMouseEvent;
         }
-
+        
+        /**
+         InputDispatcher will create a Gamepad for each attached/detected/supported gamepad.
+         Right now this is only known to work with PS4 controllers attached over USB.
+         If no controllers are attached this vector will be empty.
+         **/
+        const vector<GamepadRef> &getGamepads() const {
+            return _gamepads;
+        }
+        
     private:
+
         friend class InputListener;
 
         /**
@@ -181,7 +448,10 @@ namespace core {
         ivec2 *_lastMousePosition;
         cinder::signals::Connection _mouseDownId, _mouseUpId, _mouseWheelId, _mouseMoveId, _mouseDragId, _keyDownId, _keyUpId;
         bool _mouseHidden, _mouseLeftDown, _mouseMiddleDown, _mouseRightDown;
-
+        
+        OIS::InputManager *_oisInputManager;
+        vector<GamepadRef> _gamepads;
+        
     };
 
     /**
