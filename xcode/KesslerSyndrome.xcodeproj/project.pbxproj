@@ -910,7 +910,7 @@
 				OTHER_LDFLAGS = (
 					"$(CINDER_PATH)/lib/libcinder_d.a",
 					"$(CHIPMUNK_PATH)/xcode/build/Debug/libChipmunk-Mac.a",
-					"$(GAINPUT_PATH)/build/lib/libgainputstatic.a",
+					"$(OIS_PATH)/build/libOIS.a",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = org.zakariya.KesslerSyndrome;
 				PRODUCT_NAME = "$(TARGET_NAME)";
