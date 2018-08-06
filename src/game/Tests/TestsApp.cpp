@@ -18,6 +18,7 @@
 #include "game/Tests/MultiViewportTestScenario.hpp"
 #include "game/Tests/FilterStackTestScenario.hpp"
 #include "game/Tests/GamepadTestScenario.hpp"
+#include "game/Tests/CharacterTestScenario.hpp"
 
 #define SCENARIO_FACTORY(s) [](){ return make_pair(#s, make_shared<s>()); }
 
@@ -38,6 +39,7 @@ public:
         App::setup();
         
         _scenarioFactories = {
+            SCENARIO_FACTORY(CharacterTestScenario),
             SCENARIO_FACTORY(GamepadTestScenario),
             SCENARIO_FACTORY(MultiViewportTestScenario),
             SCENARIO_FACTORY(ParticleSystemTestScenario),

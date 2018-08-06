@@ -435,7 +435,11 @@ namespace core {
     }
 
     Stage::~Stage() {
-        // these all have to be freed before we can free the space
+
+        for (auto obj : _objects) {
+            obj->onRemovedFromStage();
+        }
+        
         _objects.clear();
         _objectsById.clear();
         _drawDispatcher.reset();
@@ -684,6 +688,10 @@ namespace core {
         }
 
         return GravitationCalculator::force(dvec2(0, 0), 0);
+    }
+    
+    GravitationCalculator::force Stage::getGravitation(dvec2 world) const {
+        return getGravitation(ALL_GRAVITATION_LAYERS, world);
     }
 
 

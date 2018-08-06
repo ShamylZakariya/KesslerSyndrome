@@ -81,12 +81,15 @@
 		63A71FB9210B75F100B91188 /* ImageWriting.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63A71FB7210B75F100B91188 /* ImageWriting.cpp */; };
 		63A71FBA210B75F100B91188 /* ImageWriting.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63A71FB7210B75F100B91188 /* ImageWriting.cpp */; };
 		63A72006211209FC00B91188 /* GamepadTestScenario.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63A72004211209FC00B91188 /* GamepadTestScenario.cpp */; };
+		63A7200A21178E9300B91188 /* Blob.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63A7200821178E9300B91188 /* Blob.cpp */; };
+		63A7200B21178E9300B91188 /* Blob.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63A7200821178E9300B91188 /* Blob.cpp */; };
 		63B8AF07202CA1A70021AC63 /* TerrainAttachmentsTestScenario.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63B8AF05202CA1A70021AC63 /* TerrainAttachmentsTestScenario.cpp */; };
 		63E29EF31F97A4C300CAF39E /* BaseParticleSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63E29EF01F97A4C300CAF39E /* BaseParticleSystem.cpp */; };
 		63E29EF41F97A4C300CAF39E /* BaseParticleSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63E29EF01F97A4C300CAF39E /* BaseParticleSystem.cpp */; };
 		63E29EF71F97A87300CAF39E /* CloudLayerParticleSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63E29EF51F97A87300CAF39E /* CloudLayerParticleSystem.cpp */; };
 		63E29EFC1F9E3F5D00CAF39E /* ParticleSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63E29EF91F9E3F5D00CAF39E /* ParticleSystem.cpp */; };
 		63E29EFD1F9E3F5D00CAF39E /* ParticleSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63E29EF91F9E3F5D00CAF39E /* ParticleSystem.cpp */; };
+		63F1011221189C7200883283 /* CharacterTestScenario.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63F1011021189C7200883283 /* CharacterTestScenario.cpp */; };
 		63F93C421F8714B200F537CA /* CinderApp.icns in Resources */ = {isa = PBXBuildFile; fileRef = 25DBEB1187074B2580185053 /* CinderApp.icns */; };
 		63F93C441F8714B200F537CA /* Svg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63F93C341F86F96A00F537CA /* Svg.cpp */; };
 		63F93C461F8714B200F537CA /* SvgParsing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63F93C381F86F96A00F537CA /* SvgParsing.cpp */; };
@@ -217,6 +220,8 @@
 		63A71FB8210B75F100B91188 /* ImageWriting.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ImageWriting.hpp; sourceTree = "<group>"; };
 		63A72004211209FC00B91188 /* GamepadTestScenario.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = GamepadTestScenario.cpp; sourceTree = "<group>"; };
 		63A72005211209FC00B91188 /* GamepadTestScenario.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = GamepadTestScenario.hpp; sourceTree = "<group>"; };
+		63A7200821178E9300B91188 /* Blob.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Blob.cpp; sourceTree = "<group>"; };
+		63A7200921178E9300B91188 /* Blob.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Blob.hpp; sourceTree = "<group>"; };
 		63A9967020D807E000EF3785 /* Bezier.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Bezier.hpp; sourceTree = "<group>"; };
 		63B8AF05202CA1A70021AC63 /* TerrainAttachmentsTestScenario.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TerrainAttachmentsTestScenario.cpp; sourceTree = "<group>"; };
 		63B8AF06202CA1A70021AC63 /* TerrainAttachmentsTestScenario.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TerrainAttachmentsTestScenario.hpp; sourceTree = "<group>"; };
@@ -232,6 +237,8 @@
 		63E29EF61F97A87300CAF39E /* CloudLayerParticleSystem.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CloudLayerParticleSystem.hpp; sourceTree = "<group>"; };
 		63E29EF91F9E3F5D00CAF39E /* ParticleSystem.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ParticleSystem.cpp; sourceTree = "<group>"; };
 		63E29EFA1F9E3F5D00CAF39E /* ParticleSystem.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ParticleSystem.hpp; sourceTree = "<group>"; };
+		63F1011021189C7200883283 /* CharacterTestScenario.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CharacterTestScenario.cpp; sourceTree = "<group>"; };
+		63F1011121189C7200883283 /* CharacterTestScenario.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CharacterTestScenario.hpp; sourceTree = "<group>"; };
 		63F93C051F86804800F537CA /* App.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = App.hpp; sourceTree = "<group>"; };
 		63F93C061F86804900F537CA /* App.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = App.cpp; sourceTree = "<group>"; };
 		63F93C081F8681E100F537CA /* Entity.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Entity.cpp; sourceTree = "<group>"; };
@@ -383,6 +390,7 @@
 		63017F96209CB018004ABFA3 /* entities */ = {
 			isa = PBXGroup;
 			children = (
+				63A7200721178E5E00B91188 /* blob */,
 				6397368920F5083200A83814 /* player */,
 			);
 			path = entities;
@@ -509,6 +517,15 @@
 			path = filters;
 			sourceTree = "<group>";
 		};
+		63A7200721178E5E00B91188 /* blob */ = {
+			isa = PBXGroup;
+			children = (
+				63A7200821178E9300B91188 /* Blob.cpp */,
+				63A7200921178E9300B91188 /* Blob.hpp */,
+			);
+			path = blob;
+			sourceTree = "<group>";
+		};
 		63E29EEF1F97A4B400CAF39E /* ParticleSystem */ = {
 			isa = PBXGroup;
 			children = (
@@ -562,10 +579,14 @@
 		63F93C281F86F84F00F537CA /* Tests */ = {
 			isa = PBXGroup;
 			children = (
+				63F1011021189C7200883283 /* CharacterTestScenario.cpp */,
+				63F1011121189C7200883283 /* CharacterTestScenario.hpp */,
 				63A5ED11204C9432001BD62E /* EasingTestScenario.cpp */,
 				63A5ED12204C9432001BD62E /* EasingTestScenario.hpp */,
 				63A71FAD20FF95D500B91188 /* FilterStackTestScenario.cpp */,
 				63A71FAE20FF95D500B91188 /* FilterStackTestScenario.hpp */,
+				63A72004211209FC00B91188 /* GamepadTestScenario.cpp */,
+				63A72005211209FC00B91188 /* GamepadTestScenario.hpp */,
 				638BFB1B203F28DE004163A9 /* IPTestsScenario.cpp */,
 				638BFB1C203F28DE004163A9 /* IPTestsScenario.hpp */,
 				63611A8F2088DC14004EE731 /* MultiViewportTestScenario.cpp */,
@@ -582,8 +603,6 @@
 				63F93C2A1F86F84F00F537CA /* TerrainTestScenario.hpp */,
 				638F4DA31F8BCF53004437E8 /* TestsApp.cpp */,
 				631CBB6D2066FAB3006D3E31 /* util */,
-				63A72004211209FC00B91188 /* GamepadTestScenario.cpp */,
-				63A72005211209FC00B91188 /* GamepadTestScenario.hpp */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -734,10 +753,12 @@
 				638BFB1D203F28DE004163A9 /* IPTestsScenario.cpp in Sources */,
 				631171361FAB72A50098069F /* ParticleSystemTestScenario.cpp in Sources */,
 				63B8AF07202CA1A70021AC63 /* TerrainAttachmentsTestScenario.cpp in Sources */,
+				63F1011221189C7200883283 /* CharacterTestScenario.cpp in Sources */,
 				638F4DAB1F8BCFCE004437E8 /* TerrainDetail.cpp in Sources */,
 				638F4DB01F8BCFCE004437E8 /* Svg.cpp in Sources */,
 				63A282751FD067E400962F8E /* ImageProcessing.cpp in Sources */,
 				630873592049A3FE000BCE27 /* PlanetGreebling.cpp in Sources */,
+				63A7200B21178E9300B91188 /* Blob.cpp in Sources */,
 				63A5ED13204C9432001BD62E /* EasingTestScenario.cpp in Sources */,
 				638F4DB21F8BCFCE004437E8 /* SvgParsing.cpp in Sources */,
 				638F4DB31F8BCFCE004437E8 /* Xml.cpp in Sources */,
@@ -778,6 +799,7 @@
 				63597BEC20766F8F00B65C2A /* GlslProgLoader.cpp in Sources */,
 				638F4DA21F898602004437E8 /* Background.cpp in Sources */,
 				63A71FAB20FBB8B900B91188 /* FilterStack.cpp in Sources */,
+				63A7200A21178E9300B91188 /* Blob.cpp in Sources */,
 				635CC38120F26F29007AE2FE /* PlayerPhysicsComponents.cpp in Sources */,
 				635CC37920EA6F37007AE2FE /* CrackGeometry.cpp in Sources */,
 				638F4DA11F897FB7004437E8 /* GameConstants.cpp in Sources */,

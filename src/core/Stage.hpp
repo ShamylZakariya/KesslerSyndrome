@@ -460,6 +460,8 @@ namespace core {
          world: position in world space.
          */
         GravitationCalculator::force getGravitation(size_t gravitationLayerMask, dvec2 world) const;
+        
+        GravitationCalculator::force getGravitation(dvec2 world) const;
 
         /**
          Listen for collisions between the two collision types. Override onCollision* methods to handle the collisions.
