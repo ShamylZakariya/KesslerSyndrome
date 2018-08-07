@@ -19,7 +19,7 @@ namespace game {
     SMART_PTR(BlobControllerComponent);
     SMART_PTR(Blob);
     
-    class BlobPhysicsComponent : public core::Component {
+    class BlobPhysicsComponent : public core::PhysicsComponent {
     public:
         
         enum class FluidType {
@@ -38,6 +38,8 @@ namespace game {
             dvec2 position;
             double radius;
             double stiffness;
+            double damping;
+            double elasticity;
             double particleDensity;
             int numParticles;
             
@@ -45,29 +47,29 @@ namespace game {
             core::seconds_t extroTime;
             core::seconds_t pulsePeriod;
             double pulseMagnitude;
-            double particleScale;
             
             cpCollisionType collisionType;
             cpShapeFilter shapeFilter;
             double friction;
-            double elasticity;
+            double maxSpeed;
             
             config():
                     type(FluidType::PROTOPLASMIC),
                     introTime(1),
                     extroTime(1),
                     position(0,0),
-                    radius(3),
+                    radius(20),
                     stiffness(0.5),
+                    damping(1),
+                    elasticity(0),
                     particleDensity(1),
                     numParticles(24),
                     pulsePeriod(4),
                     pulseMagnitude(0.125),
-                    particleScale(2),
                     collisionType(0),
                     shapeFilter(CP_SHAPE_FILTER_ALL),
-                    friction(1),
-                    elasticity(0.0)
+                    friction(10),
+                    maxSpeed(100)
             {
             }
         };
@@ -96,14 +98,13 @@ namespace game {
         
         BlobPhysicsComponent(const config &c);
         
-        // Component
+        // PhysicsComponent
         void onReady(core::ObjectRef parent, core::StageRef stage) override;
-        void onCleanup() override;
         void step(const core::time_state &time) override;
+        cpBB getBB() const override { return _bb; }
         
         // BlobPhysicsComponent
         
-        cpBB getBB() const { return _bb; }
         const vector<physics_particle> getPhysicsParticles() const { return _physicsParticles; }
         
         /// set the blob speed where > 0 is going "right" and < 0 is going "left"
@@ -119,10 +120,11 @@ namespace game {
         virtual void updateAmorphous(const core::time_state &time);
 
     protected:
+        
+        friend class BlobDrawComponent;
 
         cpBB _bb;
         config _config;
-        cpSpace *_space;
         cpBody *_centralBody;
         cpConstraint *_centralBodyConstraint;
         
@@ -136,7 +138,7 @@ namespace game {
         
     };
     
-    class BlobDrawComponent : public core::DrawComponent {
+    class BlobDrawComponent : public core::EntityDrawComponent {
     public:
         
         struct config {
@@ -179,11 +181,12 @@ namespace game {
     public:
         
         struct config {
+            core::HealthComponent::config health;
             BlobPhysicsComponent::config physics;
             BlobDrawComponent::config draw;
         };
         
-        BlobRef create(string name, const config &c, core::GamepadRef gamepad);
+        static BlobRef create(string name, const config &c, core::GamepadRef gamepad);
         
     public:
         
@@ -191,6 +194,9 @@ namespace game {
         const BlobPhysicsComponentRef &getBlobPhysicsComponent() const { return _physics; }
         const BlobDrawComponentRef &getBlobDrawComponent() const { return _drawer; }
         const BlobControllerComponentRef &getBlobControllerComponent() const { return _input; }
+        
+        // Entity
+        void onHealthChanged(double oldHealth, double newHealth) override;
         
     protected:
 

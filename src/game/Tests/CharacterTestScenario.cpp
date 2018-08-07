@@ -10,6 +10,8 @@
 
 #include <cinder/Rand.h>
 
+#include "game/KesslerSyndrome/GameConstants.hpp"
+#include "game/KesslerSyndrome/entities/blob/Blob.hpp"
 #include "elements/Components/DevComponents.hpp"
 
 using namespace core;
@@ -74,13 +76,17 @@ CharacterTestScenario::~CharacterTestScenario() {
 }
 
 void CharacterTestScenario::setup() {
-    setStage(make_shared<Stage>("Character Test Scenario"));
+    auto stage = make_shared<Stage>("Character Test Scenario");
+    setStage(stage);
+
+    stage->addGravity(DirectionalGravitationCalculator::create(game::GravitationLayers::GLOBAL, dvec2(0, -1), 9.8));
+
     
     auto terrain = terrain::TerrainObject::create("Terrain", loadLevelSvg(), DrawLayers::TERRAIN);
-    getStage()->addObject(terrain);
+    stage->addObject(terrain);
     
     _viewportController = make_shared<ViewportController>(getMainViewport<Viewport>());
-    getStage()->addObject(Object::with("ViewportControl", {
+    stage->addObject(Object::with("ViewportControl", {
         _viewportController,
         make_shared<MouseViewportControlComponent>(_viewportController)
     }));
@@ -91,9 +97,16 @@ void CharacterTestScenario::setup() {
     grid->setAxisColor(ColorA(0.2,0.2,0.7,1));
     grid->setAxisIntensity(1);
     grid->setFillColor(ColorA(0.95,0.95,0.96,1));
-    getStage()->addObject(Object::with("Grid", { grid }));
+    stage->addObject(Object::with("Grid", { grid }));
     
-    getStage()->addObject(Object::with("InputDelegation",{
+    // build a blob character
+    game::Blob::config blobConfig;
+    blobConfig.physics.position = dvec2(512,512);
+    auto gamepad = InputDispatcher::get()->getGamepads().empty() ? nullptr : InputDispatcher::get()->getGamepads().front();
+    auto blob = game::Blob::create("Blob", blobConfig, gamepad);
+    stage->addObject(blob);
+    
+    stage->addObject(Object::with("InputDelegation",{
         elements::KeyboardDelegateComponent::create(0)->onPress([&](int keyCode)->bool{
             switch(keyCode) {
                     // track 'r' for resetting scenario

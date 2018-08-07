@@ -29,6 +29,12 @@ namespace core {
             double health;
             double maxHealth;
             double regenerationRate;
+            
+            config():
+            health(1),
+            maxHealth(1),
+            regenerationRate(0)
+            {}
         };
 
         static config loadConfig(const XmlTree &node);

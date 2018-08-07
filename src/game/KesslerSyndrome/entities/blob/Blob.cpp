@@ -36,7 +36,6 @@ namespace game {
     BlobPhysicsComponent::BlobPhysicsComponent(const config &c):
     _bb(cpBBInvalid),
     _config(c),
-    _space(nullptr),
     _centralBody(nullptr),
     _centralBodyConstraint(nullptr),
     _speed(0),
@@ -49,8 +48,8 @@ namespace game {
     }
     
     void BlobPhysicsComponent::onReady(core::ObjectRef parent, core::StageRef stage) {
+        PhysicsComponent::onReady(parent,stage);
         _age = 0;
-        _space = stage->getSpace()->getSpace();
         switch(_config.type) {
             case FluidType::PROTOPLASMIC:
                 createProtoplasmic();
@@ -61,27 +60,11 @@ namespace game {
         }
     }
     
-    void BlobPhysicsComponent::onCleanup() {
-        for (cpConstraint *c : _perimeterConstraints) {
-            cpCleanupAndFree(c);
-        }
-        
-        for (auto &p : _physicsParticles) {
-            cpCleanupAndFree(p.springConstraint);
-            cpCleanupAndFree(p.slideConstraint);
-            cpCleanupAndFree(p.motorConstraint);
-            cpCleanupAndFree(p.shape);
-            cpCleanupAndFree(p.body);
-        }
-        
-        cpCleanupAndFree(_centralBodyConstraint);
-        cpCleanupAndFree(_centralBody);
-        _space = nullptr;
-    }
-    
     void BlobPhysicsComponent::step(const core::time_state &time) {
+        PhysicsComponent::step(time);
         
         _age += time.deltaT;
+
         if (_age < _config.introTime) {
             _lifecycle = _age / _config.introTime;
         } else {
@@ -105,18 +88,18 @@ namespace game {
         //    create the main body
         //
         
+        cpSpace *space = getSpace()->getSpace();
+        
         const double
             radius = std::max<double>(_config.radius * 0.5, 0.5),
             mass = 2 * M_PI * radius * radius,
             moment = cpMomentForCircle( mass, 0, radius, cpvzero );
         
-        _centralBody = cpBodyNew( mass, moment );
+        _centralBody = add(cpBodyNew( mass, moment ));
         cpBodySetUserData( _centralBody, this );
         cpBodySetPosition( _centralBody, cpv( _config.position ));
-        cpSpaceAddBody( _space, _centralBody );
         
-        _centralBodyConstraint = cpSimpleMotorNew( cpSpaceGetStaticBody( _space), _centralBody, 0 );
-        cpSpaceAddConstraint( _space, _centralBodyConstraint );
+        _centralBodyConstraint = add(cpSimpleMotorNew( cpSpaceGetStaticBody( space), _centralBody, 0 ));
         _motorConstraints.insert( _centralBodyConstraint );
         
         //
@@ -124,61 +107,57 @@ namespace game {
         //
         
         const double
-            stiffness = saturate( _config.stiffness ),
-            bodyParticleRadius = 1 * (2 * M_PI * radius) / _config.numParticles,
+            damping = lrp<double>(saturate(_config.damping), 0, 100),
+            bodyParticleRadius = 2 * (2 * M_PI * radius) / _config.numParticles,
             bodyParticleMass = 1 * M_PI * bodyParticleRadius * bodyParticleRadius,
             bodyParticleMoment = INFINITY,
-            bodyParticleSlideExtent = _config.radius - 0.5 * bodyParticleRadius,
-            springDamping = lrp<double>(stiffness, 1, 10 );
+            bodyParticleSlideExtent = _config.radius - 0.5 * bodyParticleRadius;
         
         const auto gravity = getStage()->getGravitation(_config.position);
-        _springStiffness = lrp<double>(stiffness, 0.1, 0.5 ) * mass * gravity.magnitude;
+        _springStiffness = lrp<double>(saturate( _config.stiffness ), 0.1, 2 ) * 0.5 * mass * gravity.magnitude;
         
         for ( int i = 0, N = _config.numParticles; i < N; i++ ) {
             const double offsetAngle = (i * 2 * M_PI ) / N;
             
             physics_particle physicsParticle;
             
+            physicsParticle.radius = bodyParticleRadius;
             physicsParticle.scale = 1;
             physicsParticle.offsetPosition = radius * dvec2( std::cos( offsetAngle ), std::sin( offsetAngle ));
             dvec2 position = _config.position + physicsParticle.offsetPosition;
             
-            physicsParticle.body = cpBodyNew( bodyParticleMass, bodyParticleMoment );
+            physicsParticle.body = add(cpBodyNew( bodyParticleMass, bodyParticleMoment ));
             cpBodySetPosition( physicsParticle.body, cpv(position) );
             cpBodySetUserData( physicsParticle.body, this );
-            cpSpaceAddBody( _space, physicsParticle.body );
             _fluidBodies.insert( physicsParticle.body );
             
-            physicsParticle.shape = cpCircleShapeNew( physicsParticle.body, bodyParticleRadius, cpvzero );
+            physicsParticle.shape = add(cpCircleShapeNew( physicsParticle.body, bodyParticleRadius, cpvzero ));
             cpShapeSetCollisionType( physicsParticle.shape, _config.collisionType );
             cpShapeSetFilter(physicsParticle.shape, _config.shapeFilter);
             cpShapeSetFriction( physicsParticle.shape, _config.friction );
             cpShapeSetElasticity( physicsParticle.shape, _config.elasticity );
-            cpSpaceAddShape( _space, physicsParticle.shape );
             _fluidShapes.insert( physicsParticle.shape );
             
             physicsParticle.slideConstraintLength = bodyParticleSlideExtent;
-            physicsParticle.slideConstraint = cpSlideJointNew(
+            physicsParticle.slideConstraint = add(cpSlideJointNew(
                                                               _centralBody,
                                                               physicsParticle.body,
                                                               cpvzero,
                                                               cpvzero,
                                                               0,
-                                                              bodyParticleSlideExtent);
+                                                              bodyParticleSlideExtent));
             
-            cpSpaceAddConstraint( _space, physicsParticle.slideConstraint );
             _fluidConstraints.insert( physicsParticle.slideConstraint );
             
-            physicsParticle.springConstraint = cpDampedSpringNew(
+            physicsParticle.springConstraint = add(cpDampedSpringNew(
                                                                  _centralBody,
                                                                  physicsParticle.body,
                                                                  cpBodyWorldToLocal( _centralBody, cpv(position)),
                                                                  cpvzero,
                                                                  0, // rest length
                                                                  0, // zero stiffness at initialization time
-                                                                 springDamping );
+                                                                 damping ));
             
-            cpSpaceAddConstraint( _space, physicsParticle.springConstraint );
             _fluidConstraints.insert( physicsParticle.springConstraint );
             
             _physicsParticles.push_back( physicsParticle );
@@ -189,11 +168,12 @@ namespace game {
                 *a = _physicsParticles[i].body,
                 *b = _physicsParticles[(i+1)%N].body;
             
-            cpConstraint *slide = cpSlideJointNew(a, b, cpvzero, cpvzero, 0, cpvdist( cpBodyGetPosition(a), cpBodyGetPosition(b)));
-            cpSpaceAddConstraint( _space, slide );
+            cpConstraint *slide = add(cpSlideJointNew(a, b, cpvzero, cpvzero, 0, cpvdist( cpBodyGetPosition(a), cpBodyGetPosition(b))));
             _perimeterConstraints.insert( slide );
             _fluidConstraints.insert( slide );
         }
+        
+        build(_config.shapeFilter, _config.collisionType);
     }
 
     void BlobPhysicsComponent::updateProtoplasmic(const core::time_state &time) {
@@ -233,7 +213,7 @@ namespace game {
             //    Update position and angle
             //
             
-            cpBBExpand( bounds, cpBodyGetPosition( physicsParticle->body ), currentRadius );
+            bounds = cpBBExpand( bounds, cpBodyGetPosition( physicsParticle->body ), currentRadius );
             
             phaseOffset += phaseIncrement;
         }
@@ -246,7 +226,7 @@ namespace game {
         {
             const double
                 circumference = 2 * _config.radius * M_PI,
-                requiredTurns = _speed / circumference,
+                requiredTurns = _config.maxSpeed * _speed / circumference,
                 motorRate = 2 * M_PI * requiredTurns;
             
             cpSimpleMotorSetRate( _centralBodyConstraint, motorRate );
@@ -257,6 +237,7 @@ namespace game {
         //
         
         _bb = bounds;
+        notifyMoved();
     }
     
     void BlobPhysicsComponent::createAmorphous() {
@@ -265,18 +246,20 @@ namespace game {
         //    the main body has no collider, and a gear joint against the world to prevent rotation
         //
         
+        cpSpace *space = getSpace()->getSpace();
+        
         const double
             centralBodyRadius = 1,
             centralBodyMass = 1 * M_PI * centralBodyRadius * centralBodyRadius,
             centralBodyMoment = cpMomentForCircle( centralBodyMass, 0, centralBodyRadius, cpvzero );
         
-        _centralBody = cpBodyNew( centralBodyMass, centralBodyMoment );
+        _centralBody = add(cpBodyNew( centralBodyMass, centralBodyMoment ));
         cpBodySetUserData( _centralBody, this );
         cpBodySetPosition( _centralBody, cpv( _config.position ));
-        cpSpaceAddBody( _space, _centralBody );
+        //cpSpaceAddBody( space, _centralBody );
         
-        _centralBodyConstraint = cpGearJointNew( cpSpaceGetStaticBody( _space ), _centralBody, 0, 1 );
-        cpSpaceAddConstraint( _space, _centralBodyConstraint );
+        _centralBodyConstraint = add(cpGearJointNew( cpSpaceGetStaticBody( space ), _centralBody, 0, 1 ));
+        //cpSpaceAddConstraint( space, _centralBodyConstraint );
         
         const double
             overallRadius = std::max<double>(_config.radius, 0.5),
@@ -294,42 +277,45 @@ namespace game {
             
             physics_particle physicsParticle;
             
+            physicsParticle.radius = overallRadius;
             physicsParticle.scale = 1;
             physicsParticle.offsetPosition = overallRadius * dvec2( std::cos( offsetAngle ), std::sin( offsetAngle ));
             dvec2 position = _config.position + physicsParticle.offsetPosition;
             
-            physicsParticle.body = cpBodyNew( bodyParticleMass, bodyParticleMoment );
+            physicsParticle.body = add(cpBodyNew( bodyParticleMass, bodyParticleMoment ));
             cpBodySetPosition( physicsParticle.body, cpv(position ));
             cpBodySetUserData( physicsParticle.body, this );
-            cpSpaceAddBody( _space, physicsParticle.body );
+            //cpSpaceAddBody( space, physicsParticle.body );
             _fluidBodies.insert( physicsParticle.body );
             
-            physicsParticle.shape = cpCircleShapeNew( physicsParticle.body, bodyParticleRadius, cpvzero );
+            physicsParticle.shape = add(cpCircleShapeNew( physicsParticle.body, bodyParticleRadius, cpvzero ));
             cpShapeSetCollisionType( physicsParticle.shape, _config.collisionType );
             cpShapeSetFilter( physicsParticle.shape, _config.shapeFilter );
             cpShapeSetFriction( physicsParticle.shape, _config.friction );
             cpShapeSetElasticity( physicsParticle.shape, _config.elasticity );
-            cpSpaceAddShape( _space, physicsParticle.shape );
+            //cpSpaceAddShape( space, physicsParticle.shape );
             _fluidShapes.insert( physicsParticle.shape );
             
             physicsParticle.slideConstraintLength = bodyParticleSlideExtent;
-            physicsParticle.slideConstraint = cpSlideJointNew(
+            physicsParticle.slideConstraint = add(cpSlideJointNew(
                                                               _centralBody,
                                                               physicsParticle.body,
                                                               cpvzero,
                                                               cpvzero,
                                                               0,
-                                                              bodyParticleSlideExtent);
+                                                              bodyParticleSlideExtent));
             
-            cpSpaceAddConstraint( _space, physicsParticle.slideConstraint );
+            //cpSpaceAddConstraint( space, physicsParticle.slideConstraint );
             _fluidConstraints.insert( physicsParticle.slideConstraint );
             
-            physicsParticle.motorConstraint = cpSimpleMotorNew( cpSpaceGetStaticBody(_space), physicsParticle.body, 0 );
-            cpSpaceAddConstraint( _space, physicsParticle.motorConstraint );
+            physicsParticle.motorConstraint = add(cpSimpleMotorNew( cpSpaceGetStaticBody(space), physicsParticle.body, 0 ));
+            //cpSpaceAddConstraint( space, physicsParticle.motorConstraint );
             _motorConstraints.insert( physicsParticle.motorConstraint );
             
             _physicsParticles.push_back( physicsParticle );
         }
+        
+        build(_config.shapeFilter, _config.collisionType);
     }
  
     void BlobPhysicsComponent::updateAmorphous(const core::time_state &time) {
@@ -381,7 +367,7 @@ namespace game {
                 cpSimpleMotorSetRate( physicsParticle->motorConstraint, motorRate );
             }
             
-            cpBBExpand( bounds, cpBodyGetPosition( physicsParticle->body ), physicsParticle->radius );
+            bounds = cpBBExpand( bounds, cpBodyGetPosition( physicsParticle->body ), physicsParticle->radius );
             
             phaseOffset += phaseIncrement;
         }
@@ -391,16 +377,33 @@ namespace game {
         //
         
         _bb = bounds;
+        notifyMoved();
     }
 
 
 #pragma mark - BlobDrawComponent
     
+    namespace {
+        
+        void draw_axes(cpBody *body, double length) {
+            dvec2 origin = v2(cpBodyGetPosition(body));
+            dvec2 rotation = v2(cpBodyGetRotation(body));
+            
+            ci::gl::color(ColorA(1,0,0,1));
+            ci::gl::drawLine(origin, origin + rotation * length);
+            
+            ci::gl::color(ColorA(0,1,0,1));
+            ci::gl::drawLine(origin, origin + rotateCCW(rotation) * length);
+        }
+        
+    }
+    
     /*
      BlobPhysicsComponentWeakRef _physics;
      */
+    
     BlobDrawComponent::BlobDrawComponent(const BlobDrawComponent::config &c):
-            DrawComponent(DrawLayers::PLAYER,VisibilityDetermination::FRUSTUM_CULLING)
+            EntityDrawComponent(DrawLayers::PLAYER,VisibilityDetermination::FRUSTUM_CULLING)
     {}
     
     
@@ -416,10 +419,20 @@ namespace game {
 
     void BlobDrawComponent::draw(const core::render_state &renderState) {
         const auto physics = _physics.lock();
+        const double axisLength = 10.0 * renderState.viewport->getReciprocalScale();
+
+        ci::gl::color(ColorA(0.3,0.3,0.3,1));
         for (const auto &particle : physics->getPhysicsParticles()) {
             dvec2 position = v2(cpBodyGetPosition(particle.body));
-            ci::gl::drawSolidCircle(position, particle.radius);
+            double radius = particle.radius * particle.scale;
+            ci::gl::drawSolidCircle(position, radius);
         }
+        
+        for (const auto &particle : physics->getPhysicsParticles()) {
+            draw_axes(particle.body, axisLength * 0.5);
+        }
+        
+        draw_axes(physics->_centralBody, axisLength);
     }
     
 #pragma mark - BlobControllerComponent
@@ -441,14 +454,16 @@ namespace game {
     }
 
     void BlobControllerComponent::update(const core::time_state &time) {
+        InputComponent::update(time);
+        
         double speed = 0;
         
         if (isKeyDown(app::KeyEvent::KEY_LEFT)) {
-            speed = -1;
+            speed += -1;
         }
 
         if (isKeyDown(app::KeyEvent::KEY_RIGHT)) {
-            speed = -1;
+            speed += +1;
         }
         
         if (_gamepad) {
@@ -456,8 +471,7 @@ namespace game {
             speed += _gamepad->getDPad().x;
         }
         
-        if (speed < -1) { speed = -1; }
-        if (speed > +1) { speed = +1; }
+        speed = clamp<double>(speed,-1,1);
 
         auto physics = _physics.lock();
         physics->setSpeed(speed);
@@ -469,7 +483,8 @@ namespace game {
         auto physics = make_shared<BlobPhysicsComponent>(c.physics);
         auto draw = make_shared<BlobDrawComponent>(c.draw);
         auto input = make_shared<BlobControllerComponent>(gamepad);
-        auto blob = Object::create<Blob>(name, { physics, draw, input });
+        auto health = make_shared<HealthComponent>(c.health);
+        auto blob = Entity::create<Blob>(name, { physics, draw, input, health });
         blob->_config = c;
         blob->_physics = physics;
         blob->_drawer = draw;
@@ -480,6 +495,10 @@ namespace game {
     Blob::Blob(string name):
             Entity(name)
     {
+    }
+    
+    void Blob::onHealthChanged(double oldHealth, double newHealth) {
+        Entity::onHealthChanged(oldHealth,newHealth);
     }
 
 
