@@ -180,7 +180,8 @@ namespace game {
         double
             lifecycle = _lifecycle,
             phaseOffset = M_PI * (time.time / _config.pulsePeriod),
-            phaseIncrement = M_PI / _physicsParticles.size();
+            phaseIncrement = M_PI / _physicsParticles.size(),
+            pulseMagnitude = saturate(_config.pulseMagnitude);
         
         cpBB bounds = cpBBInvalid;
         
@@ -198,7 +199,11 @@ namespace game {
             //    we need to ramp up/down spring stiffness to allow this to work
             //
             
-            cpSlideJointSetMax( physicsParticle->slideConstraint, lifecycle * physicsParticle->slideConstraintLength );
+            double pulse = cos(phaseOffset);
+            double slideLength = lifecycle * physicsParticle->slideConstraintLength;
+            double springLength = slideLength + (slideLength * pulse * pulseMagnitude);
+            cpSlideJointSetMax( physicsParticle->slideConstraint, 2*slideLength );
+            cpDampedSpringSetRestLength(physicsParticle->springConstraint, springLength);
             cpDampedSpringSetStiffness(physicsParticle->springConstraint, lifecycle * _springStiffness);
             
             //
@@ -256,10 +261,8 @@ namespace game {
         _centralBody = add(cpBodyNew( centralBodyMass, centralBodyMoment ));
         cpBodySetUserData( _centralBody, this );
         cpBodySetPosition( _centralBody, cpv( _config.position ));
-        //cpSpaceAddBody( space, _centralBody );
         
         _centralBodyConstraint = add(cpGearJointNew( cpSpaceGetStaticBody( space ), _centralBody, 0, 1 ));
-        //cpSpaceAddConstraint( space, _centralBodyConstraint );
         
         const double
             overallRadius = std::max<double>(_config.radius, 0.5),
@@ -285,7 +288,6 @@ namespace game {
             physicsParticle.body = add(cpBodyNew( bodyParticleMass, bodyParticleMoment ));
             cpBodySetPosition( physicsParticle.body, cpv(position ));
             cpBodySetUserData( physicsParticle.body, this );
-            //cpSpaceAddBody( space, physicsParticle.body );
             _fluidBodies.insert( physicsParticle.body );
             
             physicsParticle.shape = add(cpCircleShapeNew( physicsParticle.body, bodyParticleRadius, cpvzero ));
@@ -293,7 +295,6 @@ namespace game {
             cpShapeSetFilter( physicsParticle.shape, _config.shapeFilter );
             cpShapeSetFriction( physicsParticle.shape, _config.friction );
             cpShapeSetElasticity( physicsParticle.shape, _config.elasticity );
-            //cpSpaceAddShape( space, physicsParticle.shape );
             _fluidShapes.insert( physicsParticle.shape );
             
             physicsParticle.slideConstraintLength = bodyParticleSlideExtent;
@@ -305,11 +306,9 @@ namespace game {
                                                               0,
                                                               bodyParticleSlideExtent));
             
-            //cpSpaceAddConstraint( space, physicsParticle.slideConstraint );
             _fluidConstraints.insert( physicsParticle.slideConstraint );
             
             physicsParticle.motorConstraint = add(cpSimpleMotorNew( cpSpaceGetStaticBody(space), physicsParticle.body, 0 ));
-            //cpSpaceAddConstraint( space, physicsParticle.motorConstraint );
             _motorConstraints.insert( physicsParticle.motorConstraint );
             
             _physicsParticles.push_back( physicsParticle );

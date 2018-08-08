@@ -62,6 +62,16 @@ namespace {
         };
     }
     
+    game::Blob::config create_protoplasmic_blob_config() {
+        game::Blob::config c;
+        return c;
+    }
+    
+    game::Blob::config create_amorphous_blob_config() {
+        game::Blob::config c;
+        c.physics.type = game::BlobPhysicsComponent::FluidType::AMORPHOUS;
+        return c;
+    }
     
 }
 
@@ -100,8 +110,9 @@ void CharacterTestScenario::setup() {
     stage->addObject(Object::with("Grid", { grid }));
     
     // build a blob character
-    game::Blob::config blobConfig;
-    blobConfig.physics.position = dvec2(512,512);
+    const bool amorphous = true;
+    game::Blob::config blobConfig = amorphous ? create_amorphous_blob_config() : create_protoplasmic_blob_config();
+    blobConfig.physics.position = dvec2(512,256);
     auto gamepad = InputDispatcher::get()->getGamepads().empty() ? nullptr : InputDispatcher::get()->getGamepads().front();
     auto blob = game::Blob::create("Blob", blobConfig, gamepad);
     stage->addObject(blob);

@@ -68,8 +68,8 @@ namespace game {
                     pulseMagnitude(0.125),
                     collisionType(0),
                     shapeFilter(CP_SHAPE_FILTER_ALL),
-                    friction(10),
-                    maxSpeed(100)
+                    friction(5),
+                    maxSpeed(50)
             {
             }
         };
