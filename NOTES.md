@@ -2,10 +2,8 @@
 
 ## Presently
 
-This player sucks. What about a blob player like the Shoggoths in Surfacer?
-    1) Get house in order - do the yak shaving below
-    2) Read up Surfacer code for Shoggoths
-    3) Make ParticleSystem have option to render to texture, with a composite pass
+    - Both blob types should have a circle collider on central mass
+    - Amorphous blob can compact too much, maybe I need springs pushing from the central mass? maybe central mass needs a collider?
 
 ### Todo (HIGH):
 

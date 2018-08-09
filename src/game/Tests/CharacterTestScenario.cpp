@@ -110,7 +110,7 @@ void CharacterTestScenario::setup() {
     stage->addObject(Object::with("Grid", { grid }));
     
     // build a blob character
-    const bool amorphous = true;
+    const bool amorphous = false;
     game::Blob::config blobConfig = amorphous ? create_amorphous_blob_config() : create_protoplasmic_blob_config();
     blobConfig.physics.position = dvec2(512,256);
     auto gamepad = InputDispatcher::get()->getGamepads().empty() ? nullptr : InputDispatcher::get()->getGamepads().front();

@@ -51,7 +51,7 @@ namespace game {
             cpCollisionType collisionType;
             cpShapeFilter shapeFilter;
             double friction;
-            double maxSpeed;
+            double maxSpeed; // max units per second we can move linearly
             
             config():
                     type(FluidType::PROTOPLASMIC),
@@ -126,11 +126,8 @@ namespace game {
         cpBB _bb;
         config _config;
         cpBody *_centralBody;
-        cpConstraint *_centralBodyConstraint;
-        
-        cpShapeSet _fluidShapes;
-        cpBodySet _fluidBodies;
-        cpConstraintSet _fluidConstraints, _motorConstraints, _perimeterConstraints;
+        cpConstraint *_centralBodyMotorConstraint, *_centralBodyGearConstraint;
+        cpShape *_centralBodyShape;
         
         vector<physics_particle> _physicsParticles;
         double _speed, _lifecycle, _springStiffness, _bodyParticleRadius;
