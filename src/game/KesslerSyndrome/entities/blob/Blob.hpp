@@ -22,19 +22,7 @@ namespace game {
     class BlobPhysicsComponent : public core::PhysicsComponent {
     public:
         
-        enum class FluidType {
-            
-            // creates a gelatinous, soft-body round, bounded shoggoth
-            PROTOPLASMIC,
-            
-            // creates a sloppy amorphous sack of balls shoggoth
-            AMORPHOUS
-            
-        };
-
-        
         struct config {
-            FluidType type;
             dvec2 position;
             double radius;
             double stiffness;
@@ -54,7 +42,6 @@ namespace game {
             double maxSpeed; // max units per second we can move linearly
             
             config():
-                    type(FluidType::PROTOPLASMIC),
                     introTime(1),
                     extroTime(1),
                     position(0,0),
@@ -68,7 +55,7 @@ namespace game {
                     pulseMagnitude(0.125),
                     collisionType(0),
                     shapeFilter(CP_SHAPE_FILTER_ALL),
-                    friction(5),
+                    friction(20),
                     maxSpeed(50)
             {
             }
@@ -79,8 +66,7 @@ namespace game {
             double radius, slideConstraintLength, scale;
             cpBody *body;
             cpShape *shape;
-            cpConstraint *slideConstraint, *springConstraint, *motorConstraint;
-            dvec2 offsetPosition;
+            cpConstraint *slideConstraint, *springConstraint, *motorConstraint, *rotationConstraint;
             
             physics_particle():
             radius(0),
@@ -90,7 +76,8 @@ namespace game {
             shape(nullptr),
             slideConstraint(nullptr),
             springConstraint(nullptr),
-            motorConstraint(nullptr)
+            motorConstraint(nullptr),
+            rotationConstraint(nullptr)
             {}
         };
         
@@ -115,9 +102,6 @@ namespace game {
         
         virtual void createProtoplasmic();
         virtual void updateProtoplasmic(const core::time_state &time);
-
-        virtual void createAmorphous();
-        virtual void updateAmorphous(const core::time_state &time);
 
     protected:
         

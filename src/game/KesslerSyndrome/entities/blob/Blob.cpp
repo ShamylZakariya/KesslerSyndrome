@@ -46,14 +46,7 @@ namespace game {
     void BlobPhysicsComponent::onReady(core::ObjectRef parent, core::StageRef stage) {
         PhysicsComponent::onReady(parent,stage);
         _age = 0;
-        switch(_config.type) {
-            case FluidType::PROTOPLASMIC:
-                createProtoplasmic();
-                break;
-            case FluidType::AMORPHOUS:
-                createAmorphous();
-                break;
-        }
+        createProtoplasmic();
     }
     
     void BlobPhysicsComponent::step(const core::time_state &time) {
@@ -67,21 +60,14 @@ namespace game {
             _lifecycle = 1;
         }
         
-        switch(_config.type ) {
-            case FluidType::PROTOPLASMIC:
-                updateProtoplasmic(time);
-                break;
-            case FluidType::AMORPHOUS:
-                updateAmorphous(time);
-                break;
-        }
+        updateProtoplasmic(time);
     }
     
     
     void BlobPhysicsComponent::createProtoplasmic() {
 
         // protoplasmic doesn't need the circles to collide
-        _config.shapeFilter.group = reinterpret_cast<cpGroup>(this);
+        //_config.shapeFilter.group = reinterpret_cast<cpGroup>(this);
         
         //
         //    create the main body
@@ -96,7 +82,6 @@ namespace game {
         
         _centralBody = add(cpBodyNew( centralBodyMass, centralBodyMoment ));
         cpBodySetPosition( _centralBody, cpv( _config.position ));
-        _centralBodyShape = add(cpCircleShapeNew(_centralBody, centralBodyRadius, cpvzero));
         _centralBodyGearConstraint = add(cpGearJointNew( cpSpaceGetStaticBody( space ), _centralBody, 0, 1 ));
         
         
@@ -110,20 +95,20 @@ namespace game {
             bodyParticleRadius = (blobCircumference / _config.numParticles) * 0.5,
             bodyParticleMass = M_PI * bodyParticleRadius * bodyParticleRadius,
             bodyParticleMoment = cpMomentForCircle(bodyParticleMass, 0, bodyParticleRadius, cpvzero),
-            bodyParticleSlideExtent = _config.radius - centralBodyRadius;
+            bodyParticleSlideExtent = 1.5 * _config.radius - centralBodyRadius;
         
         const auto gravity = getStage()->getGravitation(_config.position);
-        _springStiffness = lrp<double>(saturate( _config.stiffness ), 0.1, 1 ) * 0.25 * bodyParticleMass * gravity.magnitude;
+        _springStiffness = lrp<double>(saturate( _config.stiffness ), 0.1, 1 ) * 1 * bodyParticleMass * gravity.magnitude;
         
         for ( int i = 0, N = _config.numParticles; i < N; i++ ) {
-            const double offsetAngle = (i * 2 * M_PI ) / N;
+            const double across =  static_cast<double>(i) / static_cast<double>(N);
+            const double offsetAngle = across * 2 * M_PI;
             
             physics_particle physicsParticle;
             
             physicsParticle.radius = bodyParticleRadius;
             physicsParticle.scale = 1;
-            physicsParticle.offsetPosition = _config.radius * dvec2( std::cos( offsetAngle ), std::sin( offsetAngle ));
-            dvec2 position = _config.position + physicsParticle.offsetPosition;
+            dvec2 position = _config.position + _config.radius * across * dvec2( std::cos( offsetAngle ), std::sin( offsetAngle ));
             
             physicsParticle.body = add(cpBodyNew( bodyParticleMass, bodyParticleMoment ));
             cpBodySetPosition( physicsParticle.body, cpv(position) );
@@ -133,20 +118,13 @@ namespace game {
             cpShapeSetElasticity( physicsParticle.shape, _config.elasticity );
             
             physicsParticle.slideConstraintLength = bodyParticleSlideExtent;
-            physicsParticle.slideConstraint = add(cpSlideJointNew(
-                                                              _centralBody,
-                                                              physicsParticle.body,
-                                                              cpvzero,
-                                                              cpvzero,
-                                                              bodyParticleSlideExtent - centralBodyRadius,
-                                                              bodyParticleSlideExtent));
             
             physicsParticle.springConstraint = add(cpDampedSpringNew(
                                                                  _centralBody,
                                                                  physicsParticle.body,
-                                                                 cpBodyWorldToLocal( _centralBody, cpv(position)),
+                                                                 cpvzero,//cpBodyWorldToLocal( _centralBody, cpv(position)),
                                                                  cpvzero,
-                                                                 bodyParticleSlideExtent,
+                                                                 bodyParticleRadius,
                                                                  _springStiffness,
                                                                  damping ));
             
@@ -155,30 +133,35 @@ namespace game {
             _physicsParticles.push_back( physicsParticle );
         }
         
-        for ( int i = 0, N = _config.numParticles; i < N; i++ ) {
-            cpBody
-                *a = _physicsParticles[i].body,
-                *b = _physicsParticles[(i+1)%N].body;
-            
-            add(cpSlideJointNew(a, b, cpvzero, cpvzero, 0, cpvdist( cpBodyGetPosition(a), cpBodyGetPosition(b))));
-        }
-        
         build(_config.shapeFilter, _config.collisionType);
     }
 
     void BlobPhysicsComponent::updateProtoplasmic(const core::time_state &time) {
 
-        cpBB bounds = cpBBExpand(cpBBInvalid, cpBodyGetPosition(_centralBody), cpCircleShapeGetRadius(_centralBodyShape));
+        cpBB bounds = _centralBodyShape ? cpBBExpand(cpBBInvalid, cpBodyGetPosition(_centralBody), cpCircleShapeGetRadius(_centralBodyShape)) : cpBBInvalid;
+        double across = 0;
+        const double acrossStep = static_cast<double>(1) / static_cast<double>(_physicsParticles.size());
+        const seconds_t breathPeriod = 2;
         
         for( auto physicsParticle = _physicsParticles.begin(), end = _physicsParticles.end();
             physicsParticle != end;
-            ++physicsParticle )
+            ++physicsParticle, across += acrossStep )
         {
+            const double radius = physicsParticle->radius * physicsParticle->scale;
+            
+            //
+            //  Update particle radius over time
+            //
+            
+            const double phasePosition = (time.time / breathPeriod) + (across * breathPeriod);
+            const double breathCycle = cos(phasePosition * 2 * M_PI);
+            physicsParticle->scale = lrp(breathCycle, 0.9, 1.2);
+            cpCircleShapeSetRadius(physicsParticle->shape, physicsParticle->radius * physicsParticle->scale);
+
             //
             //    Update motor rate
             //
             
-            double radius = physicsParticle->radius * physicsParticle->scale;
             if ( physicsParticle->motorConstraint )
             {
                 double circumference = 2 * M_PI * radius;
@@ -216,139 +199,6 @@ namespace game {
         notifyMoved();
     }
     
-    void BlobPhysicsComponent::createAmorphous() {
-        
-        // protoplasmic doesn't need the circles to collide
-        _config.shapeFilter.group = reinterpret_cast<cpGroup>(this);
-
-        //
-        //    Create particles for the main body which the jumbly particles are attached to
-        //    the main body has no collider, and a gear joint against the world to prevent rotation
-        //
-        
-        cpSpace *space = getSpace()->getSpace();
-        
-        const double
-            centralBodyRadius = 1,
-            centralBodyMass = 1 * M_PI * centralBodyRadius * centralBodyRadius,
-            centralBodyMoment = cpMomentForCircle( centralBodyMass, 0, centralBodyRadius, cpvzero );
-        
-        _centralBody = add(cpBodyNew( centralBodyMass, centralBodyMoment ));
-        cpBodySetUserData( _centralBody, this );
-        cpBodySetPosition( _centralBody, cpv( _config.position ));
-        
-        _centralBodyMotorConstraint = add(cpGearJointNew( cpSpaceGetStaticBody( space ), _centralBody, 0, 1 ));
-        
-        const double
-            overallRadius = std::max<double>(_config.radius, 0.5),
-            bodyParticleRadius = 0.5 * (2 * M_PI * overallRadius) / _config.numParticles,
-            bodyParticleMass = 1 * M_PI * bodyParticleRadius * bodyParticleRadius,
-            bodyParticleMoment = cpMomentForCircle( bodyParticleMass, 0, bodyParticleRadius, cpvzero ),
-            bodyParticleSlideExtent = (_config.radius + _config.pulseMagnitude * bodyParticleRadius) * 2;
-        
-        _bodyParticleRadius = bodyParticleRadius;
-        
-        for ( int i = 0, N = _config.numParticles; i < N; i++ )
-        {
-            double
-            offsetAngle = (i * 2 * M_PI ) / N;
-            
-            physics_particle physicsParticle;
-            
-            physicsParticle.radius = overallRadius;
-            physicsParticle.scale = 1;
-            physicsParticle.offsetPosition = overallRadius * dvec2( std::cos( offsetAngle ), std::sin( offsetAngle ));
-            dvec2 position = _config.position + physicsParticle.offsetPosition;
-            
-            physicsParticle.body = add(cpBodyNew( bodyParticleMass, bodyParticleMoment ));
-            cpBodySetPosition( physicsParticle.body, cpv(position ));
-            cpBodySetUserData( physicsParticle.body, this );
-            
-            physicsParticle.shape = add(cpCircleShapeNew( physicsParticle.body, bodyParticleRadius, cpvzero ));
-            cpShapeSetFriction( physicsParticle.shape, _config.friction );
-            cpShapeSetElasticity( physicsParticle.shape, _config.elasticity );
-            
-            physicsParticle.slideConstraintLength = bodyParticleSlideExtent;
-            physicsParticle.slideConstraint = add(cpSlideJointNew(
-                                                              _centralBody,
-                                                              physicsParticle.body,
-                                                              cpvzero,
-                                                              cpvzero,
-                                                              4 * bodyParticleRadius,
-                                                              bodyParticleSlideExtent));
-            
-            
-            physicsParticle.motorConstraint = add(cpSimpleMotorNew( cpSpaceGetStaticBody(space), physicsParticle.body, 0 ));
-
-            _physicsParticles.push_back( physicsParticle );
-        }
-        
-        build(_config.shapeFilter, _config.collisionType);
-    }
- 
-    void BlobPhysicsComponent::updateAmorphous(const core::time_state &time) {
-        double
-            lifecycle = _lifecycle,
-            phaseOffset = M_PI * time.time / _config.pulsePeriod,
-            phaseIncrement = 2 * M_PI / _physicsParticles.size(),
-            pulseMagnitude = _config.pulseMagnitude,
-            motorRate = 0;
-        
-        cpBB bounds = cpBBInvalid;
-        
-        
-        {
-            // compute required rotation rate - note, we ignore lifecycle to avoid div by zero.
-            const double
-                circumference = 2 * _bodyParticleRadius * M_PI,
-                requiredTurns = _config.maxSpeed * _speed / circumference;
-            
-            motorRate = 2 * M_PI * requiredTurns / std::sqrt(_physicsParticles.size());
-        }
-        
-        for( auto physicsParticle = _physicsParticles.begin(), end = _physicsParticles.end();
-            physicsParticle != end;
-            ++physicsParticle )
-        {
-            //
-            //    spring want to hold particle at physics_particle::offsetPosition relative to _centralBody -
-            //    we need to ramp up/down spring stiffness to allow this to work
-            //
-            
-            cpSlideJointSetMax( physicsParticle->slideConstraint, lifecycle * physicsParticle->slideConstraintLength );
-            
-            //
-            //    Scale the particle radius by lifecycle
-            //
-            
-            double pulse = 1 + pulseMagnitude * std::cos( phaseOffset );
-            physicsParticle->scale = lifecycle * pulse;
-            double currentRadius = physicsParticle->radius * physicsParticle->scale;
-            cpCircleShapeSetRadius( physicsParticle->shape, std::max<double>( currentRadius, 0.01 ) );
-            
-            //
-            //    Update motor rate
-            //
-            
-            if ( physicsParticle->motorConstraint )
-            {
-                cpSimpleMotorSetRate( physicsParticle->motorConstraint, motorRate );
-            }
-            
-            bounds = cpBBExpand( bounds, cpBodyGetPosition( physicsParticle->body ), physicsParticle->radius );
-            
-            phaseOffset += phaseIncrement;
-        }
-        
-        //
-        //    update Aabb
-        //
-        
-        _bb = bounds;
-        notifyMoved();
-    }
-
-
 #pragma mark - BlobDrawComponent
     
     namespace {
@@ -393,16 +243,19 @@ namespace game {
         for (const auto &particle : physics->getPhysicsParticles()) {
             dvec2 position = v2(cpBodyGetPosition(particle.body));
             double radius = particle.radius * particle.scale;
-            ci::gl::drawSolidCircle(position, radius);
+            ci::gl::drawSolidCircle(position, radius, 16);
         }
         
         for (const auto &particle : physics->getPhysicsParticles()) {
             draw_axes(particle.body, axisLength * 0.5);
         }
-        
-        if (physics->_centralBody) {
+
+        if (physics->_centralBodyShape) {
             ci::gl::color(ColorA(0.9,0.3,0.9,0.25));
-            ci::gl::drawSolidCircle(v2(cpBodyGetPosition(physics->_centralBody)), cpCircleShapeGetRadius(physics->_centralBodyShape));
+            ci::gl::drawSolidCircle(v2(cpBodyGetPosition(physics->_centralBody)), cpCircleShapeGetRadius(physics->_centralBodyShape), 16);
+        }
+
+        if (physics->_centralBody) {
             draw_axes(physics->_centralBody, axisLength);
         }
     }

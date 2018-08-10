@@ -62,17 +62,6 @@ namespace {
         };
     }
     
-    game::Blob::config create_protoplasmic_blob_config() {
-        game::Blob::config c;
-        return c;
-    }
-    
-    game::Blob::config create_amorphous_blob_config() {
-        game::Blob::config c;
-        c.physics.type = game::BlobPhysicsComponent::FluidType::AMORPHOUS;
-        return c;
-    }
-    
 }
 
 /*
@@ -110,8 +99,7 @@ void CharacterTestScenario::setup() {
     stage->addObject(Object::with("Grid", { grid }));
     
     // build a blob character
-    const bool amorphous = false;
-    game::Blob::config blobConfig = amorphous ? create_amorphous_blob_config() : create_protoplasmic_blob_config();
+    game::Blob::config blobConfig;
     blobConfig.physics.position = dvec2(512,256);
     auto gamepad = InputDispatcher::get()->getGamepads().empty() ? nullptr : InputDispatcher::get()->getGamepads().front();
     auto blob = game::Blob::create("Blob", blobConfig, gamepad);
@@ -166,7 +154,7 @@ terrain::WorldRef CharacterTestScenario::loadLevelSvg() {
     auto partitionedShapes = terrain::World::partition(shapes, 500);
     
     // construct
-    const terrain::material terrainMaterial(1, 0.5, COLLISION_SHAPE_RADIUS, ShapeFilters::TERRAIN, CollisionType::TERRAIN, MIN_SURFACE_AREA, TERRAIN_COLOR);
+    const terrain::material terrainMaterial(1, 1, COLLISION_SHAPE_RADIUS, ShapeFilters::TERRAIN, CollisionType::TERRAIN, MIN_SURFACE_AREA, TERRAIN_COLOR);
     const terrain::material anchorMaterial(1, 1, COLLISION_SHAPE_RADIUS, ShapeFilters::ANCHOR, CollisionType::ANCHOR, MIN_SURFACE_AREA, ANCHOR_COLOR);
     auto world = make_shared<terrain::World>(getStage()->getSpace(), terrainMaterial, anchorMaterial);
     world->build(partitionedShapes, anchors, elements);
