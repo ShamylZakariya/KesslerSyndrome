@@ -24,7 +24,7 @@ namespace game {
      cpShape *_centralBodyShape;
      
      vector<physics_particle> _physicsParticles;
-     double _speed, _currentSpeed, _lifecycle, _springStiffness, _bodyParticleRadius;
+     double _speed, _currentSpeed, _lifecycle;
      core::seconds_t _age;
      */
     
@@ -38,8 +38,6 @@ namespace game {
     _speed(0),
     _currentSpeed(0),
     _lifecycle(0),
-    _springStiffness(0),
-    _bodyParticleRadius(0),
     _age(0)
     {
     }
@@ -98,11 +96,10 @@ namespace game {
             blobCircumference = _config.radius * 2 * M_PI,
             bodyParticleRadius = (blobCircumference / _config.numParticles) * 0.5,
             bodyParticleMass = M_PI * bodyParticleRadius * bodyParticleRadius,
-            bodyParticleMoment = cpMomentForCircle(bodyParticleMass, 0, bodyParticleRadius, cpvzero),
-            bodyParticleSlideExtent = 1.5 * _config.radius - centralBodyRadius;
+            bodyParticleMoment = cpMomentForCircle(bodyParticleMass, 0, bodyParticleRadius, cpvzero);
         
         const auto gravity = getStage()->getGravitation(_config.position);
-        _springStiffness = lrp<double>(saturate( _config.stiffness ), 0.1, 1 ) * 1 * bodyParticleMass * gravity.magnitude;
+        double springStiffness = lrp<double>(saturate( _config.stiffness ), 0.1, 1 ) * 1 * bodyParticleMass * gravity.magnitude;
         
         for ( int i = 0, N = _config.numParticles; i < N; i++ ) {
             const double across =  static_cast<double>(i) / static_cast<double>(N);
@@ -123,14 +120,14 @@ namespace game {
             cpShapeSetElasticity( physicsParticle.shape, _config.elasticity );
             
             
-            physicsParticle.springConstraint = add(cpDampedSpringNew(
-                                                                 _centralBody,
-                                                                 physicsParticle.body,
-                                                                 cpv(offsetDir * bodyParticleRadius),
-                                                                 cpvzero,
-                                                                 2 * bodyParticleRadius,
-                                                                 _springStiffness,
-                                                                 damping ));
+            add(cpDampedSpringNew(
+                                  _centralBody,
+                                  physicsParticle.body,
+                                  cpv(offsetDir * bodyParticleRadius),
+                                  cpvzero,
+                                  2 * bodyParticleRadius,
+                                  springStiffness,
+                                  damping ));
             
             physicsParticle.motorConstraint = add(cpSimpleMotorNew( cpSpaceGetStaticBody(space), physicsParticle.body, 0 ));
             

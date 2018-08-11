@@ -66,14 +66,13 @@ namespace game {
             double radius, scale;
             cpBody *body;
             cpShape *shape;
-            cpConstraint *springConstraint, *motorConstraint;
+            cpConstraint *motorConstraint;
             
             physics_particle():
             radius(0),
             scale(1),
             body(nullptr),
             shape(nullptr),
-            springConstraint(nullptr),
             motorConstraint(nullptr)
             {}
         };
@@ -111,7 +110,7 @@ namespace game {
         cpShape *_centralBodyShape;
         
         vector<physics_particle> _physicsParticles;
-        double _speed, _currentSpeed, _lifecycle, _springStiffness, _bodyParticleRadius;
+        double _speed, _currentSpeed, _lifecycle;
         core::seconds_t _age;
         
     };
