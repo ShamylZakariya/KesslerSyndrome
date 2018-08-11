@@ -64,7 +64,7 @@ namespace game {
         struct physics_particle
         {
             double radius, scale;
-            cpBody *body, *wheelBody;
+            cpBody *body;
             cpShape *wheelShape;
             cpConstraint *wheelMotor;
             
@@ -72,7 +72,6 @@ namespace game {
             radius(0),
             scale(1),
             body(nullptr),
-            wheelBody(nullptr),
             wheelShape(nullptr),
             wheelMotor(nullptr)
             {}

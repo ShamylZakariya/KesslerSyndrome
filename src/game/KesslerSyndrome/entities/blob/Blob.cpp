@@ -95,11 +95,11 @@ namespace game {
             damping = lrp<double>(saturate(_config.damping), 0, 100),
             blobCircumference = _config.radius * 2 * M_PI,
             bodyParticleRadius = (blobCircumference / _config.numParticles) * 0.5,
-            bodyParticleMass = 0.5 * M_PI * bodyParticleRadius * bodyParticleRadius,
+            bodyParticleMass = M_PI * bodyParticleRadius * bodyParticleRadius,
             bodyParticleMoment = cpMomentForCircle(bodyParticleMass, 0, bodyParticleRadius, cpvzero);
         
         const auto gravity = getStage()->getGravitation(_config.position);
-        double springStiffness = lrp<double>(saturate( _config.stiffness ), 0.1, 1 ) * 2 * bodyParticleMass * gravity.magnitude;
+        double springStiffness = lrp<double>(saturate( _config.stiffness ), 0.1, 1 ) * bodyParticleMass * gravity.magnitude;
         
         for ( int i = 0, N = _config.numParticles; i < N; i++ ) {
             const double across =  static_cast<double>(i) / static_cast<double>(N);
@@ -115,10 +115,7 @@ namespace game {
             particle.body = add(cpBodyNew( bodyParticleMass, bodyParticleMoment ));
             cpBodySetPosition( particle.body, cpv(position) );
 
-            particle.wheelBody = add(cpBodyNew( bodyParticleMass, bodyParticleMoment ));
-            cpBodySetPosition( particle.wheelBody, cpv(position) );
-
-            particle.wheelShape = add(cpCircleShapeNew( particle.wheelBody, bodyParticleRadius, cpvzero ));
+            particle.wheelShape = add(cpCircleShapeNew( particle.body, bodyParticleRadius, cpvzero ));
             cpShapeSetFriction( particle.wheelShape, _config.friction );
             cpShapeSetElasticity( particle.wheelShape, _config.elasticity );
             
@@ -132,15 +129,14 @@ namespace game {
                                   springStiffness,
                                   damping ));
             
-            add(cpPivotJointNew(particle.body, particle.wheelBody, cpv(position)));
             cpConstraint *grooveConstraint = add(cpGrooveJointNew(_centralBody, particle.body, cpvzero, cpv(offsetDir * _config.radius), cpvzero));
-            particle.wheelMotor = add(cpSimpleMotorNew( cpSpaceGetStaticBody(space), particle.wheelBody, 0 ));
+            particle.wheelMotor = add(cpSimpleMotorNew( cpSpaceGetStaticBody(space), particle.body, 0 ));
             
             _physicsParticles.push_back( particle );
             
             // weaken the groove constraint
             cpConstraintSetMaxForce(grooveConstraint, springStiffness * 8);
-            cpConstraintSetErrorBias(grooveConstraint, cpConstraintGetErrorBias(grooveConstraint) * 0.01);            
+            cpConstraintSetErrorBias(grooveConstraint, cpConstraintGetErrorBias(grooveConstraint) * 0.01);
         }
         
         build(_config.shapeFilter, _config.collisionType);
@@ -261,7 +257,6 @@ namespace game {
         }
         
         for (const auto &particle : physics->getPhysicsParticles()) {
-            draw_axes(particle.wheelBody, axisLength, ColorA(0,1,1,1), ColorA(1,0,1,1));
             draw_axes(particle.body, axisLength);
         }
 
