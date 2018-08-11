@@ -95,7 +95,7 @@ namespace game {
         const vector<physics_particle> getPhysicsParticles() const { return _physicsParticles; }
         
         /// set the blob speed where > 0 is going "right" and < 0 is going "left"
-        void setSpeed(double speed) { _speed = speed; }
+        virtual void setSpeed(double speed);
         double getSpeed() const { return _speed; }
         
     protected:
@@ -114,7 +114,7 @@ namespace game {
         cpShape *_centralBodyShape;
         
         vector<physics_particle> _physicsParticles;
-        double _speed, _lifecycle, _springStiffness, _bodyParticleRadius;
+        double _speed, _currentSpeed, _lifecycle, _springStiffness, _bodyParticleRadius;
         core::seconds_t _age;
         
     };

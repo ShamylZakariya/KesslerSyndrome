@@ -24,7 +24,7 @@ namespace game {
      cpShape *_centralBodyShape;
      
      vector<physics_particle> _physicsParticles;
-     double _speed, _lifecycle, _springStiffness, _bodyParticleRadius;
+     double _speed, _currentSpeed, _lifecycle, _springStiffness, _bodyParticleRadius;
      core::seconds_t _age;
      */
     
@@ -36,6 +36,7 @@ namespace game {
     _centralBodyGearConstraint(nullptr),
     _centralBodyShape(nullptr),
     _speed(0),
+    _currentSpeed(0),
     _lifecycle(0),
     _springStiffness(0),
     _bodyParticleRadius(0),
@@ -63,6 +64,9 @@ namespace game {
         updateProtoplasmic(time);
     }
     
+    void BlobPhysicsComponent::setSpeed(double speed) {
+        _speed = clamp<double>(speed, -1, 1);
+    }
     
     void BlobPhysicsComponent::createProtoplasmic() {
 
@@ -103,12 +107,13 @@ namespace game {
         for ( int i = 0, N = _config.numParticles; i < N; i++ ) {
             const double across =  static_cast<double>(i) / static_cast<double>(N);
             const double offsetAngle = across * 2 * M_PI;
+            const dvec2 offsetDir = dvec2( std::cos( offsetAngle ), std::sin( offsetAngle ));
             
             physics_particle physicsParticle;
             
             physicsParticle.radius = bodyParticleRadius;
             physicsParticle.scale = 1;
-            dvec2 position = _config.position + _config.radius * across * dvec2( std::cos( offsetAngle ), std::sin( offsetAngle ));
+            dvec2 position = _config.position + _config.radius * across * offsetDir;
             
             physicsParticle.body = add(cpBodyNew( bodyParticleMass, bodyParticleMoment ));
             cpBodySetPosition( physicsParticle.body, cpv(position) );
@@ -122,9 +127,9 @@ namespace game {
             physicsParticle.springConstraint = add(cpDampedSpringNew(
                                                                  _centralBody,
                                                                  physicsParticle.body,
-                                                                 cpvzero,//cpBodyWorldToLocal( _centralBody, cpv(position)),
+                                                                 cpv(offsetDir * bodyParticleRadius),
                                                                  cpvzero,
-                                                                 bodyParticleRadius,
+                                                                 2 * bodyParticleRadius,
                                                                  _springStiffness,
                                                                  damping ));
             
@@ -137,11 +142,14 @@ namespace game {
     }
 
     void BlobPhysicsComponent::updateProtoplasmic(const core::time_state &time) {
+        
+        _currentSpeed = lrp(0.25, _currentSpeed, _speed);
 
         cpBB bounds = _centralBodyShape ? cpBBExpand(cpBBInvalid, cpBodyGetPosition(_centralBody), cpCircleShapeGetRadius(_centralBodyShape)) : cpBBInvalid;
         double across = 0;
         const double acrossStep = static_cast<double>(1) / static_cast<double>(_physicsParticles.size());
         const seconds_t breathPeriod = 2;
+        const double lifecycleScale = lrp<double>(_lifecycle, 0.1, 1);
         
         for( auto physicsParticle = _physicsParticles.begin(), end = _physicsParticles.end();
             physicsParticle != end;
@@ -150,12 +158,12 @@ namespace game {
             const double radius = physicsParticle->radius * physicsParticle->scale;
             
             //
-            //  Update particle radius over time
+            //  Update particle radius over time - a pulsing "breath" cycle, and lifecycle
             //
             
             const double phasePosition = (time.time / breathPeriod) + (across * breathPeriod);
             const double breathCycle = cos(phasePosition * 2 * M_PI);
-            physicsParticle->scale = lrp(breathCycle, 0.9, 1.2);
+            physicsParticle->scale = lrp(breathCycle * 0.5 + 0.5, 0.9, 1.75) * lifecycleScale;
             cpCircleShapeSetRadius(physicsParticle->shape, physicsParticle->radius * physicsParticle->scale);
 
             //
@@ -165,7 +173,7 @@ namespace game {
             if ( physicsParticle->motorConstraint )
             {
                 double circumference = 2 * M_PI * radius;
-                double targetTurnsPerSecond = (_speed * _config.maxSpeed) / circumference;
+                double targetTurnsPerSecond = (_currentSpeed * _config.maxSpeed) / circumference;
                 double motorRate = 2 * M_PI * targetTurnsPerSecond;
                 cpSimpleMotorSetRate( physicsParticle->motorConstraint, motorRate );
             }

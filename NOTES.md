@@ -2,8 +2,10 @@
 
 ## Presently
 
-    - Both blob types should have a circle collider on central mass
-    - Amorphous blob can compact too much, maybe I need springs pushing from the central mass? maybe central mass needs a collider?
+    - Blob is looking good but control needs help
+        - need to prevent/dampen angular rotation about center of mass
+        - need to apply a general left/right force to all particles (not central body mass since it has no collider)
+        - need to apply "jetpack" force to all particles (maybe central body mass?)
 
 ### Todo (HIGH):
 
