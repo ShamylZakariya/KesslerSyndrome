@@ -20,11 +20,11 @@ namespace game {
      cpBB _bb;
      config _config;
      cpBody *_centralBody;
-     cpConstraint *_centralBodyMotorConstraint, *_centralBodyGearConstraint;
+     cpConstraint *_centralBodyGearConstraint;
      cpShape *_centralBodyShape;
      
      vector<physics_particle> _physicsParticles;
-     double _speed, _currentSpeed, _lifecycle;
+     double _speed, _currentSpeed, _jetpackPower, _currentJetpackPower, _lifecycle, _particleMass;
      core::seconds_t _age;
      */
     
@@ -32,12 +32,14 @@ namespace game {
     _bb(cpBBInvalid),
     _config(c),
     _centralBody(nullptr),
-    _centralBodyMotorConstraint(nullptr),
     _centralBodyGearConstraint(nullptr),
     _centralBodyShape(nullptr),
     _speed(0),
     _currentSpeed(0),
+    _jetpackPower(0),
+    _currentJetpackPower(0),
     _lifecycle(0),
+    _particleMass(0),
     _age(0)
     {
     }
@@ -64,6 +66,10 @@ namespace game {
     
     void BlobPhysicsComponent::setSpeed(double speed) {
         _speed = clamp<double>(speed, -1, 1);
+    }
+    
+    void BlobPhysicsComponent::setJetpackPower(double power) {
+        _jetpackPower = clamp<double>(power, -1, 1);
     }
     
     void BlobPhysicsComponent::createProtoplasmic() {
@@ -101,6 +107,8 @@ namespace game {
         const auto gravity = getStage()->getGravitation(_config.position);
         double springStiffness = lrp<double>(saturate( _config.stiffness ), 0.1, 1 ) * bodyParticleMass * gravity.magnitude;
         
+        _particleMass = bodyParticleMass;
+        
         for ( int i = 0, N = _config.numParticles; i < N; i++ ) {
             const double across =  static_cast<double>(i) / static_cast<double>(N);
             const double offsetAngle = across * 2 * M_PI;
@@ -116,9 +124,7 @@ namespace game {
             cpBodySetPosition( particle.body, cpv(position) );
 
             particle.wheelShape = add(cpCircleShapeNew( particle.body, bodyParticleRadius, cpvzero ));
-            cpShapeSetFriction( particle.wheelShape, _config.friction );
-            cpShapeSetElasticity( particle.wheelShape, _config.elasticity );
-            
+            cpShapeSetFriction( particle.wheelShape, _config.friction );            
             
             add(cpDampedSpringNew(
                                   _centralBody,
@@ -145,13 +151,21 @@ namespace game {
     void BlobPhysicsComponent::updateProtoplasmic(const core::time_state &time) {
         
         _currentSpeed = lrp(0.25, _currentSpeed, _speed);
-
+        _currentJetpackPower = lrp(0.25, _currentJetpackPower, _jetpackPower);
+        
         cpBB bounds = _centralBodyShape ? cpBBExpand(cpBBInvalid, cpBodyGetPosition(_centralBody), cpCircleShapeGetRadius(_centralBodyShape)) : cpBBInvalid;
-        double across = 0;
         const double acrossStep = static_cast<double>(1) / static_cast<double>(_physicsParticles.size());
         const seconds_t breathPeriod = 2;
         const double lifecycleScale = lrp<double>(_lifecycle, 0.1, 1);
-        
+        const double targetSpeed = _currentSpeed * _config.maxSpeed;
+        const auto G = getSpace()->getGravity(v2(cpBodyGetPosition(_centralBody)));
+        const dvec2 down = G.dir;
+        const dvec2 right = rotateCCW(down);
+
+
+        dvec2 averageParticlePosition(0,0);
+        double across = 0;
+
         for( auto particle = _physicsParticles.begin(), end = _physicsParticles.end();
             particle != end;
             ++particle, across += acrossStep )
@@ -175,30 +189,46 @@ namespace game {
             
             if (particle->wheelMotor) {
                 const double circumference = 2 * M_PI * radius;
-                const double targetTurnsPerSecond = (_currentSpeed * _config.maxSpeed) / circumference;
+                const double targetTurnsPerSecond = targetSpeed / circumference;
                 const double motorRate = 2 * M_PI * targetTurnsPerSecond;
                 cpSimpleMotorSetRate( particle->wheelMotor, motorRate );
             }
- 
+            
             //
             //    Update position and angle
             //
             
-            bounds = cpBBExpand( bounds, cpBodyGetPosition( particle->body ), radius );
+            const auto position = cpBodyGetPosition(particle->body);
+            bounds = cpBBExpand( bounds, position, radius );
+            
+            averageParticlePosition += v2(position);
         }
         
+        averageParticlePosition /= _physicsParticles.size();
+        
         //
-        //    Update speed
+        //  Compute forces to apply to body to aid in locomotion and jetpack control
         //
         
-        if ( _centralBodyMotorConstraint && _centralBodyShape )
-        {
-            const double
-                circumference = 2 * M_PI * cpCircleShapeGetRadius(_centralBodyShape),
-                targetTurnsPerSecond = (_config.maxSpeed * _speed) / circumference,
-                motorRate = 2 * M_PI * targetTurnsPerSecond;
+        const double totalMass = cpBodyGetMass(_centralBody) + (_config.numParticles * _particleMass);
 
-            cpSimpleMotorSetRate( _centralBodyMotorConstraint, motorRate );
+        if (abs(_speed) > 0) {
+            const cpVect linearVel = cpBodyGetVelocity(_centralBody);
+            const double distanceFromCentroid = length(v2(cpBodyGetPosition(_centralBody)) - averageParticlePosition);
+            const double forceScale = 1.0 - clamp<double>(distanceFromCentroid / _config.radius, 0, 1);
+            
+            const double horizontalVel = linearVel.x;
+            const double velError = targetSpeed - horizontalVel;
+            const double forceMultiplier = 8;
+            const double horizontalForce = forceMultiplier * forceScale * totalMass * velError * abs(velError) * time.deltaT;
+
+            cpBodyApplyForceAtLocalPoint(_centralBody, cpv(right * horizontalForce), cpvzero);
+        }
+        
+        if (abs(_currentJetpackPower) > 1e-3) {
+            _jetpackForceDir = sign(_currentJetpackPower) * G.dir;
+            dvec2 force = -_config.jetpackPower * totalMass * G.magnitude * _jetpackForceDir * abs(_currentJetpackPower);
+            cpBodyApplyForceAtWorldPoint(_centralBody, cpv(force), cpBodyLocalToWorld(_centralBody, cpvzero));
         }
         
         //
@@ -256,9 +286,9 @@ namespace game {
             ci::gl::drawSolidCircle(position, radius, 16);
         }
         
-        for (const auto &particle : physics->getPhysicsParticles()) {
-            draw_axes(particle.body, axisLength);
-        }
+//        for (const auto &particle : physics->getPhysicsParticles()) {
+//            draw_axes(particle.body, axisLength);
+//        }
 
         if (physics->_centralBodyShape) {
             ci::gl::color(ColorA(0.9,0.3,0.9,0.25));
@@ -290,26 +320,43 @@ namespace game {
 
     void BlobControllerComponent::update(const core::time_state &time) {
         InputComponent::update(time);
-        
-        double speed = 0;
-        
-        if (isKeyDown(app::KeyEvent::KEY_LEFT)) {
-            speed += -1;
-        }
-
-        if (isKeyDown(app::KeyEvent::KEY_RIGHT)) {
-            speed += +1;
-        }
-        
-        if (_gamepad) {
-            speed += _gamepad->getLeftStick().x;
-            speed += _gamepad->getDPad().x;
-        }
-        
-        speed = clamp<double>(speed,-1,1);
-
         auto physics = _physics.lock();
-        physics->setSpeed(speed);
+
+        {
+            double speed = 0;
+            if (isKeyDown(app::KeyEvent::KEY_LEFT)) {
+                speed += -1;
+            }
+
+            if (isKeyDown(app::KeyEvent::KEY_RIGHT)) {
+                speed += +1;
+            }
+            
+            if (_gamepad) {
+                speed += _gamepad->getLeftStick().x;
+                speed += _gamepad->getDPad().x;
+            }
+
+            physics->setSpeed(speed);
+        }
+
+        {
+            double jetpack = 0;
+            if (isKeyDown(app::KeyEvent::KEY_UP)) {
+                jetpack += 1;
+            }
+
+            if (isKeyDown(app::KeyEvent::KEY_DOWN)) {
+                jetpack -= 1;
+            }
+            
+            if (_gamepad) {
+                jetpack += _gamepad->getLeftStick().y;
+                jetpack += _gamepad->getDPad().y;
+            }
+
+            physics->setJetpackPower(jetpack);
+        }
     }
     
 #pragma mark - Blob

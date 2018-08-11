@@ -3,8 +3,9 @@
 ## Presently
 
     - Blob is looking good but control needs help
-        - need to prevent/dampen angular rotation about center of mass
-        - need to apply a general left/right force to all particles (not central body mass since it has no collider)
+        - @DONE need to prevent/dampen angular rotation about center of mass
+        - @DONE need to apply a general left/right force
+            - @DONE current approach works, but when targetSpeed == 0, it acts as a damper causing blob mass to cease horizontal motion
         - need to apply "jetpack" force to all particles (maybe central body mass?)
 
 ### Todo (HIGH):

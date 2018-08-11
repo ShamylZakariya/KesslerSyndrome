@@ -27,19 +27,21 @@ namespace game {
             double radius;
             double stiffness;
             double damping;
-            double elasticity;
             double particleDensity;
             int numParticles;
             
             core::seconds_t introTime;
             core::seconds_t extroTime;
-            core::seconds_t pulsePeriod;
-            double pulseMagnitude;
             
             cpCollisionType collisionType;
             cpShapeFilter shapeFilter;
             double friction;
-            double maxSpeed; // max units per second we can move linearly
+            
+            // max units per second we can move linearly
+            double maxSpeed;
+            
+            // max power of jetpack; a value of 1 == hover, values > 1 make jetpack useful
+            double jetpackPower;
             
             config():
                     introTime(1),
@@ -47,16 +49,14 @@ namespace game {
                     position(0,0),
                     radius(20),
                     stiffness(0.5),
-                    damping(1),
-                    elasticity(0),
+                    damping(0.25),
                     particleDensity(1),
                     numParticles(24),
-                    pulsePeriod(4),
-                    pulseMagnitude(0.125),
                     collisionType(0),
                     shapeFilter(CP_SHAPE_FILTER_ALL),
                     friction(0.5),
-                    maxSpeed(50)
+                    maxSpeed(50),
+                    jetpackPower(2)
             {
             }
         };
@@ -94,6 +94,10 @@ namespace game {
         virtual void setSpeed(double speed);
         double getSpeed() const { return _speed; }
         
+        /// set jetpack power, where +1 causes player to rise, and -1 causes player to descend forcefully
+        virtual void setJetpackPower(double power);
+        double getJetpackPower() const { return _jetpackPower; }
+        
     protected:
         
         virtual void createProtoplasmic();
@@ -106,11 +110,12 @@ namespace game {
         cpBB _bb;
         config _config;
         cpBody *_centralBody;
-        cpConstraint *_centralBodyMotorConstraint, *_centralBodyGearConstraint;
+        cpConstraint *_centralBodyGearConstraint;
         cpShape *_centralBodyShape;
         
         vector<physics_particle> _physicsParticles;
-        double _speed, _currentSpeed, _lifecycle;
+        double _speed, _currentSpeed, _jetpackPower, _currentJetpackPower, _lifecycle, _particleMass;
+        dvec2 _jetpackForceDir;
         core::seconds_t _age;
         
     };
