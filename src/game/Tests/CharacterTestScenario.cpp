@@ -90,6 +90,12 @@ void CharacterTestScenario::setup() {
         make_shared<MouseViewportControlComponent>(_viewportController)
     }));
     
+    stage->addObject(Object::with("Dragger", {
+        make_shared<MousePickComponent>(ShapeFilters::GRABBABLE),
+        make_shared<MousePickDrawComponent>()
+    }));
+
+    
     // build background grid
     auto grid = elements::WorldCartesianGridDrawComponent::create(1);
     grid->setGridColor(ColorA(0.2,0.2,0.7,0.5));
@@ -100,6 +106,8 @@ void CharacterTestScenario::setup() {
     
     // build a blob character
     game::Blob::config blobConfig;
+//    blobConfig.physics.shapeFilter = game::ShapeFilters::GRABBABLE;
+    blobConfig.physics.friction = 0.5;
     blobConfig.physics.position = dvec2(512,256);
     auto gamepad = InputDispatcher::get()->getGamepads().empty() ? nullptr : InputDispatcher::get()->getGamepads().front();
     auto blob = game::Blob::create("Blob", blobConfig, gamepad);
@@ -154,7 +162,7 @@ terrain::WorldRef CharacterTestScenario::loadLevelSvg() {
     auto partitionedShapes = terrain::World::partition(shapes, 500);
     
     // construct
-    const terrain::material terrainMaterial(1, 1, COLLISION_SHAPE_RADIUS, ShapeFilters::TERRAIN, CollisionType::TERRAIN, MIN_SURFACE_AREA, TERRAIN_COLOR);
+    const terrain::material terrainMaterial(1, 100, COLLISION_SHAPE_RADIUS, ShapeFilters::TERRAIN, CollisionType::TERRAIN, MIN_SURFACE_AREA, TERRAIN_COLOR);
     const terrain::material anchorMaterial(1, 1, COLLISION_SHAPE_RADIUS, ShapeFilters::ANCHOR, CollisionType::ANCHOR, MIN_SURFACE_AREA, ANCHOR_COLOR);
     auto world = make_shared<terrain::World>(getStage()->getSpace(), terrainMaterial, anchorMaterial);
     world->build(partitionedShapes, anchors, elements);

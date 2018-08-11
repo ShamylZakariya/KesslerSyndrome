@@ -95,43 +95,52 @@ namespace game {
             damping = lrp<double>(saturate(_config.damping), 0, 100),
             blobCircumference = _config.radius * 2 * M_PI,
             bodyParticleRadius = (blobCircumference / _config.numParticles) * 0.5,
-            bodyParticleMass = M_PI * bodyParticleRadius * bodyParticleRadius,
+            bodyParticleMass = 0.5 * M_PI * bodyParticleRadius * bodyParticleRadius,
             bodyParticleMoment = cpMomentForCircle(bodyParticleMass, 0, bodyParticleRadius, cpvzero);
         
         const auto gravity = getStage()->getGravitation(_config.position);
-        double springStiffness = lrp<double>(saturate( _config.stiffness ), 0.1, 1 ) * 1 * bodyParticleMass * gravity.magnitude;
+        double springStiffness = lrp<double>(saturate( _config.stiffness ), 0.1, 1 ) * 2 * bodyParticleMass * gravity.magnitude;
         
         for ( int i = 0, N = _config.numParticles; i < N; i++ ) {
             const double across =  static_cast<double>(i) / static_cast<double>(N);
             const double offsetAngle = across * 2 * M_PI;
             const dvec2 offsetDir = dvec2( std::cos( offsetAngle ), std::sin( offsetAngle ));
             
-            physics_particle physicsParticle;
+            physics_particle particle;
             
-            physicsParticle.radius = bodyParticleRadius;
-            physicsParticle.scale = 1;
+            particle.radius = bodyParticleRadius;
+            particle.scale = 1;
             dvec2 position = _config.position + _config.radius * across * offsetDir;
             
-            physicsParticle.body = add(cpBodyNew( bodyParticleMass, bodyParticleMoment ));
-            cpBodySetPosition( physicsParticle.body, cpv(position) );
-            
-            physicsParticle.shape = add(cpCircleShapeNew( physicsParticle.body, bodyParticleRadius, cpvzero ));
-            cpShapeSetFriction( physicsParticle.shape, _config.friction );
-            cpShapeSetElasticity( physicsParticle.shape, _config.elasticity );
+            particle.body = add(cpBodyNew( bodyParticleMass, bodyParticleMoment ));
+            cpBodySetPosition( particle.body, cpv(position) );
+
+            particle.wheelBody = add(cpBodyNew( bodyParticleMass, bodyParticleMoment ));
+            cpBodySetPosition( particle.wheelBody, cpv(position) );
+
+            particle.wheelShape = add(cpCircleShapeNew( particle.wheelBody, bodyParticleRadius, cpvzero ));
+            cpShapeSetFriction( particle.wheelShape, _config.friction );
+            cpShapeSetElasticity( particle.wheelShape, _config.elasticity );
             
             
             add(cpDampedSpringNew(
                                   _centralBody,
-                                  physicsParticle.body,
+                                  particle.body,
                                   cpv(offsetDir * bodyParticleRadius),
                                   cpvzero,
                                   2 * bodyParticleRadius,
                                   springStiffness,
                                   damping ));
             
-            physicsParticle.motorConstraint = add(cpSimpleMotorNew( cpSpaceGetStaticBody(space), physicsParticle.body, 0 ));
+            add(cpPivotJointNew(particle.body, particle.wheelBody, cpv(position)));
+            cpConstraint *grooveConstraint = add(cpGrooveJointNew(_centralBody, particle.body, cpvzero, cpv(offsetDir * _config.radius), cpvzero));
+            particle.wheelMotor = add(cpSimpleMotorNew( cpSpaceGetStaticBody(space), particle.wheelBody, 0 ));
             
-            _physicsParticles.push_back( physicsParticle );
+            _physicsParticles.push_back( particle );
+            
+            // weaken the groove constraint
+            cpConstraintSetMaxForce(grooveConstraint, springStiffness * 8);
+            cpConstraintSetErrorBias(grooveConstraint, cpConstraintGetErrorBias(grooveConstraint) * 0.01);            
         }
         
         build(_config.shapeFilter, _config.collisionType);
@@ -147,38 +156,39 @@ namespace game {
         const seconds_t breathPeriod = 2;
         const double lifecycleScale = lrp<double>(_lifecycle, 0.1, 1);
         
-        for( auto physicsParticle = _physicsParticles.begin(), end = _physicsParticles.end();
-            physicsParticle != end;
-            ++physicsParticle, across += acrossStep )
+        for( auto particle = _physicsParticles.begin(), end = _physicsParticles.end();
+            particle != end;
+            ++particle, across += acrossStep )
         {
-            const double radius = physicsParticle->radius * physicsParticle->scale;
+            const double radius = particle->radius * particle->scale;
             
             //
             //  Update particle radius over time - a pulsing "breath" cycle, and lifecycle
             //
             
-            const double phasePosition = (time.time / breathPeriod) + (across * breathPeriod);
-            const double breathCycle = cos(phasePosition * 2 * M_PI);
-            physicsParticle->scale = lrp(breathCycle * 0.5 + 0.5, 0.9, 1.75) * lifecycleScale;
-            cpCircleShapeSetRadius(physicsParticle->shape, physicsParticle->radius * physicsParticle->scale);
+            {
+                const double phasePosition = (time.time / breathPeriod) + (across * breathPeriod);
+                const double breathCycle = cos(phasePosition * 2 * M_PI);
+                particle->scale = lrp(breathCycle * 0.5 + 0.5, 0.9, 1.75) * lifecycleScale;
+                cpCircleShapeSetRadius(particle->wheelShape, particle->radius * particle->scale);
+            }
 
             //
             //    Update motor rate
             //
             
-            if ( physicsParticle->motorConstraint )
-            {
-                double circumference = 2 * M_PI * radius;
-                double targetTurnsPerSecond = (_currentSpeed * _config.maxSpeed) / circumference;
-                double motorRate = 2 * M_PI * targetTurnsPerSecond;
-                cpSimpleMotorSetRate( physicsParticle->motorConstraint, motorRate );
+            if (particle->wheelMotor) {
+                const double circumference = 2 * M_PI * radius;
+                const double targetTurnsPerSecond = (_currentSpeed * _config.maxSpeed) / circumference;
+                const double motorRate = 2 * M_PI * targetTurnsPerSecond;
+                cpSimpleMotorSetRate( particle->wheelMotor, motorRate );
             }
  
             //
             //    Update position and angle
             //
             
-            bounds = cpBBExpand( bounds, cpBodyGetPosition( physicsParticle->body ), radius );
+            bounds = cpBBExpand( bounds, cpBodyGetPosition( particle->body ), radius );
         }
         
         //
@@ -207,14 +217,14 @@ namespace game {
     
     namespace {
         
-        void draw_axes(cpBody *body, double length) {
+        void draw_axes(cpBody *body, double length, ColorA xAxis = ColorA(1,0,0,1), ColorA yAxis = ColorA(0,1,0,1)) {
             dvec2 origin = v2(cpBodyGetPosition(body));
             dvec2 rotation = v2(cpBodyGetRotation(body));
             
-            ci::gl::color(ColorA(1,0,0,1));
+            ci::gl::color(xAxis);
             ci::gl::drawLine(origin, origin + rotation * length);
             
-            ci::gl::color(ColorA(0,1,0,1));
+            ci::gl::color(yAxis);
             ci::gl::drawLine(origin, origin + rotateCCW(rotation) * length);
         }
         
@@ -241,7 +251,7 @@ namespace game {
 
     void BlobDrawComponent::draw(const core::render_state &renderState) {
         const auto physics = _physics.lock();
-        const double axisLength = 10.0 * renderState.viewport->getReciprocalScale();
+        const double axisLength = 16.0 * renderState.viewport->getReciprocalScale();
 
         ci::gl::color(ColorA(0.3,0.3,0.3,1));
         for (const auto &particle : physics->getPhysicsParticles()) {
@@ -251,7 +261,8 @@ namespace game {
         }
         
         for (const auto &particle : physics->getPhysicsParticles()) {
-            draw_axes(particle.body, axisLength * 0.5);
+            draw_axes(particle.wheelBody, axisLength, ColorA(0,1,1,1), ColorA(1,0,1,1));
+            draw_axes(particle.body, axisLength);
         }
 
         if (physics->_centralBodyShape) {

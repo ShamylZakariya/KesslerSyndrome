@@ -55,7 +55,7 @@ namespace game {
                     pulseMagnitude(0.125),
                     collisionType(0),
                     shapeFilter(CP_SHAPE_FILTER_ALL),
-                    friction(20),
+                    friction(0.5),
                     maxSpeed(50)
             {
             }
@@ -64,16 +64,17 @@ namespace game {
         struct physics_particle
         {
             double radius, scale;
-            cpBody *body;
-            cpShape *shape;
-            cpConstraint *motorConstraint;
+            cpBody *body, *wheelBody;
+            cpShape *wheelShape;
+            cpConstraint *wheelMotor;
             
             physics_particle():
             radius(0),
             scale(1),
             body(nullptr),
-            shape(nullptr),
-            motorConstraint(nullptr)
+            wheelBody(nullptr),
+            wheelShape(nullptr),
+            wheelMotor(nullptr)
             {}
         };
         
