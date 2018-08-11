@@ -122,7 +122,6 @@ namespace game {
             cpShapeSetFriction( physicsParticle.shape, _config.friction );
             cpShapeSetElasticity( physicsParticle.shape, _config.elasticity );
             
-            physicsParticle.slideConstraintLength = bodyParticleSlideExtent;
             
             physicsParticle.springConstraint = add(cpDampedSpringNew(
                                                                  _centralBody,

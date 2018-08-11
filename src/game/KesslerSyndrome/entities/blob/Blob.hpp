@@ -63,21 +63,18 @@ namespace game {
         
         struct physics_particle
         {
-            double radius, slideConstraintLength, scale;
+            double radius, scale;
             cpBody *body;
             cpShape *shape;
-            cpConstraint *slideConstraint, *springConstraint, *motorConstraint, *rotationConstraint;
+            cpConstraint *springConstraint, *motorConstraint;
             
             physics_particle():
             radius(0),
-            slideConstraintLength(0),
             scale(1),
             body(nullptr),
             shape(nullptr),
-            slideConstraint(nullptr),
             springConstraint(nullptr),
-            motorConstraint(nullptr),
-            rotationConstraint(nullptr)
+            motorConstraint(nullptr)
             {}
         };
         
