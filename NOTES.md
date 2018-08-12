@@ -2,11 +2,10 @@
 
 ## Presently
 
-    - Blob is looking good but control needs help
-        - @DONE need to prevent/dampen angular rotation about center of mass
-        - @DONE need to apply a general left/right force
-            - @DONE current approach works, but when targetSpeed == 0, it acts as a damper causing blob mass to cease horizontal motion
-        - need to apply "jetpack" force to all particles (maybe central body mass?)
+    - Blob is looking good
+        - test how well my maths accommodate, e.g., higher gravity, different sizes, etc
+        - @DONE "shephard" - when a particle gets too far away from the blob central body, turn off that particle's collision detection and let the spring bring it back. Might want to scale to zero while this is happening.
+        - rendering!
 
 ### Todo (HIGH):
 

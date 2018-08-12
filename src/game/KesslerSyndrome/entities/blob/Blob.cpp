@@ -7,7 +7,10 @@
 //
 
 #include "Blob.hpp"
+
+#include "core/util/Easing.hpp"
 #include "game/KesslerSyndrome/GameConstants.hpp"
+
 
 #include <chipmunk/chipmunk_unsafe.h>
 
@@ -73,15 +76,11 @@ namespace game {
     }
     
     void BlobPhysicsComponent::createProtoplasmic() {
-
-        // protoplasmic doesn't need the circles to collide
-        //_config.shapeFilter.group = reinterpret_cast<cpGroup>(this);
+        const cpSpace *space = getSpace()->getSpace();
         
         //
         //    create the main body
         //
-        
-        cpSpace *space = getSpace()->getSpace();
         
         const double
             centralBodyRadius = std::max<double>(_config.radius * 0.5, 0.5),
@@ -126,14 +125,14 @@ namespace game {
             particle.wheelShape = add(cpCircleShapeNew( particle.body, bodyParticleRadius, cpvzero ));
             cpShapeSetFriction( particle.wheelShape, _config.friction );            
             
-            add(cpDampedSpringNew(
-                                  _centralBody,
-                                  particle.body,
-                                  cpv(offsetDir * bodyParticleRadius),
-                                  cpvzero,
-                                  2 * bodyParticleRadius,
-                                  springStiffness,
-                                  damping ));
+            cpConstraint *spring = add(cpDampedSpringNew(
+                                                         _centralBody,
+                                                         particle.body,
+                                                         cpv(offsetDir * bodyParticleRadius),
+                                                         cpvzero,
+                                                         2 * bodyParticleRadius,
+                                                         springStiffness,
+                                                         damping ));
             
             cpConstraint *grooveConstraint = add(cpGrooveJointNew(_centralBody, particle.body, cpvzero, cpv(offsetDir * _config.radius), cpvzero));
             particle.wheelMotor = add(cpSimpleMotorNew( cpSpaceGetStaticBody(space), particle.body, 0 ));
@@ -143,6 +142,9 @@ namespace game {
             // weaken the groove constraint
             cpConstraintSetMaxForce(grooveConstraint, springStiffness * 8);
             cpConstraintSetErrorBias(grooveConstraint, cpConstraintGetErrorBias(grooveConstraint) * 0.01);
+            
+            // dampen the spring constraint
+            cpConstraintSetErrorBias(spring, cpConstraintGetErrorBias(spring) * 0.01);
         }
         
         build(_config.shapeFilter, _config.collisionType);
@@ -153,7 +155,8 @@ namespace game {
         _currentSpeed = lrp(0.25, _currentSpeed, _speed);
         _currentJetpackPower = lrp(0.25, _currentJetpackPower, _jetpackPower);
         
-        cpBB bounds = _centralBodyShape ? cpBBExpand(cpBBInvalid, cpBodyGetPosition(_centralBody), cpCircleShapeGetRadius(_centralBodyShape)) : cpBBInvalid;
+        const cpVect centralBodyPosition = cpBodyGetPosition(_centralBody);
+        cpBB bounds = _centralBodyShape ? cpBBExpand(cpBBInvalid, centralBodyPosition, cpCircleShapeGetRadius(_centralBodyShape)) : cpBBInvalid;
         const double acrossStep = static_cast<double>(1) / static_cast<double>(_physicsParticles.size());
         const seconds_t breathPeriod = 2;
         const double lifecycleScale = lrp<double>(_lifecycle, 0.1, 1);
@@ -162,25 +165,34 @@ namespace game {
         const dvec2 down = G.dir;
         const dvec2 right = rotateCCW(down);
 
+        // thresholds for shepherding state
+        const double shepherdEnablementThreshold = _config.radius * 2;
+        const double shepherdDisablementThreshold = _config.radius * 0.1;
+        const double shepherdEnablementThreshold2 = shepherdEnablementThreshold * shepherdEnablementThreshold;
+        const double shepherdDisablementThreshold2 = shepherdDisablementThreshold * shepherdDisablementThreshold;
 
         dvec2 averageParticlePosition(0,0);
         double across = 0;
+        const seconds_t shepherdTransitionDuration = 0.4;
+        size_t idx = 0;
 
         for( auto particle = _physicsParticles.begin(), end = _physicsParticles.end();
             particle != end;
-            ++particle, across += acrossStep )
+            ++particle, across += acrossStep, ++idx )
         {
             const double radius = particle->radius * particle->scale;
             
             //
-            //  Update particle radius over time - a pulsing "breath" cycle, and lifecycle
+            //  Update particle radius over time - a pulsing "breath" cycle, and lifecycle.
+            //  Note: When shepherding particle back to flock, we scale radius by 1-shephardValue
+            //  to scale the particle down and back up smoothly.
             //
             
             {
                 const double phasePosition = (time.time / breathPeriod) + (across * breathPeriod);
                 const double breathCycle = cos(phasePosition * 2 * M_PI);
                 particle->scale = lrp(breathCycle * 0.5 + 0.5, 0.9, 1.75) * lifecycleScale;
-                cpCircleShapeSetRadius(particle->wheelShape, particle->radius * particle->scale);
+                cpCircleShapeSetRadius(particle->wheelShape, particle->radius * particle->scale * (1-particle->shepherdValue));
             }
 
             //
@@ -195,13 +207,62 @@ namespace game {
             }
             
             //
-            //    Update position and angle
+            //    Update bounding box and average position (which is used when controlling thrust on central body)
             //
             
             const auto position = cpBodyGetPosition(particle->body);
+            averageParticlePosition += v2(position);
             bounds = cpBBExpand( bounds, position, radius );
             
-            averageParticlePosition += v2(position);
+            
+            //
+            //  Monitor state changes for shepherding
+            //
+            
+            switch(particle->shepherdingState) {
+                case ShepherdingState::Disabled: {
+                    // Transition to Enabling if this particle is beyond threshold distance
+                    if (cpvdistsq(position, centralBodyPosition) > shepherdEnablementThreshold2) {
+                        particle->shepherdTransitionStartTime = time.time;
+                        particle->shepherdingState = ShepherdingState::Enabling;
+                        particle->shepherdValue = 0;
+                    }
+                    break;
+                }
+                case ShepherdingState::Enabling: {
+                    // animate transition to Enabled state
+                    seconds_t elapsed = time.time - particle->shepherdTransitionStartTime;
+                    if (elapsed < shepherdTransitionDuration) {
+                        particle->shepherdValue = core::util::easing::sine_ease_in_out(elapsed / shepherdTransitionDuration);
+                    } else {
+                        // we've finished enabling, turn off collision detection and got o Enabled state
+                        particle->shepherdValue = 1;
+                        particle->shepherdingState = ShepherdingState::Enabled;
+                        cpShapeSetFilter(particle->wheelShape, CP_SHAPE_FILTER_NONE);
+                    }
+                    break;
+                }
+                case ShepherdingState::Enabled: {
+                    // Transition to Disabling and re-enable collision detection if we've returned to the flock
+                    if (cpvdistsq(position, centralBodyPosition) < shepherdDisablementThreshold2) {
+                        particle->shepherdTransitionStartTime = time.time;
+                        particle->shepherdingState = ShepherdingState::Disabling;
+                        cpShapeSetFilter(particle->wheelShape, _config.shapeFilter);
+                    }
+                    break;
+                }
+                case ShepherdingState::Disabling: {
+                    // animate transition to Disabled state
+                    seconds_t elapsed = time.time - particle->shepherdTransitionStartTime;
+                    if (elapsed < shepherdTransitionDuration) {
+                        particle->shepherdValue = 1 - core::util::easing::sine_ease_in_out(elapsed / shepherdTransitionDuration);
+                    } else {
+                        particle->shepherdValue = 0;
+                        particle->shepherdingState = ShepherdingState::Disabled;
+                    }
+                    break;
+                }
+            }
         }
         
         averageParticlePosition /= _physicsParticles.size();
@@ -279,17 +340,13 @@ namespace game {
         const auto physics = _physics.lock();
         const double axisLength = 16.0 * renderState.viewport->getReciprocalScale();
 
-        ci::gl::color(ColorA(0.3,0.3,0.3,1));
         for (const auto &particle : physics->getPhysicsParticles()) {
             dvec2 position = v2(cpBodyGetPosition(particle.body));
             double radius = particle.radius * particle.scale;
+            ci::gl::color(ColorA(0.3,0.3,0.3,1).lerp(particle.shepherdValue, ColorA(1,0,1,1)));
             ci::gl::drawSolidCircle(position, radius, 16);
         }
         
-//        for (const auto &particle : physics->getPhysicsParticles()) {
-//            draw_axes(particle.body, axisLength);
-//        }
-
         if (physics->_centralBodyShape) {
             ci::gl::color(ColorA(0.9,0.3,0.9,0.25));
             ci::gl::drawSolidCircle(v2(cpBodyGetPosition(physics->_centralBody)), cpCircleShapeGetRadius(physics->_centralBodyShape), 16);

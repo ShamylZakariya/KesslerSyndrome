@@ -54,26 +54,38 @@ namespace game {
                     numParticles(24),
                     collisionType(0),
                     shapeFilter(CP_SHAPE_FILTER_ALL),
-                    friction(0.5),
+                    friction(0.25),
                     maxSpeed(50),
                     jetpackPower(2)
             {
             }
         };
         
+        enum class ShepherdingState {
+            Disabled,
+            Enabling,
+            Enabled,
+            Disabling
+        };
+        
         struct physics_particle
         {
-            double radius, scale;
+            double radius, scale, shepherdValue;
             cpBody *body;
             cpShape *wheelShape;
             cpConstraint *wheelMotor;
+            core::seconds_t shepherdTransitionStartTime;
+            ShepherdingState shepherdingState;
             
             physics_particle():
             radius(0),
             scale(1),
+            shepherdValue(0),
             body(nullptr),
             wheelShape(nullptr),
-            wheelMotor(nullptr)
+            wheelMotor(nullptr),
+            shepherdTransitionStartTime(0),
+            shepherdingState(ShepherdingState::Disabled)
             {}
         };
         

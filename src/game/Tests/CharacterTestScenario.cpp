@@ -78,7 +78,7 @@ void CharacterTestScenario::setup() {
     auto stage = make_shared<Stage>("Character Test Scenario");
     setStage(stage);
 
-    stage->addGravity(DirectionalGravitationCalculator::create(game::GravitationLayers::GLOBAL, dvec2(0, -1), 9.8));
+    stage->addGravity(DirectionalGravitationCalculator::create(game::GravitationLayers::GLOBAL, dvec2(0, -1), 9.8 * 10));
 
     
     auto terrain = terrain::TerrainObject::create("Terrain", loadLevelSvg(), DrawLayers::TERRAIN);
@@ -162,7 +162,7 @@ terrain::WorldRef CharacterTestScenario::loadLevelSvg() {
     auto partitionedShapes = terrain::World::partition(shapes, 500);
     
     // construct
-    const terrain::material terrainMaterial(1, 100, COLLISION_SHAPE_RADIUS, ShapeFilters::TERRAIN, CollisionType::TERRAIN, MIN_SURFACE_AREA, TERRAIN_COLOR);
+    const terrain::material terrainMaterial(1, 3, COLLISION_SHAPE_RADIUS, ShapeFilters::TERRAIN, CollisionType::TERRAIN, MIN_SURFACE_AREA, TERRAIN_COLOR);
     const terrain::material anchorMaterial(1, 1, COLLISION_SHAPE_RADIUS, ShapeFilters::ANCHOR, CollisionType::ANCHOR, MIN_SURFACE_AREA, ANCHOR_COLOR);
     auto world = make_shared<terrain::World>(getStage()->getSpace(), terrainMaterial, anchorMaterial);
     world->build(partitionedShapes, anchors, elements);
