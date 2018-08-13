@@ -155,10 +155,6 @@ namespace core {
             return _healthComponent;
         }
 
-        EntityDrawComponentRef getEntityDrawComponent() const {
-            return _entityDrawComponent;
-        }
-
         // Object
         void update(const time_state &time) override;
 
@@ -177,7 +173,7 @@ namespace core {
     protected:
 
         HealthComponentRef _healthComponent;
-        EntityDrawComponentRef _entityDrawComponent;
+        set<EntityDrawComponentRef> _entityDrawComponents;
 
     };
 

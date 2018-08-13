@@ -94,6 +94,12 @@ void CharacterTestScenario::setup() {
         make_shared<MousePickComponent>(ShapeFilters::GRABBABLE),
         make_shared<MousePickDrawComponent>()
     }));
+    
+    stage->addObject(Object::with("Cutter", {
+        make_shared<terrain::MouseCutterComponent>(terrain, 4),
+        make_shared<terrain::MouseCutterDrawComponent>()
+    }));
+
 
     
     // build background grid

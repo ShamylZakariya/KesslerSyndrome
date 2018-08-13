@@ -84,6 +84,11 @@ namespace core {
     }
 
 #pragma mark - Entity
+    
+    /*
+     HealthComponentRef _healthComponent;
+     set<EntityDrawComponentRef> _entityDrawComponents;
+     */
 
     Entity::Entity(string name) :
             Object(name) {
@@ -104,28 +109,25 @@ namespace core {
     void Entity::update(const time_state &time) {
         Object::update(time);
 
-        if (_entityDrawComponent) {
-            _entityDrawComponent->_alive = _healthComponent->isAlive();
-            _entityDrawComponent->_healthiness = _healthComponent->getHealthiness();
+        for (const auto &edc : _entityDrawComponents) {
+            edc->_alive = _healthComponent->isAlive();
+            edc->_healthiness = _healthComponent->getHealthiness();
         }
     }
 
     void Entity::onFinishing(seconds_t secondsLeft, double amountFinished) {
         Object::onFinishing(secondsLeft, amountFinished);
 
-        if (_entityDrawComponent) {
-            _entityDrawComponent->_deathCycleProgress = amountFinished;
+        for (const auto &edc : _entityDrawComponents) {
+            edc->_deathCycleProgress = amountFinished;
         }
     }
 
     void Entity::addComponent(ComponentRef component) {
 
-        auto dc = dynamic_pointer_cast<DrawComponent>(component);
-        if (dc) {
-            // If adding a DrawComponent, constrain that it's an EntityDrawComponent
-            auto edc = dynamic_pointer_cast<EntityDrawComponent>(component);
-            CI_ASSERT_MSG(edc, "Only assign EntityDrawComponent subclasses to Entity");
-            _entityDrawComponent = edc;
+        auto edc = dynamic_pointer_cast<EntityDrawComponent>(component);
+        if (edc) {
+            _entityDrawComponents.insert(edc);
         }
 
         Object::addComponent(component);
@@ -144,8 +146,11 @@ namespace core {
             _healthComponent->onDeath.disconnect(this);
             _healthComponent->onHealthChanged.disconnect(this);
             _healthComponent.reset();
-        } else if (component == _entityDrawComponent) {
-            _entityDrawComponent.reset();
+        } else {
+            auto edc = dynamic_pointer_cast<EntityDrawComponent>(component);
+            if (edc) {
+                _entityDrawComponents.erase(edc);
+            }
         }
     }
 

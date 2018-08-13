@@ -9,14 +9,90 @@
 #include "Blob.hpp"
 
 #include "core/util/Easing.hpp"
+#include "core/util/GlslProgLoader.hpp"
 #include "game/KesslerSyndrome/GameConstants.hpp"
 
-
+#include <cinder/Perlin.h>
 #include <chipmunk/chipmunk_unsafe.h>
 
 using namespace core;
 namespace game {
+    
+#pragma mark - BlobDebugDrawComponent
 
+    /*
+     BlobPhysicsComponentWeakRef _physics;
+     */
+    
+    class BlobDebugDrawComponent : public core::EntityDrawComponent {
+    public:
+        
+        struct config {
+            int drawLayer;
+            
+            config():
+            drawLayer(0)
+            {}
+        };
+        
+    public:
+        
+        BlobDebugDrawComponent(const config &c):
+        EntityDrawComponent(c.drawLayer,VisibilityDetermination::FRUSTUM_CULLING)
+        {}
+        
+        void onReady(core::ObjectRef parent, core::StageRef stage) override {
+            DrawComponent::onReady(parent,stage);
+            _physics = getSibling<BlobPhysicsComponent>();
+        }
+        
+        cpBB getBB() const override { return _bb; }
+        
+        void update(const core::time_state &timeState) override {
+            const auto physics = _physics.lock();
+            _bb = physics->getBB();
+        }
+        
+        void draw(const core::render_state &renderState) override {
+            const auto physics = _physics.lock();
+            const double axisLength = 16.0 * renderState.viewport->getReciprocalScale();
+            
+            for (const auto &particle : physics->getPhysicsParticles()) {
+                dvec2 position = v2(cpBodyGetPosition(particle.body));
+                double radius = particle.radius * particle.scale;
+                ci::gl::color(ColorA(0.3,0.3,0.3,1).lerp(particle.shepherdValue, ColorA(1,0,1,1)));
+                ci::gl::drawSolidCircle(position, radius, 16);
+            }
+            
+            if (physics->_centralBodyShape) {
+                ci::gl::color(ColorA(0.9,0.3,0.9,0.25));
+                ci::gl::drawSolidCircle(v2(cpBodyGetPosition(physics->_centralBody)), cpCircleShapeGetRadius(physics->_centralBodyShape), 16);
+            }
+            
+            if (physics->_centralBody) {
+                drawAxes(physics->_centralBody, axisLength);
+            }
+        }
+        
+        static void drawAxes(cpBody *body, double length, ColorA xAxis = ColorA(1,0,0,1), ColorA yAxis = ColorA(0,1,0,1)) {
+            dvec2 origin = v2(cpBodyGetPosition(body));
+            dvec2 rotation = v2(cpBodyGetRotation(body));
+            
+            ci::gl::color(xAxis);
+            ci::gl::drawLine(origin, origin + rotation * length);
+            
+            ci::gl::color(yAxis);
+            ci::gl::drawLine(origin, origin + rotateCCW(rotation) * length);
+        }
+        
+    protected:
+        
+        BlobPhysicsComponentWeakRef _physics;
+        cpBB _bb;
+        
+    };
+    
+    
 #pragma mark - BlobPhysicsComponent
     
     /*
@@ -299,63 +375,108 @@ namespace game {
         _bb = bounds;
         notifyMoved();
     }
+
+#pragma mark - BlobParticleSimulation
     
-#pragma mark - BlobDrawComponent
-    
-    namespace {
+    /// BlobParticleSimulation is an adapter to allow us to use a particle system to render the blob body
+    class BlobParticleSimulation : public elements::BaseParticleSimulation {
+    public:
         
-        void draw_axes(cpBody *body, double length, ColorA xAxis = ColorA(1,0,0,1), ColorA yAxis = ColorA(0,1,0,1)) {
-            dvec2 origin = v2(cpBodyGetPosition(body));
-            dvec2 rotation = v2(cpBodyGetRotation(body));
+        BlobParticleSimulation(BlobPhysicsComponentRef physics):
+                _physics(physics),
+                _perlin(4,12345)
+        {
+        }
+        
+        void setParticleCount(size_t particleCount) override {
+            BaseParticleSimulation::setParticleCount(particleCount);
+        }
+        
+        void onReady(core::ObjectRef parent, core::StageRef stage) override {            
+            for (auto state(_state.begin()), end(_state.end()); state != end; ++state) {
+                state->active = true;
+                state->atlasIdx = 0;
+                state->color = ColorA(0,0,0,1);
+                state->additivity = 0;
+            }
             
-            ci::gl::color(xAxis);
-            ci::gl::drawLine(origin, origin + rotation * length);
+            update(stage->getTimeState());
+        }
+
+        void update(const core::time_state &timeState) override {
+            auto blobPhysics = _physics.lock();
+            auto physics = blobPhysics->getPhysicsParticles().begin();
+            auto state = _state.begin();
+            const auto end = _state.end();
+            cpBB bb = cpBBInvalid;
+            double noiseOffset = timeState.time;
+            double noiseStep = 0.42;
             
-            ci::gl::color(yAxis);
-            ci::gl::drawLine(origin, origin + rotateCCW(rotation) * length);
+            for (; state != end; ++state, ++physics, noiseOffset += noiseStep) {
+                
+                state->position = v2(cpBodyGetPosition(physics->body));
+                
+                const double angle = _perlin.noise(noiseOffset);
+                double cosa, sina;
+                __sincos(angle, &sina, &cosa);
+                const double radius = 3 * physics->radius * physics->scale * (1-physics->shepherdValue);
+                state->right = radius * dvec2(cosa, sina);
+                state->up = rotateCCW(state->right);
+                
+                bb = cpBBExpand(bb, state->position, physics->radius);
+            }
+            
+            _bb = bb;
         }
         
-    }
-    
-    /*
-     BlobPhysicsComponentWeakRef _physics;
-     */
-    
-    BlobDrawComponent::BlobDrawComponent(const BlobDrawComponent::config &c):
-            EntityDrawComponent(DrawLayers::PLAYER,VisibilityDetermination::FRUSTUM_CULLING)
-    {}
-    
-    
-    void BlobDrawComponent::onReady(core::ObjectRef parent, core::StageRef stage) {
-        DrawComponent::onReady(parent,stage);
-        _physics = getSibling<BlobPhysicsComponent>();
-    }
-    
-    void BlobDrawComponent::update(const core::time_state &timeState) {
-        const auto physics = _physics.lock();
-        _bb = physics->getBB();
-    }
-
-    void BlobDrawComponent::draw(const core::render_state &renderState) {
-        const auto physics = _physics.lock();
-        const double axisLength = 16.0 * renderState.viewport->getReciprocalScale();
-
-        for (const auto &particle : physics->getPhysicsParticles()) {
-            dvec2 position = v2(cpBodyGetPosition(particle.body));
-            double radius = particle.radius * particle.scale;
-            ci::gl::color(ColorA(0.3,0.3,0.3,1).lerp(particle.shepherdValue, ColorA(1,0,1,1)));
-            ci::gl::drawSolidCircle(position, radius, 16);
+        size_t getFirstActive() const override {
+            return 0;
+        };
+        
+        size_t getActiveCount() const override {
+            return _state.size();
         }
         
-        if (physics->_centralBodyShape) {
-            ci::gl::color(ColorA(0.9,0.3,0.9,0.25));
-            ci::gl::drawSolidCircle(v2(cpBodyGetPosition(physics->_centralBody)), cpCircleShapeGetRadius(physics->_centralBodyShape), 16);
+        cpBB getBB() const override {
+            return _bb;
         }
+        
+    protected:
+        
+        BlobPhysicsComponentWeakRef _physics;
+        cpBB _bb;
+        Perlin _perlin;
+        
+    };
+    
+#pragma mark - BlobParticleSystemDrawComponent
+    
+    class BlobParticleSystemDrawComponent : public elements::ParticleSystemDrawComponent {
+    public:
+        
+        BlobParticleSystemDrawComponent(config c):
+                elements::ParticleSystemDrawComponent(c)
+        {
+            auto particleColor = ColorA(0.5, 0.5, 0.5, 1);
+            auto clearColor = ColorA(particleColor, 0);
+            auto stack = make_shared<FilterStack>();
+            setFilterStack(stack, clearColor);
 
-        if (physics->_centralBody) {
-            draw_axes(physics->_centralBody, axisLength);
+            auto compositor = util::loadGlslAsset("kessler/filters/blob_ps_compositor.glsl");
+            compositor->uniform("Alpha", particleColor.a);
+            stack->setScreenCompositeShader(compositor);
         }
-    }
+        
+    protected:
+        
+        gl::GlslProgRef createDefaultShader() const override {
+            return util::loadGlslAsset("kessler/shaders/blob_ps.glsl");
+        }
+        void setShaderUniforms(const gl::GlslProgRef &program, const core::render_state &renderState) override {
+            ParticleSystemDrawComponent::setShaderUniforms(program, renderState);
+        }
+        
+    };
     
 #pragma mark - BlobControllerComponent
 
@@ -418,16 +539,41 @@ namespace game {
     
 #pragma mark - Blob
 
-    BlobRef Blob::create(string name, const config &c, GamepadRef gamepad) {
+    BlobRef Blob::create(string name, config c, GamepadRef gamepad) {
+        
+        
         auto physics = make_shared<BlobPhysicsComponent>(c.physics);
-        auto draw = make_shared<BlobDrawComponent>(c.draw);
         auto input = make_shared<BlobControllerComponent>(gamepad);
         auto health = make_shared<HealthComponent>(c.health);
-        auto blob = Entity::create<Blob>(name, { physics, draw, input, health });
+        
+        // build the particle system components - note, since this isn't a
+        // classical ParticleSystem we have to do a little more handholding here
+        auto image = loadImage(app::loadAsset("kessler/textures/blob_particle.png"));
+        gl::Texture2d::Format fmt = gl::Texture2d::Format().mipmap(false);
+        elements::ParticleSystemDrawComponent::config psdc;
+        psdc.atlasType = elements::Atlas::None;
+        psdc.textureAtlas = gl::Texture2d::create(image, fmt);
+        psdc.drawLayer = DrawLayers::PLAYER;
+
+        auto psSim = make_shared<BlobParticleSimulation>(physics);
+        psSim->setParticleCount(c.physics.numParticles);
+
+        auto psDrawer = make_shared<BlobParticleSystemDrawComponent>(psdc);
+        psDrawer->setSimulation(psSim);
+
+        // build the Blob
+        auto blob = Entity::create<Blob>(name, { physics, input, health, psSim, psDrawer });
+        
         blob->_config = c;
         blob->_physics = physics;
-        blob->_drawer = draw;
         blob->_input = input;
+        
+        if ((false)) {
+            BlobDebugDrawComponent::config ddcc;
+            ddcc.drawLayer = DrawLayers::PLAYER + 10;
+            blob->addComponent(make_shared<BlobDebugDrawComponent>(ddcc));
+        }
+
         return blob;
     }
     
@@ -439,7 +585,5 @@ namespace game {
     void Blob::onHealthChanged(double oldHealth, double newHealth) {
         Entity::onHealthChanged(oldHealth,newHealth);
     }
-
-
     
 }

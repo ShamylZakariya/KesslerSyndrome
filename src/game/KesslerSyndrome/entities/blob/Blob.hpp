@@ -11,11 +11,11 @@
 
 #include "core/Core.hpp"
 #include "elements/Components/ViewportController.hpp"
+#include "elements/ParticleSystem/ParticleSystem.hpp"
 
 namespace game {
     
     SMART_PTR(BlobPhysicsComponent);
-    SMART_PTR(BlobDrawComponent);
     SMART_PTR(BlobControllerComponent);
     SMART_PTR(Blob);
     
@@ -117,7 +117,7 @@ namespace game {
 
     protected:
         
-        friend class BlobDrawComponent;
+        friend class BlobDebugDrawComponent;
 
         cpBB _bb;
         config _config;
@@ -129,29 +129,6 @@ namespace game {
         double _speed, _currentSpeed, _jetpackPower, _currentJetpackPower, _lifecycle, _particleMass;
         dvec2 _jetpackForceDir;
         core::seconds_t _age;
-        
-    };
-    
-    class BlobDrawComponent : public core::EntityDrawComponent {
-    public:
-        
-        struct config {
-            
-        };
-        
-    public:
-        
-        BlobDrawComponent(const config &c);
-        
-        void onReady(core::ObjectRef parent, core::StageRef stage) override;
-        cpBB getBB() const override { return _bb; }
-        void update(const core::time_state &timeState) override;
-        void draw(const core::render_state &renderState) override;
-        
-    protected:
-        
-        BlobPhysicsComponentWeakRef _physics;
-        cpBB _bb;
         
     };
     
@@ -177,16 +154,14 @@ namespace game {
         struct config {
             core::HealthComponent::config health;
             BlobPhysicsComponent::config physics;
-            BlobDrawComponent::config draw;
         };
         
-        static BlobRef create(string name, const config &c, core::GamepadRef gamepad);
+        static BlobRef create(string name, config c, core::GamepadRef gamepad);
         
     public:
         
         Blob(string name);
         const BlobPhysicsComponentRef &getBlobPhysicsComponent() const { return _physics; }
-        const BlobDrawComponentRef &getBlobDrawComponent() const { return _drawer; }
         const BlobControllerComponentRef &getBlobControllerComponent() const { return _input; }
         
         // Entity
@@ -197,7 +172,6 @@ namespace game {
         
         config _config;
         BlobPhysicsComponentRef _physics;
-        BlobDrawComponentRef _drawer;
         BlobControllerComponentRef _input;
         
     };
