@@ -154,6 +154,13 @@ namespace game {
         struct config {
             core::HealthComponent::config health;
             BlobPhysicsComponent::config physics;
+            
+            // particle texture for pre-composite particle system rendering. should be square texture with roughly circular, blurred shape
+            gl::Texture2dRef particle;
+            
+            // tonemap texture which maps particle alpha to output color - expects texture shaped something like 128 wide by 1 tall.
+            // output color is the color in the tonemap where x is particle alpha scaled [0,1]
+            gl::Texture2dRef tonemap;
         };
         
         static BlobRef create(string name, config c, core::GamepadRef gamepad);

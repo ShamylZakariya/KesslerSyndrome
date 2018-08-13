@@ -378,6 +378,10 @@ namespace game {
 
 #pragma mark - BlobParticleSimulation
     
+    namespace {
+        const ColorA ParticleColor(0,0,0,1);
+    }
+    
     /// BlobParticleSimulation is an adapter to allow us to use a particle system to render the blob body
     class BlobParticleSimulation : public elements::BaseParticleSimulation {
     public:
@@ -396,7 +400,7 @@ namespace game {
             for (auto state(_state.begin()), end(_state.end()); state != end; ++state) {
                 state->active = true;
                 state->atlasIdx = 0;
-                state->color = ColorA(0,0,0,1);
+                state->color = ParticleColor;
                 state->additivity = 0;
             }
             
@@ -451,29 +455,55 @@ namespace game {
     
 #pragma mark - BlobParticleSystemDrawComponent
     
+    namespace {
+        
+        class TonemapScreenCompositor : public FilterStack {
+        public:
+            TonemapScreenCompositor(gl::Texture2dRef tonemap):
+                    _tonemap(tonemap)
+            {
+                auto compositor = util::loadGlslAsset("kessler/filters/tonemap_compositor.glsl");
+                compositor->uniform("Alpha", static_cast<float>(1));
+                setScreenCompositeShader(compositor);
+            }
+            
+        protected:
+            
+            void performScreenComposite(const render_state &state, const gl::GlslProgRef &shader, const gl::FboRef &color) override {
+                gl::ScopedTextureBind stb(_tonemap, 1);
+                shader->uniform("Tonemap", 1);
+                FilterStack::performScreenComposite(state, shader, color);
+            }
+            
+        private:
+            
+            gl::Texture2dRef _tonemap;
+
+        };
+        
+    }
+    
     class BlobParticleSystemDrawComponent : public elements::ParticleSystemDrawComponent {
+    public:
+        
+        struct config : public elements::ParticleSystemDrawComponent::config {
+            gl::Texture2dRef tonemap;
+        };
+        
     public:
         
         BlobParticleSystemDrawComponent(config c):
                 elements::ParticleSystemDrawComponent(c)
         {
-            auto particleColor = ColorA(0.5, 0.5, 0.5, 1);
-            auto clearColor = ColorA(particleColor, 0);
-            auto stack = make_shared<FilterStack>();
+            auto clearColor = ColorA(ParticleColor,0);
+            auto stack = make_shared<TonemapScreenCompositor>(c.tonemap);
             setFilterStack(stack, clearColor);
-
-            auto compositor = util::loadGlslAsset("kessler/filters/blob_ps_compositor.glsl");
-            compositor->uniform("Alpha", particleColor.a);
-            stack->setScreenCompositeShader(compositor);
         }
         
     protected:
         
         gl::GlslProgRef createDefaultShader() const override {
             return util::loadGlslAsset("kessler/shaders/blob_ps.glsl");
-        }
-        void setShaderUniforms(const gl::GlslProgRef &program, const core::render_state &renderState) override {
-            ParticleSystemDrawComponent::setShaderUniforms(program, renderState);
         }
         
     };
@@ -541,18 +571,31 @@ namespace game {
 
     BlobRef Blob::create(string name, config c, GamepadRef gamepad) {
         
-        
+        // load the default components of the Blob
         auto physics = make_shared<BlobPhysicsComponent>(c.physics);
         auto input = make_shared<BlobControllerComponent>(gamepad);
         auto health = make_shared<HealthComponent>(c.health);
         
+        BlobParticleSystemDrawComponent::config psdc;
+        gl::Texture2d::Format fmt = gl::Texture2d::Format().mipmap(false);
+        if (!c.particle) {
+            auto image = loadImage(app::loadAsset("kessler/textures/blob_particle.png"));
+            psdc.textureAtlas = gl::Texture2d::create(image, fmt);
+        } else {
+            psdc.textureAtlas = c.particle;
+        }
+        
+        if (!c.tonemap) {
+            auto image = loadImage(app::loadAsset("kessler/textures/blob_compositor_tonemap.png"));
+            c.tonemap = gl::Texture2d::create(image, fmt);
+        }
+        
+        psdc.tonemap = c.tonemap;
+        
+        
         // build the particle system components - note, since this isn't a
         // classical ParticleSystem we have to do a little more handholding here
-        auto image = loadImage(app::loadAsset("kessler/textures/blob_particle.png"));
-        gl::Texture2d::Format fmt = gl::Texture2d::Format().mipmap(false);
-        elements::ParticleSystemDrawComponent::config psdc;
         psdc.atlasType = elements::Atlas::None;
-        psdc.textureAtlas = gl::Texture2d::create(image, fmt);
         psdc.drawLayer = DrawLayers::PLAYER;
 
         auto psSim = make_shared<BlobParticleSimulation>(physics);

@@ -19,6 +19,7 @@ uniform float Alpha;
 uniform sampler2D ColorTex;
 uniform vec2 ColorTexSize;
 uniform vec2 ColorTexSizeInverse;
+uniform sampler2D Tonemap;
 
 in vec2 TexCoord;
 
@@ -26,6 +27,5 @@ out vec4 oColor;
 
 void main(void) {
     vec4 tex = texture(ColorTex, TexCoord);
-    tex.a = step(0.5, tex.a) * Alpha;
-    oColor = tex;
+    oColor = texture(Tonemap, vec2(1 - (tex.a * Alpha),0));
 }

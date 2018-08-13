@@ -153,7 +153,11 @@ namespace core {
         gl::setMatricesWindow( viewportSize.x, viewportSize.y, true );
         gl::scale(vec3(viewportSize.x,viewportSize.y,1));
         
-        gl::ScopedTextureBind stb(result->getColorTexture(), 0);
+        performScreenComposite(state, shader, result);
+    }
+    
+    void FilterStack::performScreenComposite(const render_state &state, const gl::GlslProgRef &shader, const gl::FboRef &color) {
+        gl::ScopedTextureBind stb(color->getColorTexture(), 0);
         shader->uniform("ColorTex", 0);
         _blitter->draw();
     }

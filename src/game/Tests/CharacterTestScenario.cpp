@@ -112,9 +112,10 @@ void CharacterTestScenario::setup() {
     
     // build a blob character
     game::Blob::config blobConfig;
-//    blobConfig.physics.shapeFilter = game::ShapeFilters::GRABBABLE;
     blobConfig.physics.friction = 0.5;
     blobConfig.physics.position = dvec2(512,256);
+    
+    
     auto gamepad = InputDispatcher::get()->getGamepads().empty() ? nullptr : InputDispatcher::get()->getGamepads().front();
     auto blob = game::Blob::create("Blob", blobConfig, gamepad);
     stage->addObject(blob);

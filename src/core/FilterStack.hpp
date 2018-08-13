@@ -197,7 +197,9 @@ namespace core {
         
         /**
          Execute the filters in order against the contents of input, rendering result to screen using the screenCompositeShader
-         if assigned, otherwise using the default passthrough shader (core/filters/passthrough.glsl)
+         if assigned, otherwise using the default passthrough shader (core/filters/passthrough.glsl).
+         Custom composite operations may be handled by overriding FilterStack::performScreenComposite where you may bind
+         custom uniforms, extra textures, etc
          */
         virtual void executeToScreen(const render_state &state, const gl::FboRef &input);
         
@@ -220,6 +222,15 @@ namespace core {
         
         /// return the capture buffer Fbo used by capture(); this will have the last value captured.
         gl::FboRef getCaptureFbo() const { return _captureBuffer; }
+        
+    protected:
+        
+        /**
+         Performs final rendering operation for FilterStack::executeToScreen. Default implementation
+         binds the color buffer to texture 0 as "ColorTex". Custom implementations may want to
+         bind other textures, set custom uniforms for a custom screenCompositeShader, etc.
+         */
+        virtual void performScreenComposite(const render_state &state, const gl::GlslProgRef &shader, const gl::FboRef &color);
         
     protected:
         
