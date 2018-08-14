@@ -21,7 +21,7 @@ uniform vec2 ColorTexSize;
 uniform vec2 ColorTexSizeInverse;
 uniform sampler2D Tonemap;
 uniform sampler2D BackgroundFill;
-uniform float AspectRatio;
+uniform vec2 Aspect;
 uniform float BackgroundFillRepeat;
 
 in vec2 TexCoord;
@@ -31,7 +31,7 @@ out vec4 oColor;
 void main(void) {
     vec4 tex = texture(ColorTex, TexCoord);
     vec4 blobColor = texture(Tonemap, vec2(1 - (tex.a * Alpha),0));
-    vec4 backgroundColor = texture(BackgroundFill, vec2(TexCoord.s, TexCoord.y / AspectRatio) * BackgroundFillRepeat);
+    vec4 backgroundColor = texture(BackgroundFill, TexCoord * Aspect * BackgroundFillRepeat);
     blobColor.rgb *= backgroundColor.rgb;
 
     oColor = blobColor;

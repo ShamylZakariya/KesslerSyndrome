@@ -478,8 +478,15 @@ namespace game {
                 gl::ScopedTextureBind background(_background, 2);
                 shader->uniform("BackgroundFill", 2);
                 
-                float aspect = static_cast<float>(state.viewport->getAspect());
-                shader->uniform("AspectRatio", aspect);
+                const float aspectRatio = static_cast<float>(state.viewport->getAspect());
+                vec2 aspect(1,1);
+                if (aspectRatio > 1) {
+                    aspect.y = 1 / aspectRatio;
+                } else {
+                    aspect.x = aspectRatio;
+                }
+
+                shader->uniform("Aspect", aspect);
                 
                 shader->uniform("BackgroundFillRepeat", _backgroundRepeat);
 
