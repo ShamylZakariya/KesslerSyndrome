@@ -273,6 +273,7 @@ namespace core {
         Gamepad(OIS::JoyStick *joystick);
         void update();
         void loadDeviceMapping();
+        boost::optional<ci::XmlTree> findDeviceMapping(ci::XmlTree doc) const;
         
     protected:
         

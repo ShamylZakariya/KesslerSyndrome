@@ -1,5 +1,7 @@
 <mappings>
-    <mapping vendor="Sony Computer Entertainment Wireless Controller" deadzone="2000">
+    <mapping deadzone="2000">
+        <vendor>Sony Computer Entertainment Wireless Controller</vendor>
+        <vendor>Sony Interactive Entertainment Wireless Controller</vendor>
 
         <button index="0">YButton</button>
         <button index="1">BButton</button>
@@ -26,7 +28,9 @@
 
     </mapping>
     
-    <mapping vendor="NES30              NES30 Joystick">
+    <mapping>
+        <vendor>NES30              NES30 Joystick</vendor>
+
         <button index="0">AButton</button>
         <button index="1">BButton</button>
         <button index="3">XButton</button>
@@ -39,7 +43,9 @@
         <axis index="1" invert="true">DPadY</axis>
     </mapping>
 
-    <mapping vendor="8Bitdo NES30 Pro   8Bitdo NES30 Pro">
+    <mapping>
+        <vendor>8Bitdo NES30 Pro   8Bitdo NES30 Pro</vendor>
+
         <button index="0">AButton</button>
         <button index="1">BButton</button>
         <button index="3">XButton</button>

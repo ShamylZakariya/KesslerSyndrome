@@ -258,21 +258,26 @@ namespace core {
         _joystick->capture();
     }
     
+    
     void Gamepad::loadDeviceMapping() {
-        const string vendor = getVendor();
         XmlTree mappingDoc = XmlTree(app::loadAsset("core/input/gamepad_mappings.xml"));
+        XmlTree mappings = mappingDoc.getChild("mappings");
 
-        auto maybeDeviceMapping = util::xml::findElement(mappingDoc, "mapping", "vendor", vendor);
+        //auto maybeDeviceMapping = util::xml::findElement(mappingDoc, "mapping", "vendor", vendor);
+        auto maybeDeviceMapping = findDeviceMapping(mappings);
         if (maybeDeviceMapping) {
             auto deviceMapping = *maybeDeviceMapping;
 
-            CI_LOG_D("Loading mappings for device: " << getId() << " vendor: " << vendor);
+            CI_LOG_D("Loading mappings for device: " << getId() << " vendor: " << getVendor());
             
             if (deviceMapping.hasAttribute("deadzone")) {
                 _deviceAxisDeadZone = deviceMapping.getAttributeValue<double>("deadzone");
             }
             
             for (const auto &node : deviceMapping.getChildren()) {
+                
+                // skip <vendor> tags
+                if (node->getTag() == "vendor") { continue; }
                 
                 // load the component type
                 const Components component = stringToComponents(node->getValue());
@@ -294,9 +299,26 @@ namespace core {
                 }
             }
         } else {
-            CI_LOG_E("Unrecognized device with vendor: \"" << vendor << "\"");
+            CI_LOG_E("Unrecognized device with vendor: \"" << getVendor() << "\"");
         }
     }
+    
+    boost::optional<ci::XmlTree> Gamepad::findDeviceMapping(ci::XmlTree doc) const {
+        const string vendor = getVendor();
+        for (const auto &node : doc.getChildren()) {
+            if (node->getTag() == "mapping") {
+                for (const auto &field : node->getChildren()) {
+                    if (field->getTag() == "vendor") {
+                        if (field->getValue() == vendor) {
+                            return *node;
+                        }
+                    }
+                }
+            }
+        }
+        return boost::none;
+    }
+
     
 #pragma mark - InputDispatcher
     
