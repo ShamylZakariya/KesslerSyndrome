@@ -7,7 +7,9 @@
         - @DONE "shephard" - when a particle gets too far away from the blob central body, turn off that particle's collision detection and let the spring bring it back. Might want to scale to zero while this is happening.
         - rendering!
 
-### Todo (HIGH):
+## Todo (HIGH):
+    - need multiple ids for controller input matchings - different PS4 controllers have differing vendor IDs!
+        "Sony Interactive Entertainment Wireless Controller"
 
 
 ## Todo (LOW)

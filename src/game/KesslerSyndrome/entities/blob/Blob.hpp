@@ -161,6 +161,16 @@ namespace game {
             // tonemap texture which maps particle alpha to output color - expects texture shaped something like 128 wide by 1 tall.
             // output color is the color in the tonemap where x is particle alpha scaled [0,1]
             gl::Texture2dRef tonemap;
+            
+            // background fill image applied to blob - position is static against the viewport
+            gl::Texture2dRef background;
+            
+            // number of times the background fill texture repeats across the x-axis
+            double backgroundRepeat;
+            
+            config():
+                    backgroundRepeat(16)
+            {}
         };
         
         static BlobRef create(string name, config c, core::GamepadRef gamepad);

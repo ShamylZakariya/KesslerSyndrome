@@ -43,6 +43,11 @@ namespace core {
         virtual Area getBounds() const {
             return Area(0, 0, getWidth(), getHeight());
         }
+        
+        /// get ratio of width to height
+        virtual double getAspect() const {
+            return static_cast<double>(getWidth()) / static_cast<double>(getHeight());
+        }
 
         virtual dvec2 getCenter() const = 0;
 

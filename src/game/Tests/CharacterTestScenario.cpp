@@ -114,7 +114,12 @@ void CharacterTestScenario::setup() {
     game::Blob::config blobConfig;
     blobConfig.physics.friction = 0.5;
     blobConfig.physics.position = dvec2(512,256);
-    
+
+    auto image = loadImage(app::loadAsset("kessler/textures/starfield_0_squared.jpg"));
+    auto backgroundFormat = gl::Texture2d::Format().mipmap(false).wrap(GL_REPEAT);
+    blobConfig.background = gl::Texture2d::create(image, backgroundFormat);
+    blobConfig.backgroundRepeat = 1;
+
     
     auto gamepad = InputDispatcher::get()->getGamepads().empty() ? nullptr : InputDispatcher::get()->getGamepads().front();
     auto blob = game::Blob::create("Blob", blobConfig, gamepad);
