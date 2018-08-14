@@ -31,7 +31,7 @@ out vec4 oColor;
 void main(void) {
     vec4 tex = texture(ColorTex, TexCoord);
     vec4 blobColor = texture(Tonemap, vec2(1 - (tex.a * Alpha),0));
-    vec4 backgroundColor = texture(BackgroundFill, vec2(TexCoord.s * AspectRatio, TexCoord.y) * BackgroundFillRepeat);
+    vec4 backgroundColor = texture(BackgroundFill, vec2(TexCoord.s, TexCoord.y / AspectRatio) * BackgroundFillRepeat);
     blobColor.rgb *= backgroundColor.rgb;
 
     oColor = blobColor;
