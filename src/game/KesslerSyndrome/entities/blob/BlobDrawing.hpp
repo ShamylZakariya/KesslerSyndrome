@@ -89,7 +89,8 @@ namespace game {
         struct config : public elements::ParticleSystemDrawComponent::config {
             gl::Texture2dRef tonemap;
             gl::Texture2dRef background;
-            double backgroundRepeat;
+            ColorA highlightColor;
+            float backgroundRepeat;
         };
         
     public:

@@ -136,10 +136,8 @@ namespace game {
         /// custom FilterStack for running a composite filter on blob's particle system render pass
         class TonemapScreenCompositor : public FilterStack {
         public:
-            TonemapScreenCompositor(gl::Texture2dRef tonemap, gl::Texture2dRef background, double backgroundRepeat):
-            _tonemap(tonemap),
-            _background(background),
-            _backgroundRepeat(backgroundRepeat)
+            TonemapScreenCompositor(BlobParticleSystemDrawComponent::config config):
+                    _config(config)
             {
                 auto compositor = util::loadGlslAsset("kessler/filters/tonemap_compositor.glsl");
                 compositor->uniform("Alpha", static_cast<float>(1));
@@ -149,10 +147,10 @@ namespace game {
         protected:
             
             void performScreenComposite(const render_state &state, const gl::GlslProgRef &shader, const gl::FboRef &color) override {
-                gl::ScopedTextureBind tonemap(_tonemap, 1);
+                gl::ScopedTextureBind tonemap(_config.tonemap, 1);
                 shader->uniform("Tonemap", 1);
                 
-                gl::ScopedTextureBind background(_background, 2);
+                gl::ScopedTextureBind background(_config.background, 2);
                 shader->uniform("BackgroundFill", 2);
                 
                 // use aspect ratio to build a scaling factor to guarantee background fills the viewport without tiling when BackgroundFillRepeat == 1
@@ -165,15 +163,15 @@ namespace game {
                 }
                 
                 shader->uniform("Aspect", aspect);
-                shader->uniform("BackgroundFillRepeat", _backgroundRepeat);
+                shader->uniform("BackgroundFillRepeat", _config.backgroundRepeat);
+                shader->uniform("HighlightColor", _config.highlightColor);
                 
                 FilterStack::performScreenComposite(state, shader, color);
             }
             
         private:
             
-            gl::Texture2dRef _tonemap, _background;
-            float _backgroundRepeat;
+            BlobParticleSystemDrawComponent::config _config;
             
         };
         
@@ -183,7 +181,7 @@ namespace game {
             elements::ParticleSystemDrawComponent(c)
     {
         auto clearColor = ColorA(ParticleColor,0);
-        auto stack = make_shared<TonemapScreenCompositor>(c.tonemap, c.background, c.backgroundRepeat);
+        auto stack = make_shared<TonemapScreenCompositor>(c);
         setFilterStack(stack, clearColor);
     }
     

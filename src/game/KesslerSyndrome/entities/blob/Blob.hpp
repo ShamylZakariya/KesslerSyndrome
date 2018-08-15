@@ -53,11 +53,18 @@ namespace game {
             // background fill image applied to blob - position is static against the viewport
             gl::Texture2dRef background;
             
+            // highlight color applied to blob
+            ColorA highlightColor;
+            
             // number of times the background fill texture repeats across the x-axis
             double backgroundRepeat;
             
+            bool drawDebugOverlay;
+            
             config():
-                    backgroundRepeat(16)
+                    backgroundRepeat(16),
+                    drawDebugOverlay(false),
+                    highlightColor(0.5, 0.7, 0.9, 0.25)
             {}
         };
         

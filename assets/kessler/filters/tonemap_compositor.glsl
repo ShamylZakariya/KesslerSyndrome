@@ -23,6 +23,7 @@ uniform sampler2D Tonemap;
 uniform sampler2D BackgroundFill;
 uniform vec2 Aspect;
 uniform float BackgroundFillRepeat;
+uniform vec4 HighlightColor;
 
 in vec2 TexCoord;
 
@@ -33,6 +34,9 @@ void main(void) {
     vec4 blobColor = texture(Tonemap, vec2(1 - (tex.a * Alpha),0));
     vec4 backgroundColor = texture(BackgroundFill, TexCoord * Aspect * BackgroundFillRepeat);
     blobColor.rgb *= backgroundColor.rgb;
+
+    // add a highlight color
+    blobColor.rgb += HighlightColor.rgb * HighlightColor.a * step(0.975, tex.a);
 
     oColor = blobColor;
 }

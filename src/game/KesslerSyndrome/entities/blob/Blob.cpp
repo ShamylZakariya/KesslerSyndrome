@@ -98,6 +98,7 @@ namespace game {
         psdc.tonemap = c.tonemap;
         psdc.background = c.background;
         psdc.backgroundRepeat = c.backgroundRepeat;
+        psdc.highlightColor = c.highlightColor;
         
         
         // build the particle system components - note, since this isn't a
@@ -118,7 +119,7 @@ namespace game {
         blob->_physics = physics;
         blob->_input = input;
         
-        if ((true)) {
+        if (c.drawDebugOverlay) {
             BlobDebugDrawComponent::config ddcc;
             ddcc.drawLayer = DrawLayers::PLAYER + 10;
             blob->addComponent(make_shared<BlobDebugDrawComponent>(ddcc));
