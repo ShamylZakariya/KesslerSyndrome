@@ -97,6 +97,10 @@
 		63F10118211F56E900883283 /* PlayerDrawingComponents.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 635CC37B20F26E4D007AE2FE /* PlayerDrawingComponents.cpp */; };
 		63F10119211F56E900883283 /* PlayerPhysicsComponents.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 635CC37F20F26F29007AE2FE /* PlayerPhysicsComponents.cpp */; };
 		63F1011A211F56E900883283 /* PlayerInputComponents.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 635CC38220F27045007AE2FE /* PlayerInputComponents.cpp */; };
+		63F1011D21247D1700883283 /* BlobPhysics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63F1011B21247D1700883283 /* BlobPhysics.cpp */; };
+		63F1012021247DAA00883283 /* BlobDrawing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63F1011E21247DAA00883283 /* BlobDrawing.cpp */; };
+		63F1012121247DAA00883283 /* BlobDrawing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63F1011E21247DAA00883283 /* BlobDrawing.cpp */; };
+		63F1012221247DBF00883283 /* BlobPhysics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63F1011B21247D1700883283 /* BlobPhysics.cpp */; };
 		63F93C421F8714B200F537CA /* CinderApp.icns in Resources */ = {isa = PBXBuildFile; fileRef = 25DBEB1187074B2580185053 /* CinderApp.icns */; };
 		63F93C441F8714B200F537CA /* Svg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63F93C341F86F96A00F537CA /* Svg.cpp */; };
 		63F93C461F8714B200F537CA /* SvgParsing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63F93C381F86F96A00F537CA /* SvgParsing.cpp */; };
@@ -246,6 +250,10 @@
 		63E29EFA1F9E3F5D00CAF39E /* ParticleSystem.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ParticleSystem.hpp; sourceTree = "<group>"; };
 		63F1011021189C7200883283 /* CharacterTestScenario.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CharacterTestScenario.cpp; sourceTree = "<group>"; };
 		63F1011121189C7200883283 /* CharacterTestScenario.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CharacterTestScenario.hpp; sourceTree = "<group>"; };
+		63F1011B21247D1700883283 /* BlobPhysics.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = BlobPhysics.cpp; sourceTree = "<group>"; };
+		63F1011C21247D1700883283 /* BlobPhysics.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = BlobPhysics.hpp; sourceTree = "<group>"; };
+		63F1011E21247DAA00883283 /* BlobDrawing.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = BlobDrawing.cpp; sourceTree = "<group>"; };
+		63F1011F21247DAA00883283 /* BlobDrawing.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = BlobDrawing.hpp; sourceTree = "<group>"; };
 		63F93C051F86804800F537CA /* App.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = App.hpp; sourceTree = "<group>"; };
 		63F93C061F86804900F537CA /* App.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = App.cpp; sourceTree = "<group>"; };
 		63F93C081F8681E100F537CA /* Entity.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Entity.cpp; sourceTree = "<group>"; };
@@ -529,6 +537,10 @@
 			children = (
 				63A7200821178E9300B91188 /* Blob.cpp */,
 				63A7200921178E9300B91188 /* Blob.hpp */,
+				63F1011B21247D1700883283 /* BlobPhysics.cpp */,
+				63F1011C21247D1700883283 /* BlobPhysics.hpp */,
+				63F1011E21247DAA00883283 /* BlobDrawing.cpp */,
+				63F1011F21247DAA00883283 /* BlobDrawing.hpp */,
 			);
 			path = blob;
 			sourceTree = "<group>";
@@ -749,6 +761,7 @@
 				63F10117211F56E900883283 /* Player.cpp in Sources */,
 				63F10118211F56E900883283 /* PlayerDrawingComponents.cpp in Sources */,
 				63F10119211F56E900883283 /* PlayerPhysicsComponents.cpp in Sources */,
+				63F1012121247DAA00883283 /* BlobDrawing.cpp in Sources */,
 				63F1011A211F56E900883283 /* PlayerInputComponents.cpp in Sources */,
 				63F10114211F56B800883283 /* GameConstants.cpp in Sources */,
 				63F10115211F56B800883283 /* GameStage.cpp in Sources */,
@@ -756,6 +769,7 @@
 				63A71FB52107819500B91188 /* Planet.cpp in Sources */,
 				63A71FB62107819500B91188 /* CloudLayerParticleSystem.cpp in Sources */,
 				63A71FAC20FBB8CE00B91188 /* FilterStack.cpp in Sources */,
+				63F1011D21247D1700883283 /* BlobPhysics.cpp in Sources */,
 				63611A922088DF96004EE731 /* MultiViewportTestScenario.cpp in Sources */,
 				63597BED20766F9D00B65C2A /* GlslProgLoader.cpp in Sources */,
 				631CBB712066FEFA006D3E31 /* TerrainCutRecorder.cpp in Sources */,
@@ -807,6 +821,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				63F1012221247DBF00883283 /* BlobPhysics.cpp in Sources */,
 				63A71FB42104E86B00B91188 /* Filters.cpp in Sources */,
 				63A71FB9210B75F100B91188 /* ImageWriting.cpp in Sources */,
 				6363640A209756F500806152 /* VoronoiSplitView.cpp in Sources */,
@@ -825,6 +840,7 @@
 				63F93C791F87188600F537CA /* GameStage.cpp in Sources */,
 				63F93C441F8714B200F537CA /* Svg.cpp in Sources */,
 				6332FF842020C67700279B7F /* TerrainDetail_Svg.cpp in Sources */,
+				63F1012021247DAA00883283 /* BlobDrawing.cpp in Sources */,
 				63F93C461F8714B200F537CA /* SvgParsing.cpp in Sources */,
 				63E29EFC1F9E3F5D00CAF39E /* ParticleSystem.cpp in Sources */,
 				63F93C471F8714B200F537CA /* Xml.cpp in Sources */,
