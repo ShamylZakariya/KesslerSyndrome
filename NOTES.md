@@ -2,10 +2,9 @@
 
 ## Presently
 
-    - Blob is looking good
-        - test how well my maths accommodate, e.g., higher gravity, different sizes, etc
-        - @DONE "shephard" - when a particle gets too far away from the blob central body, turn off that particle's collision detection and let the spring bring it back. Might want to scale to zero while this is happening.
-        - rendering!
+    - Tentacles are passively dynamic and looking smooth
+        - texture is repeated at WAY too high frequency along length
+        - need to join at centralBody
 
 ## Todo (HIGH):
     - need multiple ids for controller input matchings - different PS4 controllers have differing vendor IDs!

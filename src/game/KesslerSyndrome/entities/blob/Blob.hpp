@@ -52,6 +52,12 @@ namespace game {
             
             // background fill image applied to blob - position is static against the viewport
             gl::Texture2dRef background;
+
+            // tentacle fill color
+            ColorA tentacleColor;
+
+            // texture to draw on tentacles
+            gl::Texture2dRef tentacleTexture;
             
             // highlight color applied to blob
             ColorA highlightColor;
@@ -64,7 +70,8 @@ namespace game {
             config():
                     backgroundRepeat(16),
                     drawDebugOverlay(false),
-                    highlightColor(0.5, 0.7, 0.9, 0.25)
+                    highlightColor(0.5, 0.7, 0.9, 0.25),
+                    tentacleColor(1,0,1,1)
             {}
         };
         

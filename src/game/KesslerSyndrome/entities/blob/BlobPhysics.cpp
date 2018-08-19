@@ -29,7 +29,7 @@ namespace game {
      dvec2 _jetpackForceDir;
      core::seconds_t _age;
      
-     vector<tentacle> _tentacles;
+     vector<shared_ptr<tentacle>> _tentacles;
      */
     
     BlobPhysicsComponent::BlobPhysicsComponent(const config &c):
@@ -50,6 +50,9 @@ namespace game {
         PhysicsComponent::onReady(parent,stage);
         _age = 0;
         createProtoplasmic();
+        createTentacles();
+        
+        build(_config.shapeFilter, _config.collisionType);
     }
     
     void BlobPhysicsComponent::step(const core::time_state &time) {
@@ -65,7 +68,7 @@ namespace game {
         
         // update protoplasmic shape and tentacles, and our bb
         _bb = updateProtoplasmic(time);
-        //        _bb = cpBBExpand(_bb, updateTentacles(time));
+        _bb = cpBBExpand(_bb, updateTentacles(time));
         notifyMoved();
     }
     
@@ -148,8 +151,6 @@ namespace game {
             // dampen the spring constraint
             cpConstraintSetErrorBias(spring, cpConstraintGetErrorBias(spring) * 0.01);
         }
-        
-        build(_config.shapeFilter, _config.collisionType);
     }
     
     cpBB BlobPhysicsComponent::updateProtoplasmic(const core::time_state &time) {
@@ -298,11 +299,99 @@ namespace game {
     }
     
     void BlobPhysicsComponent::createTentacles() {
+        const auto G = getSpace()->getGravity(v2(cpBodyGetPosition(_centralBody)));
+        
+        for (size_t i = 0; i < _config.numTentacles; i++) {
+            double
+                segmentWidth = _config.tentacleSegmentWidth,
+                segmentLength = _config.tentacleSegmentLength,
+                segmentWidthIncrement = segmentWidth * real(-1) / _config.numTentacleSegments;
+
+            const double
+                minAngularLimit = radians<double>(5),
+                maxAngularLimit = radians<double>(30),
+                torqueMax = segmentWidth * segmentLength * _config.tentacleSegmentDensity * _config.numTentacleSegments * G.magnitude * 8,
+                torqueMin = torqueMax * 0.0125,
+                angleIncrement = 2 * M_PI / _config.numTentacles,
+                angle = -M_PI_2 + i * angleIncrement;
+
+            cpBody *previousBody = _centralBody;
+            
+            const dvec2 dir(cos(angle), sin(angle));
+            dvec2 anchor = dir * _config.radius * 0.0;
+            dvec2 position = v2(cpBodyGetPosition(_centralBody)) + anchor;
+            
+            auto currentTentacle = make_shared<tentacle>();
+            currentTentacle->attachmentAnchor = anchor;
+            currentTentacle->angleOffset = 0; // TODO: Old code this was an offset value from radial distribution, what should it be here?
+            
+            for (size_t s = 0; s < _config.numTentacleSegments; s++) {
+                const double distanceAlongTentacle = static_cast<double>(s) / _config.numTentacleSegments;
+                
+                tentacle::segment seg;
+                seg.width = segmentWidth;
+                seg.length = segmentLength;
+                
+                const double
+                    mass = std::max<double>( seg.width * seg.length * _config.tentacleSegmentDensity, 0.1 ),
+                    moment = cpMomentForBox( mass, seg.width, seg.length );
+                
+                seg.body = add(cpBodyNew( mass, moment ));
+                cpBodySetPosition( seg.body, cpv(position + dir * seg.length * 0.5 ));
+                
+                //
+                //    Create joints
+                //
+                
+                seg.torque = lrp( pow(distanceAlongTentacle, 0.25), torqueMax, torqueMin );
+                
+                seg.joint = add(cpPivotJointNew( previousBody, seg.body, cpv(position)));
+                
+//                seg.rotation = add(cpGearJointNew( previousBody, seg.body, 0, 1 ));
+//                cpConstraintSetMaxForce( seg.rotation, seg.torque );
+//                cpConstraintSetErrorBias(seg.rotation, lrp<double>(distanceAlongTentacle, cpConstraintGetErrorBias(seg.rotation), 0.001 * cpConstraintGetErrorBias(seg.rotation)));
+                
+//                double angle = i == 0 ? (currentTentacle->angleOffset-M_PI_2) : 0;
+//                seg.angularLimit = add(cpRotaryLimitJointNew( previousBody, seg.body, angle - seg.angularRange, angle + seg.angularRange ));
+                
+                const double angularLimit = lrp(distanceAlongTentacle, minAngularLimit, maxAngularLimit);
+                seg.angularLimit = add(cpRotaryLimitJointNew( previousBody, seg.body, -angularLimit, +angularLimit ));
+//                cpConstraintSetErrorBias(seg.angularLimit, lrp<double>(distanceAlongTentacle, cpConstraintGetErrorBias(seg.angularLimit), 0.0000001 * cpConstraintGetErrorBias(seg.angularLimit)));
+                cpConstraintSetMaxBias(seg.angularLimit, 0.02);
+
+                
+                //
+                //    Add this segment
+                //
+                
+                currentTentacle->segments.push_back( seg );
+                
+                //
+                //    Move forward to end of this segment, and apply size falloff
+                //
+                
+                position += dir * segmentLength;
+                previousBody = seg.body;
+                
+                segmentLength *= 0.9;
+                segmentWidth = std::max<double>( segmentWidth + segmentWidthIncrement, 0.05 );
+            }
+            
+            _tentacles.push_back(currentTentacle);            
+        }
         
     }
     
     cpBB BlobPhysicsComponent::updateTentacles(const core::time_state &time) {
-        return cpBBInvalid;
+        cpBB bb = cpBBInvalid;
+        for (const auto &tentacle : _tentacles) {
+            for (const auto &segment : tentacle->segments) {
+                
+                // expend our bb
+                bb = cpBBExpand(bb, cpBodyGetPosition(segment.body), segment.width);
+            }            
+        }
+        return bb;
     }
     
 }

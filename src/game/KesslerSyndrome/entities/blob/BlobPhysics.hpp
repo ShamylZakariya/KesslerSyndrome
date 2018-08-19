@@ -71,13 +71,14 @@ namespace game {
             jetpackPower(2),
             numTentacles(1),
             numTentacleSegments(8),
-            tentacleSegmentLength(4),
-            tentacleSegmentWidth(1),
+            tentacleSegmentLength(8),
+            tentacleSegmentWidth(3),
             tentacleSegmentDensity(1)
             {
             }
         };
         
+        /// represents the current shepherding state of particles via physics_particle::shepherdingState
         enum class ShepherdingState {
             Disabled,
             Enabling,
@@ -105,29 +106,30 @@ namespace game {
             {}
         };
         
-        struct tentacle_segment {
-            cpBody *body;
-            cpConstraint *joint;
-            cpConstraint *rotation;
-            cpConstraint *angularLimit;
-            
-            double width, length, angularRange, torque;
-            dvec2 position, dir;
-            
-            tentacle_segment():
-            body(nullptr),
-            joint(nullptr),
-            rotation(nullptr),
-            angularLimit(nullptr),
-            width(0),
-            length(0),
-            angularRange(0),
-            torque(0)
-            {}
-        };
         
         struct tentacle {
-            vector<tentacle_segment> segments;
+            struct segment {
+                cpBody *body;
+                cpConstraint *joint;
+                cpConstraint *rotation;
+                cpConstraint *angularLimit;
+                
+                double width, length, angularRange, torque;
+                dvec2 dir;
+                
+                segment():
+                body(nullptr),
+                joint(nullptr),
+                rotation(nullptr),
+                angularLimit(nullptr),
+                width(0),
+                length(0),
+                angularRange(0),
+                torque(0)
+                {}
+            };
+    
+            vector<segment> segments;
             
             // the attachment anchor point (relative to Blob's _centralBody)
             dvec2 attachmentAnchor;
@@ -166,7 +168,7 @@ namespace game {
         double getJetpackPower() const { return _jetpackPower; }
         
         /// get the blob's tentacles
-        const vector<tentacle> getTentacles() const { return _tentacles; }
+        const vector<shared_ptr<tentacle>> getTentacles() const { return _tentacles; }
         
         
     protected:
@@ -189,7 +191,7 @@ namespace game {
         dvec2 _jetpackForceDir;
         core::seconds_t _age;
         
-        vector<tentacle> _tentacles;
+        vector<shared_ptr<tentacle>> _tentacles;
         
     };
     

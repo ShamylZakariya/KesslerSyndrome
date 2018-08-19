@@ -254,6 +254,7 @@
 		63F1011C21247D1700883283 /* BlobPhysics.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = BlobPhysics.hpp; sourceTree = "<group>"; };
 		63F1011E21247DAA00883283 /* BlobDrawing.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = BlobDrawing.cpp; sourceTree = "<group>"; };
 		63F1011F21247DAA00883283 /* BlobDrawing.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = BlobDrawing.hpp; sourceTree = "<group>"; };
+		63F101232129FCBC00883283 /* Spline.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Spline.hpp; sourceTree = "<group>"; };
 		63F93C051F86804800F537CA /* App.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = App.hpp; sourceTree = "<group>"; };
 		63F93C061F86804900F537CA /* App.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = App.cpp; sourceTree = "<group>"; };
 		63F93C081F8681E100F537CA /* Entity.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Entity.cpp; sourceTree = "<group>"; };
@@ -640,6 +641,7 @@
 				63A71FB8210B75F100B91188 /* ImageWriting.hpp */,
 				632622F51E7D9A630051ABE2 /* LineSegment.hpp */,
 				632622FB1E7D9A630051ABE2 /* SpatialIndex.hpp */,
+				63F101232129FCBC00883283 /* Spline.hpp */,
 				63F93C341F86F96A00F537CA /* Svg.cpp */,
 				63F93C3B1F86F96A00F537CA /* Svg.hpp */,
 				63F93C381F86F96A00F537CA /* SvgParsing.cpp */,

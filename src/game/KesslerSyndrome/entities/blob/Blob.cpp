@@ -95,14 +95,18 @@ namespace game {
             c.tonemap = gl::Texture2d::create(image, fmt);
         }
         
+        if (!c.tentacleTexture) {
+            auto image = loadImage(app::loadAsset("kessler/textures/tentacle.png"));
+            c.tentacleTexture = gl::Texture2d::create(image, gl::Texture2d::Format().wrap(GL_REPEAT).mipmap());
+        }
+        
+        // build the particle system components - note, since this isn't a
+        // classical ParticleSystem we have to do a little more handholding here
+
         psdc.tonemap = c.tonemap;
         psdc.background = c.background;
         psdc.backgroundRepeat = c.backgroundRepeat;
         psdc.highlightColor = c.highlightColor;
-        
-        
-        // build the particle system components - note, since this isn't a
-        // classical ParticleSystem we have to do a little more handholding here
         psdc.atlasType = elements::Atlas::None;
         psdc.drawLayer = DrawLayers::PLAYER;
 
@@ -111,9 +115,16 @@ namespace game {
 
         auto psDrawer = make_shared<BlobParticleSystemDrawComponent>(psdc);
         psDrawer->setSimulation(psSim);
+        
+        // build the tentacle drawing component
+        BlobTentacleDrawComponent::config btdc;
+        btdc.drawLayer = psdc.drawLayer - 1;
+        btdc.tentacleColor = c.tentacleColor;
+        btdc.tentacleTexture = c.tentacleTexture;
+        auto tentacleDrawer = make_shared<BlobTentacleDrawComponent>(btdc);
 
         // build the Blob
-        auto blob = Entity::create<Blob>(name, { physics, input, health, psSim, psDrawer });
+        auto blob = Entity::create<Blob>(name, { physics, input, health, psSim, psDrawer, tentacleDrawer });
         
         blob->_config = c;
         blob->_physics = physics;

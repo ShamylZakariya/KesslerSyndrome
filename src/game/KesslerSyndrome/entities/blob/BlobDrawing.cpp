@@ -8,7 +8,9 @@
 
 #include "BlobDrawing.hpp"
 
+#include "core/MathHelpers.hpp"
 #include "core/util/GlslProgLoader.hpp"
+#include "core/util/Spline.hpp"
 
 #include <cinder/Perlin.h>
 
@@ -29,8 +31,187 @@ namespace game {
             ci::gl::color(yAxis);
             ci::gl::drawLine(origin, origin + rotateCCW(rotation) * length);
         }
+        
+        void drawCapsule(dvec2 a, dvec2 b, double radius, bool filled) {
+            const dvec2 center = (a + b) * 0.5;
+            const double len = distance(a, b);
+            const dvec2 dir = (b - a) / len;
+            const double angle = atan2(dir.y, dir.x);
+            
+            gl::ScopedModelMatrix smm;
+            mat4 M = glm::translate(dvec3(center.x, center.y, 0)) * glm::rotate(angle, dvec3(0, 0, 1));
+            gl::multModelMatrix(M);
+            
+            if (filled) {
+                gl::drawSolidRoundedRect(Rectf(-len / 2 - radius, -radius, +len / 2 + radius, +radius), radius, 8);
+            } else {
+                gl::drawStrokedRoundedRect(Rectf(-len / 2 - radius, -radius, +len / 2 + radius, +radius), radius, 8);
+            }
+        }
+        
     }
 
+#pragma mark - BlobTentacleDrawer
+
+    /*
+     size_t _idx;
+     shared_ptr<BlobPhysicsComponent::tentacle> _tentacle;
+     vector<vertex> _vertices;
+     spline_rep _spline;
+     
+     gl::Texture2dRef _texture;
+     ColorA _color;
+     
+     gl::GlslProgRef _shader;
+     gl::VboRef _vbo;
+     gl::BatchRef _batch;
+     */
+    
+    BlobTentacleDrawer::BlobTentacleDrawer(config c, const shared_ptr<BlobPhysicsComponent::tentacle> &tentacle, size_t idx):
+    _idx(idx),
+    _tentacle(tentacle),
+    _texture(c.tex),
+    _color(c.color),
+    _shader(core::util::loadGlslAsset("kessler/shaders/blob_tentacle.glsl"))
+    {
+        _shader->uniform("Texture", 0);
+        _shader->uniform("Color", _color);
+    }
+    
+    void BlobTentacleDrawer::update(const core::time_state &time) {
+        updateSplineReps();
+        triangulate();
+    }
+    
+    void BlobTentacleDrawer::draw(const core::render_state &state) {
+        
+        if (_batch) {
+            gl::ScopedTextureBind tex(_texture, 0);
+            _batch->draw();
+        }
+        
+        if (state.testGizmoBit(Gizmos::WIREFRAME)) {
+            for (size_t i = 0, N = _vertices.size(); i < N; i+= 3) {
+                gl::color(ci::ColorA(CM_HSV, static_cast<float>(i) / N, 1, 1));
+                gl::drawLine(_vertices[i].position, _vertices[i+1].position);
+                gl::drawLine(_vertices[i+1].position, _vertices[i+2].position);
+                gl::drawLine(_vertices[i+2].position, _vertices[i].position);
+            }
+        }
+    }
+    
+    void BlobTentacleDrawer::updateSplineReps() {
+
+        _spline.segmentVertices.clear();
+        _spline.splineVertices.clear();
+
+        if ( _tentacle->segments.empty() ) { return; }
+
+        const auto &firstSegment = _tentacle->segments.front();
+        const auto &lastSegment(_tentacle->segments.back());
+        _spline.startWidth = firstSegment.width;
+        _spline.endWidth = lastSegment.width;
+
+        for (const auto &segment : _tentacle->segments) {
+            _spline.segmentVertices.push_back(v2(cpBodyGetPosition(segment.body)));
+        }
+        
+        util::spline::spline<float>( _spline.segmentVertices, 0.5f, _spline.segmentVertices.size() * 5, false, _spline.splineVertices );
+    }
+    
+    void BlobTentacleDrawer::triangulate() {
+        size_t nVertices = _vertices.size();
+        _vertices.clear();
+
+        const auto &spline = _spline.splineVertices;
+
+        const bool odd = _idx % 2;
+        float distanceAlongTentacle = 0;
+        float halfWidth = _spline.startWidth / 2;
+        
+        const float
+            incrementScale = static_cast<float>(1) / ( spline.size()-1),
+            halfWidthIncrement = ((_spline.endWidth/2) - halfWidth) * incrementScale,
+            ty = odd ? 0 : 1,
+            ty2 = odd ? 1 : 0,
+        
+            // texture dx and dy scale
+            //dys = 0.5 * (odd ? -1 : 1),
+            dxs = 0.5;
+
+        vec2 a,b,c,d;
+        segment_extents( spline.front(), spline[1], halfWidth, a, d );
+        a += spline.front();
+        d += spline.front();
+        
+        //
+        //    generate triangles from spline; our indexing looks like so:
+        //    a -> b
+        //    ^ /  v
+        //    d <- c
+        //    making triangles (a,b,d), (c,d,b) from each quad
+        //
+        
+        for( std::vector< vec2 >::const_iterator
+            s0(spline.begin()),
+            s1(spline.begin()+1),
+            end(spline.end());
+            s1 != end;
+            ++s0, ++s1 )
+        {
+            float length = segment_extents( *s0, *s1, halfWidth + halfWidthIncrement, b, c );
+            b += *s1;
+            c += *s1;
+            
+            float nextDistanceAlongTentacle = distanceAlongTentacle + dxs * length;
+            
+            const vertex va{ a, vec2( distanceAlongTentacle, ty ) };
+            const vertex vb{ b, vec2( nextDistanceAlongTentacle, ty ) };
+            const vertex vc{ c, vec2( nextDistanceAlongTentacle, ty2 ) };
+            const vertex vd{ d, vec2( distanceAlongTentacle, ty2 ) };
+            
+            _vertices.push_back(va);
+            _vertices.push_back(vb);
+            _vertices.push_back(vd);
+
+            _vertices.push_back(vc);
+            _vertices.push_back(vd);
+            _vertices.push_back(vb);
+            
+            distanceAlongTentacle = nextDistanceAlongTentacle;
+            halfWidth += halfWidthIncrement;
+            
+            a = b;
+            d = c;
+        }
+        
+        //
+        //    If number of quads changed, we need to (re)create the batch
+        //
+        
+        if ( _vertices.size() != nVertices ) {
+            _vbo = gl::Vbo::create(GL_ARRAY_BUFFER, _vertices, GL_STREAM_DRAW);
+            
+            geom::BufferLayout particleLayout;
+            particleLayout.append(geom::Attrib::POSITION, 2, sizeof(vertex), offsetof(vertex, position));
+            particleLayout.append(geom::Attrib::TEX_COORD_0, 2, sizeof(vertex), offsetof(vertex, texCoord));
+            
+            // pair our layout with vbo to create a cinder Batch
+            auto mesh = gl::VboMesh::create(static_cast<uint32_t>(_vertices.size()), GL_TRIANGLES, {{particleLayout, _vbo}});
+            _batch = gl::Batch::create(mesh, _shader);
+        } else {
+
+            //
+            // Vbo exists, so just copy new vertices over
+            //
+            
+            void *gpuMem = _vbo->mapReplace();
+            memcpy(gpuMem, _vertices.data(), _vertices.size() * sizeof(vertex));
+            _vbo->unmap();
+        }
+        
+        
+    }
     
 #pragma mark - BlobDebugDrawComponent
     
@@ -50,7 +231,6 @@ namespace game {
         _physics = getSibling<BlobPhysicsComponent>();
     }
     
-    
     void BlobDebugDrawComponent::update(const core::time_state &timeState) {
         const auto physics = _physics.lock();
         _bb = physics->getBB();
@@ -58,17 +238,80 @@ namespace game {
     
     void BlobDebugDrawComponent::draw(const core::render_state &renderState) {
         const auto physics = _physics.lock();
-        const double axisLength = 16.0 * renderState.viewport->getReciprocalScale();
+        drawParticles(renderState, physics);
+        drawTentacles(renderState, physics);
         
+        const double axisLength = 16.0 * renderState.viewport->getReciprocalScale();
+        drawAxes(physics->getCentralBody(), axisLength);
+        
+        gl::color(ColorA(1,0,1,1));
+        gl::drawStrokedRect(Rectf(_bb.l, _bb.t, _bb.r, _bb.b));
+    }
+    
+    void BlobDebugDrawComponent::drawParticles(const core::render_state &renderState, const BlobPhysicsComponentRef &physics) {
         for (const auto &particle : physics->getPhysicsParticles()) {
             dvec2 position = v2(cpBodyGetPosition(particle.body));
             double radius = particle.radius * particle.scale;
             ci::gl::color(_config.particleColor.lerp(particle.shepherdValue, ColorA(1,1,0,1)));
             ci::gl::drawSolidCircle(position, radius, 16);
         }
+    }
+
+    void BlobDebugDrawComponent::drawTentacles(const core::render_state &renderState, const BlobPhysicsComponentRef &physics) {
+        ci::gl::color(_config.tentacleColor.lerp(0.7, ColorA(0,0,0,1)));
+        for (const auto &tentacle : physics->getTentacles()) {
+            dvec2 a = v2(cpBodyLocalToWorld(physics->getCentralBody(), cpPivotJointGetAnchorA(tentacle->segments.front().joint)));
+            for (const auto &segment : tentacle->segments) {
+                dvec2 b = v2(cpBodyLocalToWorld(segment.body, cpPivotJointGetAnchorB(segment.joint)));
+                if (lengthSquared(a-b) > 0.01) {
+                    drawCapsule(a, b, segment.width/2, false);
+                }
+                a = b;
+            }
+        }
+    }
+    
+#pragma mark - BlobDebugDrawComponent
+    
+    /*
+     config _config;
+     BlobPhysicsComponentWeakRef _physics;
+     cpBB _bb;
+     vector<BlobTentacleDrawer> _tentacleDrawers;
+     */
+    
+    BlobTentacleDrawComponent::BlobTentacleDrawComponent(const config &c):
+    EntityDrawComponent(c.drawLayer,VisibilityDetermination::FRUSTUM_CULLING),
+    _config(c)
+    {}
+    
+    void BlobTentacleDrawComponent::onReady(core::ObjectRef parent, core::StageRef stage) {
+        DrawComponent::onReady(parent,stage);
+        _physics = getSibling<BlobPhysicsComponent>();
+    }
+    
+    void BlobTentacleDrawComponent::update(const core::time_state &timeState) {
+        const auto physics = _physics.lock();
+        _bb = physics->getBB();
         
-        drawAxes(physics->getCentralBody(), axisLength);
-    }    
+        if (_tentacleDrawers.empty()) {
+            size_t idx = 0;
+            BlobTentacleDrawer::config c { _config.tentacleTexture, _config.tentacleColor };
+            for (const auto &tentacle : physics->getTentacles()) {
+                _tentacleDrawers.emplace_back(c, tentacle, idx++);
+            }
+        }
+        
+        for (auto &tentacleDrawer : _tentacleDrawers) {
+            tentacleDrawer.update(timeState);
+        }
+    }
+    
+    void BlobTentacleDrawComponent::draw(const core::render_state &renderState) {
+        for (auto &tentacleDrawer : _tentacleDrawers) {
+            tentacleDrawer.draw(renderState);
+        }
+    }
     
 #pragma mark - BlobParticleSimulation
     

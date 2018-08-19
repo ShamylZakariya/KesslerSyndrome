@@ -540,6 +540,26 @@ T closest_turn_radians(T start, T end) {
 }
 
 /**
+    Given a line segment defined by segStart->segEnd, and a halfWidth, write the left direction scaled to halfWidth into `a and the right direction
+ scaled to halfWidth to `b, and return the length of the segment.
+ */
+template<class T, glm::precision P>
+float segment_extents( const glm::tvec2<T, P> &segStart, const glm::tvec2<T, P> &segEnd, T halfWidth, glm::tvec2<T, P> &a, glm::tvec2<T, P> &b )
+{
+    glm::tvec2<T, P> dir = segEnd - segStart;
+    T length = glm::length(dir);
+    dir /= length;
+    
+    a = glm::tvec2<T, P>( halfWidth * dir.y, halfWidth * -dir.x );
+    b.x = -a.x;
+    b.y = -a.y;
+    
+    return length;
+}
+
+
+
+/**
 	@brief determines if an integer is a power of two
 	@ingroup maths
 	@return true if @a n is a power of two
