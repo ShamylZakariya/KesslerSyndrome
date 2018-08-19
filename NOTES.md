@@ -3,8 +3,7 @@
 ## Presently
 
     - Tentacles are passively dynamic and looking smooth
-        - texture is repeated at WAY too high frequency along length
-        - need to join at centralBody
+        - need aiming control
 
 ## Todo (HIGH):
     - need multiple ids for controller input matchings - different PS4 controllers have differing vendor IDs!

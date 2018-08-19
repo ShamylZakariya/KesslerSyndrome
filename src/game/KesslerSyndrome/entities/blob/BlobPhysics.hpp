@@ -131,6 +131,9 @@ namespace game {
     
             vector<segment> segments;
             
+            // body the tentacle is attached to
+            cpBody *rootBody;
+            
             // the attachment anchor point (relative to Blob's _centralBody)
             dvec2 attachmentAnchor;
             
@@ -138,6 +141,7 @@ namespace game {
             double angleOffset;
             
             tentacle():
+            rootBody(nullptr),
             angleOffset(0)
             {}
         };
@@ -176,6 +180,7 @@ namespace game {
         void createProtoplasmic();
         cpBB updateProtoplasmic(const core::time_state &time);
         
+        double estimateTotalTentacleMass() const;
         void createTentacles();
         cpBB updateTentacles(const core::time_state &time);
         

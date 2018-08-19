@@ -111,11 +111,16 @@ namespace game {
         const auto &lastSegment(_tentacle->segments.back());
         _spline.startWidth = firstSegment.width;
         _spline.endWidth = lastSegment.width;
+        
+        // use the root attachment as first spline vertex
+        _spline.segmentVertices.push_back(v2(cpBodyLocalToWorld(_tentacle->rootBody, cpv(_tentacle->attachmentAnchor))));
 
+        // now walk segments and record each body position
         for (const auto &segment : _tentacle->segments) {
             _spline.segmentVertices.push_back(v2(cpBodyGetPosition(segment.body)));
         }
-        
+
+        // finally perform spline subdivision
         util::spline::spline<float>( _spline.segmentVertices, 0.5f, _spline.segmentVertices.size() * 5, false, _spline.splineVertices );
     }
     
@@ -128,16 +133,14 @@ namespace game {
         const bool odd = _idx % 2;
         float distanceAlongTentacle = 0;
         float halfWidth = _spline.startWidth / 2;
+        const size_t numSegments = _tentacle->segments.size();
         
         const float
             incrementScale = static_cast<float>(1) / ( spline.size()-1),
             halfWidthIncrement = ((_spline.endWidth/2) - halfWidth) * incrementScale,
             ty = odd ? 0 : 1,
             ty2 = odd ? 1 : 0,
-        
-            // texture dx and dy scale
-            //dys = 0.5 * (odd ? -1 : 1),
-            dxs = 0.5;
+            dxs = numSegments * incrementScale * 0.5f;
 
         vec2 a,b,c,d;
         segment_extents( spline.front(), spline[1], halfWidth, a, d );

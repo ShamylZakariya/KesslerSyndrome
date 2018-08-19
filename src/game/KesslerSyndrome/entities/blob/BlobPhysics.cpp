@@ -102,14 +102,16 @@ namespace game {
         //
         
         const double
-        damping = lrp<double>(saturate(_config.damping), 0, 100),
-        blobCircumference = _config.radius * 2 * M_PI,
-        bodyParticleRadius = (blobCircumference / _config.numParticles) * 0.5,
-        bodyParticleMass = M_PI * bodyParticleRadius * bodyParticleRadius,
-        bodyParticleMoment = cpMomentForCircle(bodyParticleMass, 0, bodyParticleRadius, cpvzero);
+            damping = lrp<double>(saturate(_config.damping), 0, 100),
+            blobCircumference = _config.radius * 2 * M_PI,
+            bodyParticleRadius = (blobCircumference / _config.numParticles) * 0.5,
+            bodyParticleMass = M_PI * bodyParticleRadius * bodyParticleRadius,
+            bodyParticleMoment = cpMomentForCircle(bodyParticleMass, 0, bodyParticleRadius, cpvzero),
+            estimatedTotalTentacleMass = estimateTotalTentacleMass(),
+            tentacleMassAccommodation = estimatedTotalTentacleMass * 0.25;
         
         const auto gravity = getStage()->getGravitation(_config.position);
-        double springStiffness = lrp<double>(saturate( _config.stiffness ), 0.1, 1 ) * bodyParticleMass * gravity.magnitude;
+        double springStiffness = lrp<double>(saturate( _config.stiffness ), 0.1, 1 ) * (bodyParticleMass+tentacleMassAccommodation) * gravity.magnitude;
         
         _particleMass = bodyParticleMass;
         
@@ -149,7 +151,7 @@ namespace game {
             cpConstraintSetErrorBias(grooveConstraint, cpConstraintGetErrorBias(grooveConstraint) * 0.75);
             
             // dampen the spring constraint
-            cpConstraintSetErrorBias(spring, cpConstraintGetErrorBias(spring) * 0.01);
+            cpConstraintSetErrorBias(spring, cpConstraintGetErrorBias(spring) * 1);
         }
     }
     
@@ -298,6 +300,11 @@ namespace game {
         return bounds;
     }
     
+    double BlobPhysicsComponent::estimateTotalTentacleMass() const {
+        return _config.tentacleSegmentWidth * _config.tentacleSegmentLength * _config.tentacleSegmentDensity * _config.numTentacles;
+    }
+
+    
     void BlobPhysicsComponent::createTentacles() {
         const auto G = getSpace()->getGravity(v2(cpBodyGetPosition(_centralBody)));
         
@@ -322,6 +329,7 @@ namespace game {
             dvec2 position = v2(cpBodyGetPosition(_centralBody)) + anchor;
             
             auto currentTentacle = make_shared<tentacle>();
+            currentTentacle->rootBody = _centralBody;
             currentTentacle->attachmentAnchor = anchor;
             currentTentacle->angleOffset = 0; // TODO: Old code this was an offset value from radial distribution, what should it be here?
             
