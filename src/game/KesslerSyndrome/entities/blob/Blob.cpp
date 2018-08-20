@@ -18,57 +18,81 @@ namespace game {
     /*
      BlobPhysicsComponentWeakRef _physics;
      core::GamepadRef _gamepad;
+     double _horizontalSpeed, _jetpackThrust;
+     dvec2 _aimDir;
      */
     
     BlobControllerComponent::BlobControllerComponent(core::GamepadRef gamepad):
             InputComponent(0),
-            _gamepad(gamepad)
+            _gamepad(gamepad),
+            _horizontalSpeed(0),
+            _jetpackThrust(0),
+            _aimDir(0,0)
     {}
     
-    // component
-    void BlobControllerComponent::onReady(core::ObjectRef parent, core::StageRef stage) {
-        InputComponent::onReady(parent, stage);
-        _physics = getSibling<BlobPhysicsComponent>();
-    }
-
     void BlobControllerComponent::update(const core::time_state &time) {
         InputComponent::update(time);
-        auto physics = _physics.lock();
 
         {
-            double speed = 0;
-            if (isKeyDown(app::KeyEvent::KEY_LEFT)) {
-                speed += -1;
+            _horizontalSpeed = 0;
+            if (isKeyDown(app::KeyEvent::KEY_a)) {
+                _horizontalSpeed += -1;
             }
 
-            if (isKeyDown(app::KeyEvent::KEY_RIGHT)) {
-                speed += +1;
+            if (isKeyDown(app::KeyEvent::KEY_d)) {
+                _horizontalSpeed += +1;
             }
             
             if (_gamepad) {
-                speed += _gamepad->getLeftStick().x;
-                speed += _gamepad->getDPad().x;
+                _horizontalSpeed += _gamepad->getLeftStick().x;
+                _horizontalSpeed += _gamepad->getDPad().x;
             }
 
-            physics->setSpeed(speed);
         }
 
         {
-            double jetpack = 0;
-            if (isKeyDown(app::KeyEvent::KEY_UP)) {
-                jetpack += 1;
+            _jetpackThrust = 0;
+            if (isKeyDown(app::KeyEvent::KEY_w)) {
+                _jetpackThrust += 1;
             }
 
-            if (isKeyDown(app::KeyEvent::KEY_DOWN)) {
-                jetpack -= 1;
+            if (isKeyDown(app::KeyEvent::KEY_s)) {
+                _jetpackThrust -= 1;
             }
             
             if (_gamepad) {
-                jetpack += _gamepad->getLeftStick().y;
-                jetpack += _gamepad->getDPad().y;
+                _jetpackThrust += _gamepad->getLeftStick().y;
+                _jetpackThrust += _gamepad->getDPad().y;
             }
+        }
+        
+        //
+        //  Handle aiming direction
+        //
+        
+        _aimDir.x = _aimDir.y = 0;
+        if (isKeyDown(app::KeyEvent::KEY_LEFT)) {
+            _aimDir.x -= 1;
+        }
 
-            physics->setJetpackPower(jetpack);
+        if (isKeyDown(app::KeyEvent::KEY_RIGHT)) {
+            _aimDir.x += 1;
+        }
+
+        if (isKeyDown(app::KeyEvent::KEY_UP)) {
+            _aimDir.y += 1;
+        }
+        
+        if (isKeyDown(app::KeyEvent::KEY_DOWN)) {
+            _aimDir.y -= 1;
+        }
+        
+        if (_gamepad) {
+            _aimDir += _gamepad->getRightStick();
+        }
+        
+        if (lengthSquared(_aimDir) > 0) {
+            _aimDir = normalize(_aimDir);
         }
     }
     
@@ -142,6 +166,12 @@ namespace game {
     Blob::Blob(string name):
             Entity(name)
     {
+    }
+    
+    void Blob::update(const core::time_state &time) {
+        Entity::update(time);
+        _physics->setSpeed(_input->getHorizontalSpeed());
+        _physics->setJetpackPower(_input->getJetpackThrust());
     }
     
     void Blob::onHealthChanged(double oldHealth, double newHealth) {

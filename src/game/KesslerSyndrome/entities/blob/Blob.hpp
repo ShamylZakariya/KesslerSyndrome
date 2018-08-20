@@ -26,13 +26,20 @@ namespace game {
         BlobControllerComponent(core::GamepadRef gamepad);
         
         // component
-        void onReady(core::ObjectRef parent, core::StageRef stage) override;
         void update(const core::time_state &time) override;
         
+        // BlobControllerComponent
+        double getHorizontalSpeed() const { return _horizontalSpeed; }
+        double getJetpackThrust() const { return _jetpackThrust; }
+        dvec2 getAimDirection() const { return _aimDir; }
+                
     protected:
 
-        BlobPhysicsComponentWeakRef _physics;
         core::GamepadRef _gamepad;
+        
+        double _horizontalSpeed, _jetpackThrust;
+        dvec2 _aimDir;
+        
 
     };
 
@@ -84,6 +91,7 @@ namespace game {
         const BlobControllerComponentRef &getBlobControllerComponent() const { return _input; }
         
         // Entity
+        void update(const core::time_state &time) override;
         void onHealthChanged(double oldHealth, double newHealth) override;
         
     protected:
