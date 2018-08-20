@@ -276,7 +276,7 @@ namespace game {
         //  Compute forces to apply to body to aid in locomotion and jetpack control
         //
         
-        const double totalMass = cpBodyGetMass(_centralBody) + (_config.numParticles * _particleMass);
+        const double totalMass = cpBodyGetMass(_centralBody) + (_config.numParticles * _particleMass) + estimateTotalTentacleMass();
         
         if (abs(_speed) > 0) {
             const cpVect linearVel = cpBodyGetVelocity(_centralBody);
