@@ -25,8 +25,8 @@ namespace game {
      cpConstraint *_centralBodyGearConstraint;
      
      vector<physics_particle> _physicsParticles;
-     double _speed, _currentSpeed, _jetpackPower, _currentJetpackPower, _lifecycle, _particleMass;
-     dvec2 _jetpackForceDir;
+     double _speed, _currentSpeed, _jetpackPower, _currentJetpackPower, _lifecycle, _particleMass, _tentacleAimStrength;
+     dvec2 _jetpackForceDir, _aimDirection;
      core::seconds_t _age;
      
      vector<shared_ptr<tentacle>> _tentacles;
@@ -41,8 +41,11 @@ namespace game {
             _currentSpeed(0),
             _jetpackPower(0),
             _currentJetpackPower(0),
+            _jetpackForceDir(0,0),
+            _aimDirection(0,0),
             _lifecycle(0),
             _particleMass(0),
+            _tentacleAimStrength(0),
             _age(0)
     {}
     
@@ -78,6 +81,13 @@ namespace game {
     
     void BlobPhysicsComponent::setJetpackPower(double power) {
         _jetpackPower = clamp<double>(power, -1, 1);
+    }
+    
+    void BlobPhysicsComponent::setAimDirection(dvec2 dir) {
+        _aimDirection = dir;
+        if (lengthSquared(_aimDirection) > 1) {
+            _aimDirection = normalize(_aimDirection);
+        }
     }
     
     void BlobPhysicsComponent::createProtoplasmic() {
@@ -304,7 +314,6 @@ namespace game {
         return _config.tentacleSegmentWidth * _config.tentacleSegmentLength * _config.tentacleSegmentDensity * _config.numTentacles;
     }
 
-    
     void BlobPhysicsComponent::createTentacles() {
         const auto G = getSpace()->getGravity(v2(cpBodyGetPosition(_centralBody)));
         
@@ -315,12 +324,12 @@ namespace game {
                 segmentWidthIncrement = segmentWidth * real(-1) / _config.numTentacleSegments;
 
             const double
-                minAngularLimit = radians<double>(5),
-                maxAngularLimit = radians<double>(30),
+                minAngularLimit = radians<double>(7.5),
+                maxAngularLimit = radians<double>(40),
                 torqueMax = segmentWidth * segmentLength * _config.tentacleSegmentDensity * _config.numTentacleSegments * G.magnitude * 8,
                 torqueMin = torqueMax * 0.0125,
                 angleIncrement = 2 * M_PI / _config.numTentacles,
-                angle = -M_PI_2 + i * angleIncrement;
+                angle = i * angleIncrement;
 
             cpBody *previousBody = _centralBody;
             
@@ -331,7 +340,7 @@ namespace game {
             auto currentTentacle = make_shared<tentacle>();
             currentTentacle->rootBody = _centralBody;
             currentTentacle->attachmentAnchor = anchor;
-            currentTentacle->angleOffset = 0; // TODO: Old code this was an offset value from radial distribution, what should it be here?
+            currentTentacle->angleOffset = angle;
             
             for (size_t s = 0; s < _config.numTentacleSegments; s++) {
                 const double distanceAlongTentacle = static_cast<double>(s) / _config.numTentacleSegments;
@@ -359,15 +368,10 @@ namespace game {
 //                cpConstraintSetMaxForce( seg.rotation, seg.torque );
 //                cpConstraintSetErrorBias(seg.rotation, lrp<double>(distanceAlongTentacle, cpConstraintGetErrorBias(seg.rotation), 0.001 * cpConstraintGetErrorBias(seg.rotation)));
                 
-//                double angle = i == 0 ? (currentTentacle->angleOffset-M_PI_2) : 0;
-//                seg.angularLimit = add(cpRotaryLimitJointNew( previousBody, seg.body, angle - seg.angularRange, angle + seg.angularRange ));
-                
                 const double angularLimit = lrp(distanceAlongTentacle, minAngularLimit, maxAngularLimit);
                 seg.angularLimit = add(cpRotaryLimitJointNew( previousBody, seg.body, -angularLimit, +angularLimit ));
-//                cpConstraintSetErrorBias(seg.angularLimit, lrp<double>(distanceAlongTentacle, cpConstraintGetErrorBias(seg.angularLimit), 0.0000001 * cpConstraintGetErrorBias(seg.angularLimit)));
-                cpConstraintSetMaxBias(seg.angularLimit, 0.02);
+                cpConstraintSetErrorBias(seg.angularLimit, angularLimit * 0.25);
 
-                
                 //
                 //    Add this segment
                 //
@@ -391,11 +395,27 @@ namespace game {
     }
     
     cpBB BlobPhysicsComponent::updateTentacles(const core::time_state &time) {
+        
+        // when user is aiming, _tentacleAimStrength goes to 1, otherwise, it goes to 0
+        const double aimStrength = length(_aimDirection);
+        _tentacleAimStrength = lrp<double>(0.125, _tentacleAimStrength, aimStrength);
+        const double limpness = 1 - _tentacleAimStrength;
+        
         cpBB bb = cpBBInvalid;
         for (const auto &tentacle : _tentacles) {
             for (const auto &segment : tentacle->segments) {
                 
-                // expend our bb
+                // when aiming, we strengthen rotation constraint, when not aiming, strengthen angular limits to allow for limp behavior
+                if (segment.rotation) {
+                    cpConstraintSetMaxForce(segment.rotation, _tentacleAimStrength * segment.torque);
+                }
+                
+                if (segment.angularLimit) {
+                    // default max force is INFINITY, so, just ramp up to an absurd value
+                    cpConstraintSetMaxForce(segment.angularLimit, limpness * 999999);
+                }
+
+                // expand our bb
                 bb = cpBBExpand(bb, cpBodyGetPosition(segment.body), segment.width);
             }            
         }

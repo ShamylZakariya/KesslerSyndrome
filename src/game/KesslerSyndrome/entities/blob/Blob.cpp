@@ -18,7 +18,7 @@ namespace game {
     /*
      BlobPhysicsComponentWeakRef _physics;
      core::GamepadRef _gamepad;
-     double _horizontalSpeed, _jetpackThrust;
+     double _horizontalSpeed, _jetpackPower;
      dvec2 _aimDir;
      */
     
@@ -26,7 +26,7 @@ namespace game {
             InputComponent(0),
             _gamepad(gamepad),
             _horizontalSpeed(0),
-            _jetpackThrust(0),
+            _jetpackPower(0),
             _aimDir(0,0)
     {}
     
@@ -51,18 +51,18 @@ namespace game {
         }
 
         {
-            _jetpackThrust = 0;
+            _jetpackPower = 0;
             if (isKeyDown(app::KeyEvent::KEY_w)) {
-                _jetpackThrust += 1;
+                _jetpackPower += 1;
             }
 
             if (isKeyDown(app::KeyEvent::KEY_s)) {
-                _jetpackThrust -= 1;
+                _jetpackPower -= 1;
             }
             
             if (_gamepad) {
-                _jetpackThrust += _gamepad->getLeftStick().y;
-                _jetpackThrust += _gamepad->getDPad().y;
+                _jetpackPower += _gamepad->getLeftStick().y;
+                _jetpackPower += _gamepad->getDPad().y;
             }
         }
         
@@ -171,7 +171,8 @@ namespace game {
     void Blob::update(const core::time_state &time) {
         Entity::update(time);
         _physics->setSpeed(_input->getHorizontalSpeed());
-        _physics->setJetpackPower(_input->getJetpackThrust());
+        _physics->setJetpackPower(_input->getJetpackPower());
+        _physics->setAimDirection(_input->getAimDirection());
     }
     
     void Blob::onHealthChanged(double oldHealth, double newHealth) {

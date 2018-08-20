@@ -171,6 +171,10 @@ namespace game {
         virtual void setJetpackPower(double power);
         double getJetpackPower() const { return _jetpackPower; }
         
+        /// set the direction in world coordinates of the current aim
+        virtual void setAimDirection(dvec2 direction);
+        dvec2 getAimDirection() const { return _aimDirection; }
+        
         /// get the blob's tentacles
         const vector<shared_ptr<tentacle>> getTentacles() const { return _tentacles; }
         
@@ -192,8 +196,8 @@ namespace game {
         cpConstraint *_centralBodyGearConstraint;
         
         vector<physics_particle> _physicsParticles;
-        double _speed, _currentSpeed, _jetpackPower, _currentJetpackPower, _lifecycle, _particleMass;
-        dvec2 _jetpackForceDir;
+        double _speed, _currentSpeed, _jetpackPower, _currentJetpackPower, _lifecycle, _particleMass, _tentacleAimStrength;
+        dvec2 _jetpackForceDir, _aimDirection;
         core::seconds_t _age;
         
         vector<shared_ptr<tentacle>> _tentacles;

@@ -261,7 +261,7 @@ namespace game {
     }
 
     void BlobDebugDrawComponent::drawTentacles(const core::render_state &renderState, const BlobPhysicsComponentRef &physics) {
-        ci::gl::color(_config.tentacleColor.lerp(0.7, ColorA(0,0,0,1)));
+        ci::gl::color(_config.tentacleColor);
         for (const auto &tentacle : physics->getTentacles()) {
             dvec2 a = v2(cpBodyLocalToWorld(physics->getCentralBody(), cpPivotJointGetAnchorA(tentacle->segments.front().joint)));
             for (const auto &segment : tentacle->segments) {

@@ -30,14 +30,14 @@ namespace game {
         
         // BlobControllerComponent
         double getHorizontalSpeed() const { return _horizontalSpeed; }
-        double getJetpackThrust() const { return _jetpackThrust; }
+        double getJetpackPower() const { return _jetpackPower; }
         dvec2 getAimDirection() const { return _aimDir; }
                 
     protected:
 
         core::GamepadRef _gamepad;
         
-        double _horizontalSpeed, _jetpackThrust;
+        double _horizontalSpeed, _jetpackPower;
         dvec2 _aimDir;
         
 
