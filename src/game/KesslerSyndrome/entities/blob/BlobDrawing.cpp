@@ -344,9 +344,10 @@ namespace game {
         auto physics = blobPhysics->getPhysicsParticles().begin();
         auto state = _state.begin();
         const auto end = _state.end();
-        cpBB bb = cpBBInvalid;
         double noiseOffset = timeState.time;
-        double noiseStep = 0.42;
+        const double noiseStep = 0.42;
+        const double bbFudge = 3; // expand our bbs a little extra to accommodate blur
+        cpBB bb = cpBBInvalid;
         
         for (; state != end; ++state, ++physics, noiseOffset += noiseStep) {
             
@@ -359,7 +360,7 @@ namespace game {
             state->right = radius * dvec2(cosa, sina);
             state->up = rotateCCW(state->right);
             
-            bb = cpBBExpand(bb, state->position, physics->radius);
+            bb = cpBBExpand(bb, state->position, bbFudge * physics->radius);
         }
         
         _bb = bb;
@@ -411,6 +412,7 @@ namespace game {
                 shader->uniform("Aspect", aspect);
                 shader->uniform("BackgroundFillRepeat", _config.backgroundRepeat);
                 shader->uniform("HighlightColor", _config.highlightColor);
+                shader->uniform("TexCoordStep", static_cast<float>(1) / vec2(state.viewport->getSize()));
                 
                 FilterStack::performScreenComposite(state, shader, color);
             }
@@ -429,6 +431,10 @@ namespace game {
         auto clearColor = ColorA(ParticleColor,0);
         auto stack = make_shared<TonemapScreenCompositor>(c);
         setFilterStack(stack, clearColor);
+    }
+    
+    void BlobParticleSystemDrawComponent::setShaderUniforms(const gl::GlslProgRef &program, const core::render_state &renderState) {
+        ParticleSystemDrawComponent::setShaderUniforms(program, renderState);
     }
     
     gl::GlslProgRef BlobParticleSystemDrawComponent::createDefaultShader() const {

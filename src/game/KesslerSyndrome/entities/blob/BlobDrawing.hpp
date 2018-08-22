@@ -187,7 +187,8 @@ namespace game {
         BlobParticleSystemDrawComponent(config c);
         
     protected:
-        
+
+        void setShaderUniforms(const gl::GlslProgRef &program, const core::render_state &renderState) override;
         gl::GlslProgRef createDefaultShader() const override;
         
     };

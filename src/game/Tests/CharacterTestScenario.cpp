@@ -112,7 +112,7 @@ void CharacterTestScenario::setup() {
     
     // build a blob character
     game::Blob::config blobConfig;
-    blobConfig.drawDebugOverlay = true;
+    blobConfig.drawDebugOverlay = false;
     blobConfig.physics.friction = 0.5;
     blobConfig.physics.position = dvec2(512,256);
     blobConfig.physics.numTentacles = 3;

@@ -21,6 +21,7 @@ uniform vec2 ColorTexSize;
 uniform vec2 ColorTexSizeInverse;
 uniform sampler2D Tonemap;
 uniform sampler2D BackgroundFill;
+uniform vec2 TexCoordStep;
 uniform vec2 Aspect;
 uniform float BackgroundFillRepeat;
 uniform vec4 HighlightColor;
@@ -31,12 +32,17 @@ out vec4 oColor;
 
 void main(void) {
     vec4 tex = texture(ColorTex, TexCoord);
+
     vec4 blobColor = texture(Tonemap, vec2(1 - (tex.a * Alpha),0));
     vec4 backgroundColor = texture(BackgroundFill, TexCoord * Aspect * BackgroundFillRepeat);
     blobColor.rgb *= backgroundColor.rgb;
 
-    // add a highlight color
-    blobColor.rgb += HighlightColor.rgb * HighlightColor.a * step(0.975, tex.a);
+    float highlight = tex.a;
+    float nextHighlight = texture(ColorTex, vec2(TexCoord.s, TexCoord.t - TexCoordStep.t)).a;
+    if (nextHighlight > highlight) {
+        // add a highlight color if the gradient is increasing downwards
+        blobColor.rgb += HighlightColor.rgb * HighlightColor.a * step(0.875, highlight);
+    }
 
     oColor = blobColor;
 }
