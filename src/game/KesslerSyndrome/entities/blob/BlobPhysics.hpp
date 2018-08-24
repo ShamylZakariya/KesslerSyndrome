@@ -47,6 +47,10 @@ namespace game {
             // number of segments per tentacle
             int numTentacleSegments;
             
+            // amount of random variance applied to tentacles when created. a value of zero means all are the same,
+            // and a value of 0.5 means each parameter can be moulated by 50%, etc.
+            double tentacleVariance;
+            
             // length of each tentacle segment
             double tentacleSegmentLength;
             
@@ -77,11 +81,12 @@ namespace game {
             friction(0.25),
             maxSpeed(50),
             jetpackPower(2),
-            numTentacles(1),
+            numTentacles(11),
             numTentacleSegments(8),
+            tentacleVariance(0.75),
             tentacleSegmentLength(12),
             tentacleSegmentLengthFalloff(0.9),
-            tentacleSegmentWidth(5),
+            tentacleSegmentWidth(6),
             tentacleSegmentDensity(1),
             tentacleDamping(0.025)
             {

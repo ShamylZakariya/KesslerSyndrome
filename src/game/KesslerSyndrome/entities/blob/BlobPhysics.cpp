@@ -11,6 +11,7 @@
 #include "core/util/Easing.hpp"
 #include "game/KesslerSyndrome/GameConstants.hpp"
 
+#include <cinder/Rand.h>
 #include <chipmunk/chipmunk_unsafe.h>
 
 using namespace core;
@@ -337,19 +338,26 @@ namespace game {
         
         return _config.tentacleSegmentWidth * totalLength * _config.tentacleSegmentDensity * 0.5;
     }
+    
+    namespace {
+        double apply_variance(Rand &rng, double value, double variance) {
+            return value + rng.nextFloat(-value * variance , +value * variance);
+        }
+    }
 
     void BlobPhysicsComponent::createTentacles() {
         const auto G = getSpace()->getGravity(v2(cpBodyGetPosition(_centralBody)));
+        Rand rng;
         
         for (size_t i = 0; i < _config.numTentacles; i++) {
             double
-                segmentWidth = _config.tentacleSegmentWidth,
-                segmentLength = _config.tentacleSegmentLength,
+                segmentWidth = apply_variance(rng, _config.tentacleSegmentWidth, _config.tentacleVariance),
+                segmentLength = apply_variance(rng, _config.tentacleSegmentLength, _config.tentacleVariance),
                 segmentWidthIncrement = segmentWidth * real(-1) / _config.numTentacleSegments;
 
             const double
-                minAngularLimit = radians<double>(7.5),
-                maxAngularLimit = radians<double>(40),
+                minAngularLimit = radians<double>(apply_variance(rng, 7.5, _config.tentacleVariance * 0.5)),
+                maxAngularLimit = radians<double>(apply_variance(rng, 40, _config.tentacleVariance * 0.5)),
                 torqueMax = estimateTotalTentacleMass() * G.magnitude * 64,
                 torqueMin = torqueMax * 0.25,
                 angleIncrement = 2 * M_PI / _config.numTentacles,
@@ -449,7 +457,9 @@ namespace game {
 
         const double aimStrength = length(_aimDirection);
         _tentacleAimStrength = lrp<double>(0.25, _tentacleAimStrength, aimStrength);
-        const double limpness = lrp<double>(_tentacleAimStrength, 1.0, 0.2);
+        const double limpness = 1 - _tentacleAimStrength;
+        const double gearJointStrength = lrp<double>(limpness, 0.5, 1.0);
+        const double angularLimitStrength = lrp<double>(limpness, 0.0, 1.0);
 
         
         cpBB bb = cpBBInvalid;
@@ -459,6 +469,8 @@ namespace game {
             double tentaclePerlinOffset = tentacleIdx * 0.3;
             for (const auto &segment : tentacle->segments) {
                 
+                const double distanceAlongSegment = static_cast<double>(segmentIdx) / tentacle->segments.size();
+                
                 // apply damping
                 cpBodySetVelocity(segment.body, cpvmult(cpBodyGetVelocity(segment.body), velocityScaling));
                 cpBodySetAngularVelocity(segment.body, cpBodyGetAngularVelocity(segment.body) * velocityScaling);
@@ -467,11 +479,12 @@ namespace game {
                 {
                     const double angle = segment.angularRange * sin( (time.time / wavePeriod) + (segmentIdx * 0.5 + tentacleIdx * 2.5) * (0.5 + 0.5 * _tentaclePerlin.noise(tentaclePerlinOffset)));
                     cpGearJointSetPhase( segment.gearJoint, angle );
-                    cpConstraintSetMaxForce(segment.gearJoint, limpness * segment.torque);
+                    const double appliedStrength = lrp<double>(limpness, 1.0, distanceAlongSegment);
+                    cpConstraintSetMaxForce(segment.gearJoint, appliedStrength * gearJointStrength * segment.torque);
                 }
 
                 // ramp up limit force when not aiming
-                cpConstraintSetMaxForce(segment.angularLimitJoint, limpness * segment.torque);
+                cpConstraintSetMaxForce(segment.angularLimitJoint, angularLimitStrength * segment.torque);
                 
                 // expand our bb
                 bb = cpBBExpand(bb, cpBodyGetPosition(segment.body), segment.width);
