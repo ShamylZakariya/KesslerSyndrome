@@ -12,6 +12,8 @@
 #include "core/Core.hpp"
 #include "elements/Components/ViewportController.hpp"
 
+#include <cinder/Perlin.h>
+
 namespace game {
     
     SMART_PTR(BlobPhysicsComponent);
@@ -48,11 +50,17 @@ namespace game {
             // length of each tentacle segment
             double tentacleSegmentLength;
             
+            // amount each segment length is reduced from previous segment
+            double tentacleSegmentLengthFalloff;
+            
             // width of the base tentacle segment - they narrow towards the tip
             double tentacleSegmentWidth;
             
             // density of tentacle segments
             double tentacleSegmentDensity;
+            
+            // amount of linear/angular velocity lost per timestep by tentacle bodies.
+            double tentacleDamping;
             
             
             config():
@@ -71,9 +79,11 @@ namespace game {
             jetpackPower(2),
             numTentacles(1),
             numTentacleSegments(8),
-            tentacleSegmentLength(8),
+            tentacleSegmentLength(10),
+            tentacleSegmentLengthFalloff(0.9),
             tentacleSegmentWidth(3),
-            tentacleSegmentDensity(1)
+            tentacleSegmentDensity(1),
+            tentacleDamping(0.025)
             {
             }
         };
@@ -110,18 +120,18 @@ namespace game {
         struct tentacle {
             struct segment {
                 cpBody *body;
-                cpConstraint *joint;
-                cpConstraint *rotation;
-                cpConstraint *angularLimit;
+                cpConstraint *pivotJoint;
+                cpConstraint *gearJoint;
+                cpConstraint *angularLimitJoint;
                 
                 double width, length, angularRange, torque;
                 dvec2 dir;
                 
                 segment():
                 body(nullptr),
-                joint(nullptr),
-                rotation(nullptr),
-                angularLimit(nullptr),
+                pivotJoint(nullptr),
+                gearJoint(nullptr),
+                angularLimitJoint(nullptr),
                 width(0),
                 length(0),
                 angularRange(0),
@@ -131,18 +141,26 @@ namespace game {
     
             vector<segment> segments;
             
-            // body the tentacle is attached to
+            // root body this tentacle is attached to - this is Blob's _centralBody
             cpBody *rootBody;
             
+            // connects final segment's body to blob's _centralBody with an offset to "aim" the tentacle.
+            cpConstraint *aimingPinJoint;
+
             // the attachment anchor point (relative to Blob's _centralBody)
             dvec2 attachmentAnchor;
             
             // tentacles are radially attached, this is the angle of this tentacle's root
             double angleOffset;
             
+            double mass;
+            
+            
             tentacle():
             rootBody(nullptr),
-            angleOffset(0)
+            aimingPinJoint(nullptr),
+            angleOffset(0),
+            mass(0)
             {}
         };
         
@@ -163,13 +181,9 @@ namespace game {
         /// get the particles making up the blob
         const vector<physics_particle> getPhysicsParticles() const { return _physicsParticles; }
         
-        /// set the blob speed where > 0 is going "right" and < 0 is going "left"
-        virtual void setSpeed(double speed);
-        double getSpeed() const { return _speed; }
-        
-        /// set jetpack power, where +1 causes player to rise, and -1 causes player to descend forcefully
-        virtual void setJetpackPower(double power);
-        double getJetpackPower() const { return _jetpackPower; }
+        /// get the direction the blob is to travel
+        virtual void setMotionDirection(dvec2 direction);
+        dvec2 getMotionDirection() const { return _motionDirection; }
         
         /// set the direction in world coordinates of the current aim
         virtual void setAimDirection(dvec2 direction);
@@ -196,11 +210,12 @@ namespace game {
         cpConstraint *_centralBodyGearConstraint;
         
         vector<physics_particle> _physicsParticles;
-        double _speed, _currentSpeed, _jetpackPower, _currentJetpackPower, _lifecycle, _particleMass, _tentacleAimStrength;
-        dvec2 _jetpackForceDir, _aimDirection;
+        double _jetpackPower, _currentJetpackPower, _lifecycle, _tentacleAimStrength, _totalMass;
+        dvec2 _jetpackForceDir, _motionDirection, _aimDirection, _targetVelocity;
         core::seconds_t _age;
         
         vector<shared_ptr<tentacle>> _tentacles;
+        Perlin _tentaclePerlin;
         
     };
     

@@ -16,6 +16,17 @@
 using namespace core;
 namespace game {
     
+    namespace {
+        
+        enum class LocomotionStyle {
+            WHEEL_MOTOR,
+            SURFACE_VELOCITY
+        };
+        
+        const LocomotionStyle lomotionStyle = LocomotionStyle::WHEEL_MOTOR;
+        
+    }
+    
 #pragma mark - BlobPhysicsComponent
     
     /*
@@ -25,11 +36,12 @@ namespace game {
      cpConstraint *_centralBodyGearConstraint;
      
      vector<physics_particle> _physicsParticles;
-     double _speed, _currentSpeed, _jetpackPower, _currentJetpackPower, _lifecycle, _particleMass, _tentacleAimStrength;
-     dvec2 _jetpackForceDir, _aimDirection;
+     double _jetpackPower, _currentJetpackPower, _lifecycle, _tentacleAimStrength, _totalMass;
+     dvec2 _jetpackForceDir, _motionDirection, _aimDirection, _targetVelocity;
      core::seconds_t _age;
-     
+
      vector<shared_ptr<tentacle>> _tentacles;
+     Perlin _tentaclePerlin;
      */
     
     BlobPhysicsComponent::BlobPhysicsComponent(const config &c):
@@ -37,16 +49,17 @@ namespace game {
             _config(c),
             _centralBody(nullptr),
             _centralBodyGearConstraint(nullptr),
-            _speed(0),
-            _currentSpeed(0),
             _jetpackPower(0),
             _currentJetpackPower(0),
             _jetpackForceDir(0,0),
+            _motionDirection(0,0),
             _aimDirection(0,0),
+            _targetVelocity(0,0),
             _lifecycle(0),
-            _particleMass(0),
             _tentacleAimStrength(0),
-            _age(0)
+            _totalMass(0),
+            _age(0),
+            _tentaclePerlin(4,567)
     {}
     
     void BlobPhysicsComponent::onReady(core::ObjectRef parent, core::StageRef stage) {
@@ -75,12 +88,11 @@ namespace game {
         notifyMoved();
     }
     
-    void BlobPhysicsComponent::setSpeed(double speed) {
-        _speed = clamp<double>(speed, -1, 1);
-    }
-    
-    void BlobPhysicsComponent::setJetpackPower(double power) {
-        _jetpackPower = clamp<double>(power, -1, 1);
+    void BlobPhysicsComponent::setMotionDirection(dvec2 direction) {
+        _motionDirection = direction;
+        if (lengthSquared(_motionDirection) > 1) {
+            _motionDirection = normalize(_motionDirection);
+        }
     }
     
     void BlobPhysicsComponent::setAimDirection(dvec2 dir) {
@@ -98,14 +110,15 @@ namespace game {
         //
         
         const double
-        centralBodyRadius = std::max<double>(_config.radius * 0.5, 0.5),
-        centralBodyMass = M_PI * centralBodyRadius * centralBodyRadius,
-        centralBodyMoment = cpMomentForCircle( centralBodyMass, 0, centralBodyRadius, cpvzero );
+            centralBodyRadius = std::max<double>(_config.radius * 0.5, 0.5),
+            centralBodyMass = M_PI * centralBodyRadius * centralBodyRadius,
+            centralBodyMoment = cpMomentForCircle( centralBodyMass, 0, centralBodyRadius, cpvzero );
         
         _centralBody = add(cpBodyNew( centralBodyMass, centralBodyMoment ));
         cpBodySetPosition( _centralBody, cpv( _config.position ));
         _centralBodyGearConstraint = add(cpGearJointNew( cpSpaceGetStaticBody( space ), _centralBody, 0, 1 ));
-        
+    
+        _totalMass += centralBodyMass;
         
         //
         //    Create particles for the jumbly body
@@ -122,9 +135,7 @@ namespace game {
         
         const auto gravity = getStage()->getGravitation(_config.position);
         double springStiffness = lrp<double>(saturate( _config.stiffness ), 0.1, 1 ) * (bodyParticleMass+tentacleMassAccommodation) * gravity.magnitude;
-        
-        _particleMass = bodyParticleMass;
-        
+                
         for ( int i = 0, N = _config.numParticles; i < N; i++ ) {
             const double across =  static_cast<double>(i) / static_cast<double>(N);
             const double offsetAngle = across * 2 * M_PI;
@@ -162,20 +173,21 @@ namespace game {
             
             // dampen the spring constraint
             cpConstraintSetErrorBias(spring, cpConstraintGetErrorBias(spring) * 1);
+            
+            _totalMass += bodyParticleMass;
         }
     }
     
     cpBB BlobPhysicsComponent::updateProtoplasmic(const core::time_state &time) {
         
-        _currentSpeed = lrp(0.25, _currentSpeed, _speed);
-        _currentJetpackPower = lrp(0.25, _currentJetpackPower, _jetpackPower);
+        _targetVelocity = lrp(0.25, _targetVelocity, _motionDirection * _config.maxSpeed);
+        _currentJetpackPower = lrp(0.25, _currentJetpackPower, _motionDirection.y);
         
         const cpVect centralBodyPosition = cpBodyGetPosition(_centralBody);
         cpBB bounds = cpBBInvalid;
         const double acrossStep = static_cast<double>(1) / static_cast<double>(_physicsParticles.size());
         const seconds_t breathPeriod = 2;
         const double lifecycleScale = lrp<double>(_lifecycle, 0.1, 1);
-        const double targetSpeed = _currentSpeed * _config.maxSpeed;
         const auto G = getSpace()->getGravity(v2(cpBodyGetPosition(_centralBody)));
         const dvec2 down = G.dir;
         const dvec2 right = rotateCCW(down);
@@ -209,16 +221,23 @@ namespace game {
                 particle->scale = lrp(breathCycle * 0.5 + 0.5, 0.9, 1.75) * lifecycleScale;
                 cpCircleShapeSetRadius(particle->wheelShape, particle->radius * particle->scale * (1-particle->shepherdValue));
             }
-            
+
             //
-            //    Update motor rate
+            //  Update surface velocity for motion
             //
-            
-            if (particle->wheelMotor) {
-                const double circumference = 2 * M_PI * radius;
-                const double targetTurnsPerSecond = targetSpeed / circumference;
-                const double motorRate = 2 * M_PI * targetTurnsPerSecond;
-                cpSimpleMotorSetRate( particle->wheelMotor, motorRate );
+
+            switch (lomotionStyle) {
+                case LocomotionStyle::WHEEL_MOTOR:
+                    if (particle->wheelMotor) {
+                        const double circumference = 2 * M_PI * radius;
+                        const double targetTurnsPerSecond = _targetVelocity.x / circumference;
+                        const double motorRate = 2 * M_PI * targetTurnsPerSecond;
+                        cpSimpleMotorSetRate( particle->wheelMotor, motorRate );
+                    }
+                    break;
+                case LocomotionStyle::SURFACE_VELOCITY:
+                    cpShapeSetSurfaceVelocity(particle->wheelShape, cpv(-_targetVelocity.x, -_targetVelocity.y));
+                    break;
             }
             
             //
@@ -286,24 +305,22 @@ namespace game {
         //  Compute forces to apply to body to aid in locomotion and jetpack control
         //
         
-        const double totalMass = cpBodyGetMass(_centralBody) + (_config.numParticles * _particleMass) + estimateTotalTentacleMass();
-        
-        if (abs(_speed) > 0) {
+        if (abs(_targetVelocity.x) > 1e-3) {
             const cpVect linearVel = cpBodyGetVelocity(_centralBody);
             const double distanceFromCentroid = length(v2(cpBodyGetPosition(_centralBody)) - averageParticlePosition);
             const double forceScale = 1.0 - clamp<double>(distanceFromCentroid / _config.radius, 0, 1);
             
             const double horizontalVel = linearVel.x;
-            const double velError = targetSpeed - horizontalVel;
+            const double velError = _targetVelocity.x - horizontalVel;
             const double forceMultiplier = 8;
-            const double horizontalForce = forceMultiplier * forceScale * totalMass * velError * abs(velError) * time.deltaT;
+            const double horizontalForce = forceMultiplier * forceScale * _totalMass * velError * abs(velError) * time.deltaT;
             
             cpBodyApplyForceAtLocalPoint(_centralBody, cpv(right * horizontalForce), cpvzero);
         }
         
         if (abs(_currentJetpackPower) > 1e-3) {
             _jetpackForceDir = sign(_currentJetpackPower) * G.dir;
-            dvec2 force = -_config.jetpackPower * totalMass * G.magnitude * _jetpackForceDir * abs(_currentJetpackPower);
+            dvec2 force = -_config.jetpackPower * _totalMass * G.magnitude * _jetpackForceDir * abs(_currentJetpackPower);
             cpBodyApplyForceAtWorldPoint(_centralBody, cpv(force), cpBodyLocalToWorld(_centralBody, cpvzero));
         }
         
@@ -311,7 +328,14 @@ namespace game {
     }
     
     double BlobPhysicsComponent::estimateTotalTentacleMass() const {
-        return _config.tentacleSegmentWidth * _config.tentacleSegmentLength * _config.tentacleSegmentDensity * _config.numTentacles;
+        double totalLength = 0;
+        double segmentLength = _config.tentacleSegmentLength;
+        for (int i = 0; i < _config.numTentacleSegments; i++) {
+            totalLength += segmentLength;
+            segmentLength *= _config.tentacleSegmentLengthFalloff;
+        }
+        
+        return _config.tentacleSegmentWidth * totalLength * _config.tentacleSegmentDensity * 0.5;
     }
 
     void BlobPhysicsComponent::createTentacles() {
@@ -326,8 +350,8 @@ namespace game {
             const double
                 minAngularLimit = radians<double>(7.5),
                 maxAngularLimit = radians<double>(40),
-                torqueMax = segmentWidth * segmentLength * _config.tentacleSegmentDensity * _config.numTentacleSegments * G.magnitude * 8,
-                torqueMin = torqueMax * 0.0125,
+                torqueMax = estimateTotalTentacleMass() * G.magnitude * 64,
+                torqueMin = torqueMax * 0.25,
                 angleIncrement = 2 * M_PI / _config.numTentacles,
                 angle = i * angleIncrement;
 
@@ -341,6 +365,7 @@ namespace game {
             currentTentacle->rootBody = _centralBody;
             currentTentacle->attachmentAnchor = anchor;
             currentTentacle->angleOffset = angle;
+            currentTentacle->mass = 0;
             
             for (size_t s = 0; s < _config.numTentacleSegments; s++) {
                 const double distanceAlongTentacle = static_cast<double>(s) / _config.numTentacleSegments;
@@ -359,24 +384,24 @@ namespace game {
                 //
                 //    Create joints
                 //
+                seg.angularRange = lrp(distanceAlongTentacle, minAngularLimit, maxAngularLimit);
                 
                 seg.torque = lrp( pow(distanceAlongTentacle, 0.25), torqueMax, torqueMin );
                 
-                seg.joint = add(cpPivotJointNew( previousBody, seg.body, cpv(position)));
+                seg.pivotJoint = add(cpPivotJointNew( previousBody, seg.body, cpv(position)));
                 
-//                seg.rotation = add(cpGearJointNew( previousBody, seg.body, 0, 1 ));
-//                cpConstraintSetMaxForce( seg.rotation, seg.torque );
-//                cpConstraintSetErrorBias(seg.rotation, lrp<double>(distanceAlongTentacle, cpConstraintGetErrorBias(seg.rotation), 0.001 * cpConstraintGetErrorBias(seg.rotation)));
+                seg.gearJoint = add(cpGearJointNew( previousBody, seg.body, 0, 1 ));
+                cpConstraintSetErrorBias(seg.gearJoint, seg.angularRange * 0.25);
                 
-                const double angularLimit = lrp(distanceAlongTentacle, minAngularLimit, maxAngularLimit);
-                seg.angularLimit = add(cpRotaryLimitJointNew( previousBody, seg.body, -angularLimit, +angularLimit ));
-                cpConstraintSetErrorBias(seg.angularLimit, angularLimit * 0.25);
+                seg.angularLimitJoint = add(cpRotaryLimitJointNew( previousBody, seg.body, -seg.angularRange, +seg.angularRange ));
+                cpConstraintSetErrorBias(seg.angularLimitJoint, seg.angularRange * 0.25);
 
                 //
                 //    Add this segment
                 //
                 
                 currentTentacle->segments.push_back( seg );
+                currentTentacle->mass += mass;
                 
                 //
                 //    Move forward to end of this segment, and apply size falloff
@@ -385,9 +410,20 @@ namespace game {
                 position += dir * segmentLength;
                 previousBody = seg.body;
                 
-                segmentLength *= 0.9;
+                segmentLength *= _config.tentacleSegmentLengthFalloff;
                 segmentWidth = std::max<double>( segmentWidth + segmentWidthIncrement, 0.05 );
+                
+                _totalMass += mass;
             }
+            
+            //
+            //  Now build aiming constraint. AnchorA is on Blob's _centralBody with a force of zero. To aim
+            //  we'll move anchorA to a point outside radius of body and ramp up the force
+            //
+            
+            currentTentacle->aimingPinJoint = add(cpPinJointNew(currentTentacle->rootBody, previousBody, cpvzero, cpvzero));
+            cpConstraintSetMaxForce(currentTentacle->aimingPinJoint, 0);
+            cpPinJointSetDist(currentTentacle->aimingPinJoint, 0);
             
             _tentacles.push_back(currentTentacle);            
         }
@@ -396,29 +432,57 @@ namespace game {
     
     cpBB BlobPhysicsComponent::updateTentacles(const core::time_state &time) {
         
+        const double timeScale = 1;
+        
+        const auto G = getSpace()->getGravity(v2(cpBodyGetPosition(_centralBody)));
+
         // when user is aiming, _tentacleAimStrength goes to 1, otherwise, it goes to 0
         const double aimStrength = length(_aimDirection);
-        _tentacleAimStrength = lrp<double>(0.125, _tentacleAimStrength, aimStrength);
-        const double limpness = 1 - _tentacleAimStrength;
+        _tentacleAimStrength = lrp<double>(0.25, _tentacleAimStrength, aimStrength);
+        const double limpness = lrp<double>(_tentacleAimStrength, 1.0, 0.2);
+
+        const double velocityScaling = 1 - _config.tentacleDamping;
         
+        // aiming anchor is in coordinate system of _centralBody
+        const cpVect aimAnchorPosition = cpv(_aimDirection * _config.radius * 2.0);
+
         cpBB bb = cpBBInvalid;
+        int tentacleIdx = 0;
         for (const auto &tentacle : _tentacles) {
+            int segmentIdx = 0;
+            double tentaclePerlinOffset = tentacleIdx * 0.3;
             for (const auto &segment : tentacle->segments) {
                 
-                // when aiming, we strengthen rotation constraint, when not aiming, strengthen angular limits to allow for limp behavior
-                if (segment.rotation) {
-                    cpConstraintSetMaxForce(segment.rotation, _tentacleAimStrength * segment.torque);
+                // apply damping
+                cpBodySetVelocity(segment.body, cpvmult(cpBodyGetVelocity(segment.body), velocityScaling));
+                cpBodySetAngularVelocity(segment.body, cpBodyGetAngularVelocity(segment.body) * velocityScaling);
+
+                // apply a gentle undulation
+                if (segment.gearJoint) {
+                    double angle = segment.angularRange * sin( (timeScale * time.time) + (segmentIdx * 0.5 + tentacleIdx * 2.5) * (0.5 + 0.5 * _tentaclePerlin.noise(tentaclePerlinOffset)));
+                    cpGearJointSetPhase( segment.gearJoint, angle );
+                    cpConstraintSetMaxForce(segment.gearJoint, limpness * segment.torque);
                 }
                 
-                if (segment.angularLimit) {
-                    // default max force is INFINITY, so, just ramp up to an absurd value
-                    cpConstraintSetMaxForce(segment.angularLimit, limpness * 999999);
+                if (segment.angularLimitJoint) {
+                    cpConstraintSetMaxForce(segment.angularLimitJoint, limpness * segment.torque);
                 }
-
+                
                 // expand our bb
                 bb = cpBBExpand(bb, cpBodyGetPosition(segment.body), segment.width);
-            }            
+                segmentIdx++;
+            }
+
+            // update the aiming constraint
+            cpPinJointSetAnchorA(tentacle->aimingPinJoint, aimAnchorPosition);
+            cpConstraintSetMaxForce(tentacle->aimingPinJoint, aimStrength * tentacle->mass * G.magnitude);
+
+            tentacleIdx++;
         }
+        
+
+        
+        
         return bb;
     }
     
