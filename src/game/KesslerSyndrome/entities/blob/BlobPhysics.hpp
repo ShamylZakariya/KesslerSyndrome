@@ -79,9 +79,9 @@ namespace game {
             jetpackPower(2),
             numTentacles(1),
             numTentacleSegments(8),
-            tentacleSegmentLength(10),
+            tentacleSegmentLength(12),
             tentacleSegmentLengthFalloff(0.9),
-            tentacleSegmentWidth(3),
+            tentacleSegmentWidth(5),
             tentacleSegmentDensity(1),
             tentacleDamping(0.025)
             {
@@ -153,14 +153,19 @@ namespace game {
             // tentacles are radially attached, this is the angle of this tentacle's root
             double angleOffset;
             
+            // total mass of tentacle
             double mass;
+            
+            // total length of tentacle
+            double length;
             
             
             tentacle():
             rootBody(nullptr),
             aimingPinJoint(nullptr),
             angleOffset(0),
-            mass(0)
+            mass(0),
+            length(0)
             {}
         };
         

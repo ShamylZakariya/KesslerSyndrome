@@ -366,6 +366,7 @@ namespace game {
             currentTentacle->attachmentAnchor = anchor;
             currentTentacle->angleOffset = angle;
             currentTentacle->mass = 0;
+            currentTentacle->length = 0;
             
             for (size_t s = 0; s < _config.numTentacleSegments; s++) {
                 const double distanceAlongTentacle = static_cast<double>(s) / _config.numTentacleSegments;
@@ -402,6 +403,7 @@ namespace game {
                 
                 currentTentacle->segments.push_back( seg );
                 currentTentacle->mass += mass;
+                currentTentacle->length += segmentLength;
                 
                 //
                 //    Move forward to end of this segment, and apply size falloff
@@ -423,7 +425,7 @@ namespace game {
             
             currentTentacle->aimingPinJoint = add(cpPinJointNew(currentTentacle->rootBody, previousBody, cpvzero, cpvzero));
             cpConstraintSetMaxForce(currentTentacle->aimingPinJoint, 0);
-            cpPinJointSetDist(currentTentacle->aimingPinJoint, 0);
+            cpPinJointSetDist(currentTentacle->aimingPinJoint, _config.radius * 0.25);
             
             _tentacles.push_back(currentTentacle);            
         }
@@ -443,8 +445,6 @@ namespace game {
 
         const double velocityScaling = 1 - _config.tentacleDamping;
         
-        // aiming anchor is in coordinate system of _centralBody
-        const cpVect aimAnchorPosition = cpv(_aimDirection * _config.radius * 2.0);
 
         cpBB bb = cpBBInvalid;
         int tentacleIdx = 0;
@@ -474,14 +474,13 @@ namespace game {
             }
 
             // update the aiming constraint
+            // aiming anchor is in coordinate system of _centralBody
+            const cpVect aimAnchorPosition = cpv(_aimDirection * tentacle->length * 0.9);
             cpPinJointSetAnchorA(tentacle->aimingPinJoint, aimAnchorPosition);
             cpConstraintSetMaxForce(tentacle->aimingPinJoint, aimStrength * tentacle->mass * G.magnitude);
 
             tentacleIdx++;
         }
-        
-
-        
         
         return bb;
     }
