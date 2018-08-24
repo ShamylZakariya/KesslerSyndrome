@@ -263,9 +263,9 @@ namespace game {
     void BlobDebugDrawComponent::drawTentacles(const core::render_state &renderState, const BlobPhysicsComponentRef &physics) {
         ci::gl::color(_config.tentacleColor);
         for (const auto &tentacle : physics->getTentacles()) {
-            dvec2 a = v2(cpBodyLocalToWorld(physics->getCentralBody(), cpPivotJointGetAnchorA(tentacle->segments.front().joint)));
+            dvec2 a = v2(cpBodyLocalToWorld(physics->getCentralBody(), cpPivotJointGetAnchorA(tentacle->segments.front().pivotJoint)));
             for (const auto &segment : tentacle->segments) {
-                dvec2 b = v2(cpBodyLocalToWorld(segment.body, cpPivotJointGetAnchorB(segment.joint)));
+                dvec2 b = v2(cpBodyLocalToWorld(segment.body, cpPivotJointGetAnchorB(segment.pivotJoint)));
                 if (lengthSquared(a-b) > 0.01) {
                     drawCapsule(a, b, segment.width/2, false);
                 }

@@ -29,16 +29,13 @@ namespace game {
         void update(const core::time_state &time) override;
         
         // BlobControllerComponent
-        double getHorizontalSpeed() const { return _horizontalSpeed; }
-        double getJetpackPower() const { return _jetpackPower; }
+        dvec2 getMotionDirection() const { return _motionDir; }
         dvec2 getAimDirection() const { return _aimDir; }
                 
     protected:
 
-        core::GamepadRef _gamepad;
-        
-        double _horizontalSpeed, _jetpackPower;
-        dvec2 _aimDir;
+        core::GamepadRef _gamepad;        
+        dvec2 _motionDir, _aimDir;
         
 
     };

@@ -16,61 +16,48 @@ namespace game {
 #pragma mark - BlobControllerComponent
 
     /*
-     BlobPhysicsComponentWeakRef _physics;
      core::GamepadRef _gamepad;
-     double _horizontalSpeed, _jetpackPower;
-     dvec2 _aimDir;
+     dvec2 _motionDir, _aimDir;
      */
     
     BlobControllerComponent::BlobControllerComponent(core::GamepadRef gamepad):
             InputComponent(0),
             _gamepad(gamepad),
-            _horizontalSpeed(0),
-            _jetpackPower(0),
+            _motionDir(0,0),
             _aimDir(0,0)
     {}
     
     void BlobControllerComponent::update(const core::time_state &time) {
         InputComponent::update(time);
 
-        {
-            _horizontalSpeed = 0;
-            if (isKeyDown(app::KeyEvent::KEY_a)) {
-                _horizontalSpeed += -1;
-            }
+        _motionDir.x = _motionDir.y = 0;
+        _aimDir.x = _aimDir.y = 0;
 
-            if (isKeyDown(app::KeyEvent::KEY_d)) {
-                _horizontalSpeed += +1;
-            }
-            
-            if (_gamepad) {
-                _horizontalSpeed += _gamepad->getLeftStick().x;
-                _horizontalSpeed += _gamepad->getDPad().x;
-            }
+        //
+        //  Handle motion direction
+        //
 
+        if (isKeyDown(app::KeyEvent::KEY_a)) {
+            _motionDir.x += -1;
         }
 
-        {
-            _jetpackPower = 0;
-            if (isKeyDown(app::KeyEvent::KEY_w)) {
-                _jetpackPower += 1;
-            }
-
-            if (isKeyDown(app::KeyEvent::KEY_s)) {
-                _jetpackPower -= 1;
-            }
-            
-            if (_gamepad) {
-                _jetpackPower += _gamepad->getLeftStick().y;
-                _jetpackPower += _gamepad->getDPad().y;
-            }
+        if (isKeyDown(app::KeyEvent::KEY_d)) {
+            _motionDir.x += +1;
         }
+        
+        if (isKeyDown(app::KeyEvent::KEY_w)) {
+            _motionDir.y += 1;
+        }
+
+        if (isKeyDown(app::KeyEvent::KEY_s)) {
+            _motionDir.y -= 1;
+        }
+        
         
         //
         //  Handle aiming direction
         //
         
-        _aimDir.x = _aimDir.y = 0;
         if (isKeyDown(app::KeyEvent::KEY_LEFT)) {
             _aimDir.x -= 1;
         }
@@ -86,9 +73,21 @@ namespace game {
         if (isKeyDown(app::KeyEvent::KEY_DOWN)) {
             _aimDir.y -= 1;
         }
-        
+
+        //
+        //  Query gamepad
+        //
+
         if (_gamepad) {
+            _motionDir += _gamepad->getLeftStick();
+            _motionDir += _gamepad->getDPad();
             _aimDir += _gamepad->getRightStick();
+        }
+        
+        // sanitize
+
+        if (lengthSquared(_motionDir) > 0) {
+            _motionDir = normalize(_motionDir);
         }
         
         if (lengthSquared(_aimDir) > 0) {
@@ -170,8 +169,7 @@ namespace game {
     
     void Blob::update(const core::time_state &time) {
         Entity::update(time);
-        _physics->setSpeed(_input->getHorizontalSpeed());
-        _physics->setJetpackPower(_input->getJetpackPower());
+        _physics->setMotionDirection(_input->getMotionDirection());
         _physics->setAimDirection(_input->getAimDirection());
     }
     
