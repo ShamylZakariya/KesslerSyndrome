@@ -412,7 +412,6 @@ namespace game {
                 shader->uniform("Aspect", aspect);
                 shader->uniform("BackgroundFillRepeat", _config.backgroundRepeat);
                 shader->uniform("HighlightColor", _config.highlightColor);
-                shader->uniform("TexCoordStep", static_cast<float>(1) / vec2(state.viewport->getSize()));
                 
                 FilterStack::performScreenComposite(state, shader, color);
             }
