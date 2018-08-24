@@ -2,10 +2,6 @@
 
 ## Presently
 
-    - Blob PS bb is tightly wrapping the physics particles, but doesn't accommodate blur
-
-    - Tentacles are passively dynamic and looking smooth
-        - need aiming control
 
 ## Todo (HIGH):
     - need multiple ids for controller input matchings - different PS4 controllers have differing vendor IDs!

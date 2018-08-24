@@ -385,15 +385,19 @@ namespace game {
                 //
                 //    Create joints
                 //
-                seg.angularRange = lrp(distanceAlongTentacle, minAngularLimit, maxAngularLimit);
-                
+
                 seg.torque = lrp( pow(distanceAlongTentacle, 0.25), torqueMax, torqueMin );
-                
+                seg.angularRange = lrp(distanceAlongTentacle, minAngularLimit, maxAngularLimit);
+
+                // connect this segment to previous body
                 seg.pivotJoint = add(cpPivotJointNew( previousBody, seg.body, cpv(position)));
-                
+
+
+                // gear joint is used to add a waving motion to tentacle
                 seg.gearJoint = add(cpGearJointNew( previousBody, seg.body, 0, 1 ));
                 cpConstraintSetErrorBias(seg.gearJoint, seg.angularRange * 0.25);
                 
+                // angular range allow "limp" tentacle to not simply fall loose like a chain
                 seg.angularLimitJoint = add(cpRotaryLimitJointNew( previousBody, seg.body, -seg.angularRange, +seg.angularRange ));
                 cpConstraintSetErrorBias(seg.angularLimitJoint, seg.angularRange * 0.25);
 
@@ -434,18 +438,20 @@ namespace game {
     
     cpBB BlobPhysicsComponent::updateTentacles(const core::time_state &time) {
         
-        const double timeScale = 1;
-        
+        // tentacle waving period
+        const double wavePeriod = 1;
         const auto G = getSpace()->getGravity(v2(cpBodyGetPosition(_centralBody)));
+        const double velocityScaling = 1 - _config.tentacleDamping;
 
-        // when user is aiming, _tentacleAimStrength goes to 1, otherwise, it goes to 0
+        //
+        //  When user is aiming, _tentacleAimStrength is 1, when not aiming, limpness is 1
+        //
+
         const double aimStrength = length(_aimDirection);
         _tentacleAimStrength = lrp<double>(0.25, _tentacleAimStrength, aimStrength);
         const double limpness = lrp<double>(_tentacleAimStrength, 1.0, 0.2);
 
-        const double velocityScaling = 1 - _config.tentacleDamping;
         
-
         cpBB bb = cpBBInvalid;
         int tentacleIdx = 0;
         for (const auto &tentacle : _tentacles) {
@@ -458,15 +464,14 @@ namespace game {
                 cpBodySetAngularVelocity(segment.body, cpBodyGetAngularVelocity(segment.body) * velocityScaling);
 
                 // apply a gentle undulation
-                if (segment.gearJoint) {
-                    double angle = segment.angularRange * sin( (timeScale * time.time) + (segmentIdx * 0.5 + tentacleIdx * 2.5) * (0.5 + 0.5 * _tentaclePerlin.noise(tentaclePerlinOffset)));
+                {
+                    const double angle = segment.angularRange * sin( (time.time / wavePeriod) + (segmentIdx * 0.5 + tentacleIdx * 2.5) * (0.5 + 0.5 * _tentaclePerlin.noise(tentaclePerlinOffset)));
                     cpGearJointSetPhase( segment.gearJoint, angle );
                     cpConstraintSetMaxForce(segment.gearJoint, limpness * segment.torque);
                 }
-                
-                if (segment.angularLimitJoint) {
-                    cpConstraintSetMaxForce(segment.angularLimitJoint, limpness * segment.torque);
-                }
+
+                // ramp up limit force when not aiming
+                cpConstraintSetMaxForce(segment.angularLimitJoint, limpness * segment.torque);
                 
                 // expand our bb
                 bb = cpBBExpand(bb, cpBodyGetPosition(segment.body), segment.width);
