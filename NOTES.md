@@ -1,16 +1,12 @@
 # Dev Notes
 
 ## Presently
-
+    
 
 ## Todo (HIGH):
-    - need multiple ids for controller input matchings - different PS4 controllers have differing vendor IDs!
-        "Sony Interactive Entertainment Wireless Controller"
-
 
 ## Todo (LOW)
     - use unowned_ptr<> for chipmunk pointers. https://github.com/coryshrmn/cgs/blob/master/include/cgs/unowned_ptr.hpp
-
 
 ## Optimization 
     - observe TerrainWorld::417 cpSpaceBBQuery - I might be able to use cpSPace queries to test if attachments are inside the cut volume. might be a lot faster than my approach, since chipmunk is pretty optimized.

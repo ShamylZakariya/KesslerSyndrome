@@ -115,7 +115,6 @@ void CharacterTestScenario::setup() {
     blobConfig.drawDebugOverlay = false;
     blobConfig.physics.friction = 0.5;
     blobConfig.physics.position = dvec2(512,256);
-    blobConfig.physics.numTentacles = 3;
 
     auto image = loadImage(app::loadAsset("kessler/textures/starfield_0_squared.jpg"));
     auto backgroundFormat = gl::Texture2d::Format().mipmap(false).wrap(GL_REPEAT);

@@ -12,6 +12,7 @@
 #include "core/util/GlslProgLoader.hpp"
 #include "core/util/Spline.hpp"
 
+#include <cinder/Rand.h>
 #include <cinder/Perlin.h>
 
 using namespace core;
@@ -296,11 +297,14 @@ namespace game {
     void BlobTentacleDrawComponent::update(const core::time_state &timeState) {
         const auto physics = _physics.lock();
         _bb = physics->getBB();
+        Rand rng;
         
         if (_tentacleDrawers.empty()) {
             size_t idx = 0;
-            BlobTentacleDrawer::config c { _config.tentacleTexture, _config.tentacleColor };
             for (const auto &tentacle : physics->getTentacles()) {
+                const float colorVariance = 1 + rng.nextFloat(-0.25,+0.25);
+                ColorA color(_config.tentacleColor.r * colorVariance, _config.tentacleColor.g * colorVariance, _config.tentacleColor.b * colorVariance, _config.tentacleColor.a);
+                BlobTentacleDrawer::config c { _config.tentacleTexture, color };
                 _tentacleDrawers.emplace_back(c, tentacle, idx++);
             }
         }

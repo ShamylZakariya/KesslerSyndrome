@@ -493,7 +493,7 @@ namespace game {
 
             // update the aiming constraint
             // aiming anchor is in coordinate system of _centralBody
-            const cpVect aimAnchorPosition = cpv(_aimDirection * tentacle->length * 0.9);
+            const cpVect aimAnchorPosition = cpv(_aimDirection * tentacle->length * 1.2);
             cpPinJointSetAnchorA(tentacle->aimingPinJoint, aimAnchorPosition);
             cpConstraintSetMaxForce(tentacle->aimingPinJoint, aimStrength * tentacle->mass * G.magnitude);
 
