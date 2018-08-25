@@ -80,15 +80,8 @@ void CharacterTestScenario::setup() {
 
     stage->addGravity(DirectionalGravitationCalculator::create(game::GravitationLayers::GLOBAL, dvec2(0, -1), 9.8 * 10));
 
-    
     auto terrain = terrain::TerrainObject::create("Terrain", loadLevelSvg(), DrawLayers::TERRAIN);
     stage->addObject(terrain);
-    
-    _viewportController = make_shared<ViewportController>(getMainViewport<Viewport>());
-    stage->addObject(Object::with("ViewportControl", {
-        _viewportController,
-        make_shared<MouseViewportControlComponent>(_viewportController)
-    }));
     
     stage->addObject(Object::with("Dragger", {
         make_shared<MousePickComponent>(ShapeFilters::GRABBABLE),
@@ -100,8 +93,6 @@ void CharacterTestScenario::setup() {
         make_shared<terrain::MouseCutterDrawComponent>()
     }));
 
-
-    
     // build background grid
     auto grid = elements::WorldCartesianGridDrawComponent::create(1);
     grid->setGridColor(ColorA(0.2,0.2,0.7,0.5));
@@ -121,9 +112,12 @@ void CharacterTestScenario::setup() {
     blobConfig.background = gl::Texture2d::create(image, backgroundFormat);
     blobConfig.backgroundRepeat = 1;
 
-    
     auto gamepad = InputDispatcher::get()->getGamepads().empty() ? nullptr : InputDispatcher::get()->getGamepads().front();
     auto blob = game::Blob::create("Blob", blobConfig, gamepad);
+    
+    auto vc = make_shared<game::BlobViewportController>(stage->getMainViewport(), blob, nullptr);
+    blob->addComponent(vc);
+    
     stage->addObject(blob);
     
     stage->addObject(Object::with("InputDelegation",{

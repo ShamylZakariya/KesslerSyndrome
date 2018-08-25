@@ -13,6 +13,7 @@
 #include "game/KesslerSyndrome/entities/blob/BlobPhysics.hpp"
 #include "game/KesslerSyndrome/entities/blob/BlobDrawing.hpp"
 
+#include "game/KesslerSyndrome/elements/Planet.hpp"
 
 namespace game {
     
@@ -40,7 +41,7 @@ namespace game {
 
     };
 
-    class Blob : public core::Entity {
+    class Blob : public core::Entity, public core::Trackable {
     public:
         
         struct config {
@@ -84,12 +85,19 @@ namespace game {
     public:
         
         Blob(string name);
+        virtual ~Blob();
+        
+        // Blob
         const BlobPhysicsComponentRef &getBlobPhysicsComponent() const { return _physics; }
         const BlobControllerComponentRef &getBlobControllerComponent() const { return _input; }
         
         // Entity
         void update(const core::time_state &time) override;
         void onHealthChanged(double oldHealth, double newHealth) override;
+        
+        // Tracking
+        dvec2 getTrackingPosition() const override;
+        dvec2 getTrackingUp() const override;
         
     protected:
 
@@ -99,7 +107,24 @@ namespace game {
         BlobControllerComponentRef _input;
         
     };
+
+#pragma mark - BlobViewportController
     
+    class BlobViewportController : public elements::ViewportController {
+    public:
+        
+        BlobViewportController(core::ViewportRef viewport, BlobRef blob, PlanetRef planet);
+        
+        void onReady(core::ObjectRef parent, core::StageRef stage) override;
+        void firstUpdate(const core::time_state &time) override;
+        void update(const core::time_state &time) override;
+        
+    private:
+        
+        BlobRef _blob;
+        PlanetRef _planet;
+        
+    };
     
 }
 

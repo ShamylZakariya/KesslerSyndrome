@@ -17,7 +17,7 @@
 namespace game {
     
     SMART_PTR(BlobPhysicsComponent);
-    class BlobPhysicsComponent : public core::PhysicsComponent {
+    class BlobPhysicsComponent : public core::PhysicsComponent, public core::Trackable {
     public:
         
         struct config {
@@ -182,6 +182,10 @@ namespace game {
         void onReady(core::ObjectRef parent, core::StageRef stage) override;
         void step(const core::time_state &time) override;
         cpBB getBB() const override { return _bb; }
+
+        // Trackable
+        dvec2 getTrackingPosition() const override { return _trackingPosition; }
+        dvec2 getTrackingUp() const override { return _trackingUp; }
         
         // BlobPhysicsComponent
         
@@ -192,11 +196,11 @@ namespace game {
         const vector<physics_particle> getPhysicsParticles() const { return _physicsParticles; }
         
         /// get the direction the blob is to travel
-        virtual void setMotionDirection(dvec2 direction);
+        void setMotionDirection(dvec2 direction);
         dvec2 getMotionDirection() const { return _motionDirection; }
         
         /// set the direction in world coordinates of the current aim
-        virtual void setAimDirection(dvec2 direction);
+        void setAimDirection(dvec2 direction);
         dvec2 getAimDirection() const { return _aimDirection; }
         
         /// get the blob's tentacles
@@ -206,11 +210,13 @@ namespace game {
     protected:
         
         void createProtoplasmic();
-        cpBB updateProtoplasmic(const core::time_state &time);
+        cpBB updateProtoplasmic(const core::time_state &time, const core::GravitationCalculator::force &localGravity);
         
         double estimateTotalTentacleMass() const;
         void createTentacles();
-        cpBB updateTentacles(const core::time_state &time);
+        cpBB updateTentacles(const core::time_state &time, const core::GravitationCalculator::force &localGravity);
+        
+        void updateTracking(const core::time_state &time, const core::GravitationCalculator::force &localGravity);
         
     protected:
         
@@ -226,6 +232,8 @@ namespace game {
         
         vector<shared_ptr<tentacle>> _tentacles;
         Perlin _tentaclePerlin;
+        
+        dvec2 _trackingPosition, _trackingUp;
         
     };
     

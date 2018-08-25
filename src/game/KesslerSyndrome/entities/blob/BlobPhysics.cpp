@@ -40,9 +40,11 @@ namespace game {
      double _jetpackPower, _currentJetpackPower, _lifecycle, _tentacleAimStrength, _totalMass;
      dvec2 _jetpackForceDir, _motionDirection, _aimDirection, _targetVelocity;
      core::seconds_t _age;
-
+     
      vector<shared_ptr<tentacle>> _tentacles;
      Perlin _tentaclePerlin;
+     
+     dvec2 _trackingPosition, _trackingUp;
      */
     
     BlobPhysicsComponent::BlobPhysicsComponent(const config &c):
@@ -82,10 +84,15 @@ namespace game {
         } else {
             _lifecycle = 1;
         }
+
+        const auto localGravity = getSpace()->getGravity(v2(cpBodyGetPosition(_centralBody)));
         
         // update protoplasmic shape and tentacles, and our bb
-        _bb = updateProtoplasmic(time);
-        _bb = cpBBExpand(_bb, updateTentacles(time));
+        _bb = updateProtoplasmic(time, localGravity);
+        _bb = cpBBExpand(_bb, updateTentacles(time, localGravity));
+        
+        updateTracking(time, localGravity);
+        
         notifyMoved();
     }
     
@@ -179,7 +186,7 @@ namespace game {
         }
     }
     
-    cpBB BlobPhysicsComponent::updateProtoplasmic(const core::time_state &time) {
+    cpBB BlobPhysicsComponent::updateProtoplasmic(const core::time_state &time, const core::GravitationCalculator::force &localGravity) {
         
         _targetVelocity = lrp(0.25, _targetVelocity, _motionDirection * _config.maxSpeed);
         _currentJetpackPower = lrp(0.25, _currentJetpackPower, _motionDirection.y);
@@ -189,8 +196,7 @@ namespace game {
         const double acrossStep = static_cast<double>(1) / static_cast<double>(_physicsParticles.size());
         const seconds_t breathPeriod = 2;
         const double lifecycleScale = lrp<double>(_lifecycle, 0.1, 1);
-        const auto G = getSpace()->getGravity(v2(cpBodyGetPosition(_centralBody)));
-        const dvec2 down = G.dir;
+        const dvec2 down = localGravity.dir;
         const dvec2 right = rotateCCW(down);
         
         // thresholds for shepherding state
@@ -320,8 +326,8 @@ namespace game {
         }
         
         if (abs(_currentJetpackPower) > 1e-3) {
-            _jetpackForceDir = sign(_currentJetpackPower) * G.dir;
-            dvec2 force = -_config.jetpackPower * _totalMass * G.magnitude * _jetpackForceDir * abs(_currentJetpackPower);
+            _jetpackForceDir = sign(_currentJetpackPower) * localGravity.dir;
+            dvec2 force = -_config.jetpackPower * _totalMass * localGravity.magnitude * _jetpackForceDir * abs(_currentJetpackPower);
             cpBodyApplyForceAtWorldPoint(_centralBody, cpv(force), cpBodyLocalToWorld(_centralBody, cpvzero));
         }
         
@@ -444,11 +450,10 @@ namespace game {
         
     }
     
-    cpBB BlobPhysicsComponent::updateTentacles(const core::time_state &time) {
+    cpBB BlobPhysicsComponent::updateTentacles(const core::time_state &time, const core::GravitationCalculator::force &localGravity) {
         
         // tentacle waving period
         const double wavePeriod = 1;
-        const auto G = getSpace()->getGravity(v2(cpBodyGetPosition(_centralBody)));
         const double velocityScaling = 1 - _config.tentacleDamping;
 
         //
@@ -495,12 +500,17 @@ namespace game {
             // aiming anchor is in coordinate system of _centralBody
             const cpVect aimAnchorPosition = cpv(_aimDirection * tentacle->length * 1.2);
             cpPinJointSetAnchorA(tentacle->aimingPinJoint, aimAnchorPosition);
-            cpConstraintSetMaxForce(tentacle->aimingPinJoint, aimStrength * tentacle->mass * G.magnitude);
+            cpConstraintSetMaxForce(tentacle->aimingPinJoint, aimStrength * tentacle->mass * localGravity.magnitude);
 
             tentacleIdx++;
         }
         
         return bb;
+    }
+    
+    void BlobPhysicsComponent::updateTracking(const core::time_state &time, const core::GravitationCalculator::force &localGravity) {
+        _trackingPosition = v2(cpBodyGetPosition(_centralBody));
+        _trackingUp = -localGravity.dir;
     }
     
 }

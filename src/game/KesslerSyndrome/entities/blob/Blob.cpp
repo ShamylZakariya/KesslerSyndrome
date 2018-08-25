@@ -167,6 +167,10 @@ namespace game {
     {
     }
     
+    Blob::~Blob() {
+        CI_LOG_D("Blob[" << getName() << "]::dtor");
+    }
+    
     void Blob::update(const core::time_state &time) {
         Entity::update(time);
         _physics->setMotionDirection(_input->getMotionDirection());
@@ -177,4 +181,49 @@ namespace game {
         Entity::onHealthChanged(oldHealth,newHealth);
     }
     
+    dvec2 Blob::getTrackingPosition() const {
+        return _physics->getTrackingPosition();
+    }
+
+    dvec2 Blob::getTrackingUp() const {
+        return _physics->getTrackingUp();
+    }
+    
+#pragma mark - BlobViewportController
+
+    /*
+     BlobRef _blob;
+     PlanetRef _planet;
+     */
+    
+    BlobViewportController::BlobViewportController(core::ViewportRef viewport, BlobRef blob, PlanetRef planet):
+    elements::ViewportController(viewport),
+    _blob(blob),
+    _planet(planet)
+    {
+        setTrackableTarget(blob);
+    }
+    
+    void BlobViewportController::onReady(core::ObjectRef parent, core::StageRef stage) {
+        ViewportController::onReady(parent, stage);
+    }
+
+    void BlobViewportController::firstUpdate(const core::time_state &time) {
+        getViewport()->setLook(getTarget());
+    }
+
+    void BlobViewportController::update(const core::time_state &time) {
+        if (_planet) {
+            const dvec2 trackingPosition = _blob->getTrackingPosition();
+            const double planetRadius = _planet->getSurfaceConfig().radius;
+            const double distanceFromPlanet = max(length(trackingPosition - _planet->getOrigin()) - (0.5*planetRadius), 0.01 * planetRadius);
+            const double viewportSize = 0.5 * min(getViewport()->getWidth(), getViewport()->getHeight());
+            const double fudge = 1;
+            const double scale = fudge * viewportSize / distanceFromPlanet;
+            setTargetScale(scale);
+        }
+
+        ViewportController::update(time);
+    }
+
 }
