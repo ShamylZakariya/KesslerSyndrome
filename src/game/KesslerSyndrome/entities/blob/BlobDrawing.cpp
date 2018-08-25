@@ -302,8 +302,10 @@ namespace game {
         if (_tentacleDrawers.empty()) {
             size_t idx = 0;
             for (const auto &tentacle : physics->getTentacles()) {
-                const float colorVariance = 1 + rng.nextFloat(-0.25,+0.25);
-                ColorA color(_config.tentacleColor.r * colorVariance, _config.tentacleColor.g * colorVariance, _config.tentacleColor.b * colorVariance, _config.tentacleColor.a);
+                const float rv = 1 + rng.nextFloat(-0.25,+0.25);
+                const float gv = 1 + rng.nextFloat(-0.25,+0.25);
+                const float bv = 1 + rng.nextFloat(-0.25,+0.25);
+                ColorA color(_config.tentacleColor.r * rv, _config.tentacleColor.g * gv, _config.tentacleColor.b * bv, _config.tentacleColor.a);
                 BlobTentacleDrawer::config c { _config.tentacleTexture, color };
                 _tentacleDrawers.emplace_back(c, tentacle, idx++);
             }
