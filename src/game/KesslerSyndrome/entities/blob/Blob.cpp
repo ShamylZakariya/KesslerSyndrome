@@ -167,10 +167,6 @@ namespace game {
     {
     }
     
-    Blob::~Blob() {
-        CI_LOG_D("Blob[" << getName() << "]::dtor");
-    }
-    
     void Blob::update(const core::time_state &time) {
         Entity::update(time);
         _physics->setMotionDirection(_input->getMotionDirection());
@@ -213,14 +209,18 @@ namespace game {
     }
 
     void BlobViewportController::update(const core::time_state &time) {
-        if (_planet) {
-            const dvec2 trackingPosition = _blob->getTrackingPosition();
-            const double planetRadius = _planet->getSurfaceConfig().radius;
-            const double distanceFromPlanet = max(length(trackingPosition - _planet->getOrigin()) - (0.5*planetRadius), 0.01 * planetRadius);
-            const double viewportSize = 0.5 * min(getViewport()->getWidth(), getViewport()->getHeight());
-            const double fudge = 1;
-            const double scale = fudge * viewportSize / distanceFromPlanet;
-            setTargetScale(scale);
+        auto planet = _planet.lock();
+        if (planet) {
+            auto blob = _blob.lock();
+            if (blob) {
+                const dvec2 trackingPosition = blob->getTrackingPosition();
+                const double planetRadius = planet->getSurfaceConfig().radius;
+                const double distanceFromPlanet = max(length(trackingPosition - planet->getOrigin()) - (0.5*planetRadius), 0.01 * planetRadius);
+                const double viewportSize = 0.5 * min(getViewport()->getWidth(), getViewport()->getHeight());
+                const double fudge = 1;
+                const double scale = fudge * viewportSize / distanceFromPlanet;
+                setTargetScale(scale);
+            }
         }
 
         ViewportController::update(time);

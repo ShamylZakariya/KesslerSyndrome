@@ -85,7 +85,6 @@ namespace game {
     public:
         
         Blob(string name);
-        virtual ~Blob();
         
         // Blob
         const BlobPhysicsComponentRef &getBlobPhysicsComponent() const { return _physics; }
@@ -121,8 +120,8 @@ namespace game {
         
     private:
         
-        BlobRef _blob;
-        PlanetRef _planet;
+        BlobWeakRef _blob;
+        PlanetWeakRef _planet;
         
     };
     
