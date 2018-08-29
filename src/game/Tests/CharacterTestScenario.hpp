@@ -32,7 +32,7 @@ public:
     
 private:
     
-    elements::terrain::WorldRef loadLevelSvg();
+    elements::terrain::WorldRef loadLevelSvg(string levelSvgAsset);
     
 private:
     

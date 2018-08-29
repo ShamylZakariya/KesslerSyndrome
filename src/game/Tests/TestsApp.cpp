@@ -40,16 +40,16 @@ public:
         
         _scenarioFactories = {
             SCENARIO_FACTORY(CharacterTestScenario),
-            SCENARIO_FACTORY(GamepadTestScenario),
-            SCENARIO_FACTORY(MultiViewportTestScenario),
-            SCENARIO_FACTORY(ParticleSystemTestScenario),
-            SCENARIO_FACTORY(FilterStackTestScenario),
-            SCENARIO_FACTORY(PerlinWorldTestScenario),
-            SCENARIO_FACTORY(SvgTestScenario),
+            SCENARIO_FACTORY(TerrainTestScenario),
             SCENARIO_FACTORY(TerrainAttachmentsTestScenario),
+            SCENARIO_FACTORY(ParticleSystemTestScenario),
+            SCENARIO_FACTORY(PerlinWorldTestScenario),
+            SCENARIO_FACTORY(FilterStackTestScenario),
+            SCENARIO_FACTORY(MultiViewportTestScenario),
+            SCENARIO_FACTORY(SvgTestScenario),
             SCENARIO_FACTORY(IPTestsScenario),
             SCENARIO_FACTORY(EasingTestScenario),
-            SCENARIO_FACTORY(TerrainTestScenario),
+            SCENARIO_FACTORY(GamepadTestScenario),
         };
         
         _index = 0;

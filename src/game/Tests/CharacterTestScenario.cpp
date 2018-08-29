@@ -19,6 +19,8 @@ using namespace elements;
 
 namespace {
     
+#pragma mark - Constants
+    
     const double COLLISION_SHAPE_RADIUS = 0;
     const double MIN_SURFACE_AREA = 2;
     const Color TERRAIN_COLOR(0.2, 0.2, 0.2);
@@ -62,7 +64,97 @@ namespace {
         };
     }
     
+#pragma mark - Human
+
+    class HumanState : public core::Component, public core::Trackable {
+    public:
+        HumanState(ColorA color, dvec2 startPosition, double radius, double speed = 4 ):
+        _position(startPosition),
+        _radius(radius),
+        _speed(speed),
+        _color(color)
+        {}
+        
+        void setPosition(dvec2 position) { _position = position; notifyMoved(); }
+        dvec2 getPosition() const { return _position; }
+        
+        void setRadius(double r) { _radius = r; notifyMoved(); }
+        double getRadius() const { return _radius; }
+        
+        void setColor(ColorA color) { _color = color; }
+        ColorA getColor() const { return _color; }
+        
+        void setSpeed(double s) { _speed = s; }
+        double getSpeed() const { return _speed; }
+        
+        // Trackable
+        dvec2 getTrackingPosition() const override { return _position; }
+        
+    private:
+        dvec2 _position;
+        double _radius, _speed;
+        ColorA _color;
+    };
+    
+    class HumanDrawComponent : public core::DrawComponent {
+    public:
+        HumanDrawComponent():
+        DrawComponent(100, VisibilityDetermination::FRUSTUM_CULLING)
+        {}
+        
+        void onReady(ObjectRef parent, StageRef stage) override {
+            DrawComponent::onReady(parent, stage);
+            _state = getSibling<HumanState>();
+        }
+        
+        cpBB getBB() const override {
+            auto state = _state.lock();
+            return cpBBNewForCircle(cpv(state->getPosition()), state->getRadius());
+        }
+        
+        void draw(const render_state &renderState) override {
+            auto state = _state.lock();
+            gl::ScopedBlendAlpha sba;
+            gl::ScopedColor sc(state->getColor());
+            gl::drawSolidCircle(state->getPosition(), state->getRadius());
+        }
+        
+    protected:
+        
+        weak_ptr<HumanState> _state;
+        
+    };
+    
+    class Human : public core::Object, core::Trackable {
+    public:
+        
+        static shared_ptr<Human> create(string name, dvec2 position, ColorA color) {
+            auto state = make_shared<HumanState>(color, position, 10, 10);
+            auto drawer = make_shared<HumanDrawComponent>();
+            auto human = core::Object::create<Human>(name, { state, drawer });
+            human->_state = state;
+            return human;
+        }
+        
+    public:
+        
+        Human(string name):
+                Object(name)
+        {}
+
+        // Trackable
+        dvec2 getTrackingPosition() const override { return _state->getTrackingPosition(); }
+        dvec2 getTrackingUp() const override { return _state->getTrackingUp(); };
+
+    private:
+        
+        shared_ptr<HumanState> _state;
+        
+    };
+        
 }
+
+#pragma mark - CharacterTestScenario
 
 /*
  terrain::TerrainObjectRef _terrain;
@@ -80,7 +172,7 @@ void CharacterTestScenario::setup() {
 
     stage->addGravity(DirectionalGravitationCalculator::create(game::GravitationLayers::GLOBAL, dvec2(0, -1), 9.8 * 10));
 
-    auto terrain = terrain::TerrainObject::create("Terrain", loadLevelSvg(), DrawLayers::TERRAIN);
+    auto terrain = terrain::TerrainObject::create("Terrain", loadLevelSvg("tests/blob_world.svg"), DrawLayers::TERRAIN);
     stage->addObject(terrain);
     
     stage->addObject(Object::with("Dragger", {
@@ -102,10 +194,11 @@ void CharacterTestScenario::setup() {
     stage->addObject(Object::with("Grid", { grid }));
     
     // build a blob character
+    auto playerElement = terrain->getWorld()->getElementById("player");
     game::Blob::config blobConfig;
     blobConfig.drawDebugOverlay = false;
     blobConfig.physics.friction = 0.5;
-    blobConfig.physics.position = dvec2(512,256);
+    blobConfig.physics.position = playerElement->getModelCentroid();
 
     auto image = loadImage(app::loadAsset("kessler/textures/starfield_0_squared.jpg"));
     auto backgroundFormat = gl::Texture2d::Format().mipmap(false).wrap(GL_REPEAT);
@@ -120,6 +213,13 @@ void CharacterTestScenario::setup() {
     
     stage->addObject(blob);
     
+    // build a "human" target
+    auto humanElement = terrain->getWorld()->getElementById("human");
+    auto human = Human::create("Human!", humanElement->getModelCentroid(), ColorA(1,1,0,1));
+    stage->addObject(human);
+
+    
+    // add keyboard handler
     stage->addObject(Object::with("InputDelegation",{
         elements::KeyboardDelegateComponent::create(0)->onPress([&](int keyCode)->bool{
             switch(keyCode) {
@@ -157,13 +257,13 @@ void CharacterTestScenario::reset() {
 }
 
 
-terrain::WorldRef CharacterTestScenario::loadLevelSvg() {
+terrain::WorldRef CharacterTestScenario::loadLevelSvg(string levelSvgAsset) {
     
     // load shapes and anchors from SVG
     vector<terrain::ShapeRef> shapes;
     vector<terrain::AnchorRef> anchors;
     vector<terrain::ElementRef> elements;
-    terrain::World::loadSvg(app::loadAsset("tests/blob_world.svg"), dmat4(), shapes, anchors, elements, true);
+    terrain::World::loadSvg(app::loadAsset(levelSvgAsset), dmat4(), shapes, anchors, elements, true);
     
     // partition
     auto partitionedShapes = terrain::World::partition(shapes, 500);

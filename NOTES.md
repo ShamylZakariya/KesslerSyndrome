@@ -4,6 +4,7 @@
     
 
 ## Todo (HIGH):
+    - I have global gravity computation - should add global damping! Would eliminate need to manually perform it on my physics components
 
 ## Todo (LOW)
     - use unowned_ptr<> for chipmunk pointers. https://github.com/coryshrmn/cgs/blob/master/include/cgs/unowned_ptr.hpp
